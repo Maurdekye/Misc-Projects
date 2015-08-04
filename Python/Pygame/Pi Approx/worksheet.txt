@@ -1,0 +1,3 @@
+PiR**2 = A
+PiR = sqrt(A)
+Pi = sqrt(A) / R
