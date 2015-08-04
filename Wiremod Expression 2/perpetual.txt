@@ -1,0 +1,10 @@
+@name perpetual
+interval(10)
+
+E = entity()
+T = E:isWeldedTo()
+Grav = 9.0134
+
+E:setAlpha(0)
+E:applyForce(vec(0, 0, Grav*E:mass()) + E:vel()*E:mass())
+T:applyForce(vec(0, 0, Grav*T:mass()) + T:vel()*T:mass())

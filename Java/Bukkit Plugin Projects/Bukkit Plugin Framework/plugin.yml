@@ -1,0 +1,9 @@
+name: Plugin Framework
+main: mainpackage.MainFile
+version: 1.0
+description: Basic framework to expedite the creation of Bukkit Plugins
+commands:
+  save-data:
+    description: Saves all player information.
+  getinfo:
+    description: Provides some server info.

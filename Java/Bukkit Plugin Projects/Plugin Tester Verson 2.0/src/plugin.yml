@@ -1,0 +1,12 @@
+name: PluginTestingV2
+main: mainpack.PluginTestingV2
+version: 1.0
+description: Test socks, please ignore
+
+commands:
+  whatvalue:
+    description: There is no description, Neo.
+  showmenu:
+    description: This makes no sense whatsoever.
+  giveboots:
+    description: Gives the user sooper-boots.

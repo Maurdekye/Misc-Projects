@@ -1,0 +1,99 @@
+@name Jetpack
+@inputs XForcer:entity YForcer:entity ZForcer:entity
+@outputs XForce YForce ZForce
+@persist XFPosPID:vector YFPosPID:vector ZFPosPID:vector
+@persist XFAngPID:angle YFAngPID:angle ZFAngPID:angle
+@persist TargetPos:vector TarPosPID:vector
+runOnTick(1)
+interval(400)
+
+if (first())
+{
+    TargetPos = owner():pos() + vec(0, 0, 50)
+    holoCreate(1)
+}
+
+OwnerPos = owner():pos() # entity():pos() + vec(0, 0, 50)
+
+holoPos(1, TargetPos)
+
+# XForcer PID Controller
+
+XFTarPos = OwnerPos - vec(30, 0, -50)
+XFPosPID = XFTarPos - XForcer:pos()
+XForcer:applyForce($XFPosPID*80 + XFPosPID*30)
+
+XFTarAng = ang(90, 0, 0)
+XFAngPID = XForcer:toLocal(XFTarAng)
+XForcer:applyAngForce($XFAngPID*10 + XFAngPID*5)
+
+# YForcer PID Controller
+
+YFTarPos = OwnerPos - vec(0, 30, -50)
+YFPosPID = YFTarPos - YForcer:pos()
+YForcer:applyForce($YFPosPID*80 + YFPosPID*30)
+
+YFTarAng = ang(0, 0, 270)
+YFAngPID = YForcer:toLocal(YFTarAng)
+YForcer:applyAngForce($YFAngPID*10 + YFAngPID*5)
+
+# ZForcer PID Controller
+
+ZFTarPos = OwnerPos - vec(0, 0, -20)
+ZFPosPID = ZFTarPos - ZForcer:pos()
+ZForcer:applyForce($ZFPosPID*80 + ZFPosPID*30)
+
+ZFTarAng = ang(0, 0, 0)
+ZFAngPID = ZForcer:toLocal(ZFTarAng)
+ZForcer:applyAngForce($ZFAngPID*10 + ZFAngPID*5)
+
+# Owner Position PID Controller
+
+TarPosPID = TargetPos - OwnerPos
+Force = $TarPosPID*40 + TarPosPID*10
+XForce = Force:x()
+YForce = Force:y()
+ZForce = Force:z()
+
+# Positional Modification
+
+BaseSpeed = 5
+Sprint = owner():keySprint() ? 4 : 1
+
+if (owner():keyJump())
+{
+    TargetPos += vec(0, 0, 1) * BaseSpeed * Sprint
+}
+if (owner():keyDuck())
+{
+    TargetPos -= vec(0, 0, 1) * BaseSpeed * Sprint
+}
+if (owner():keyForward())
+{
+    TargetPos += owner():eye() * BaseSpeed * Sprint
+}
+if (owner():keyBack())
+{
+    TargetPos -= owner():eye() * BaseSpeed * Sprint
+}
+#[if (owner():keyLeft())
+{
+    TargetPos += owner():left() * 20 * Sprint
+}
+if (owner():keyRight())
+{
+    TargetPos += owner():right() * 20 * Sprint
+}]#
+
+# Defaults for Entities
+
+if (clk())
+{
+    XForcer:setAlpha(96)
+    
+    YForcer:setAlpha(96)
+    
+    ZForcer:setAlpha(96)
+    
+}
+

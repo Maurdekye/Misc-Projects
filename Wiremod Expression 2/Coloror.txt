@@ -1,0 +1,24 @@
+@name Coloror
+@inputs AddRed AddBlue AddGreen
+@inputs SubRed SubBlue SubGreen
+@inputs Ent:entity
+@outputs Red Blue Green Color:vector
+@persist Red_ Blue_ Green_
+
+interval(10)
+
+if (AddRed) {Red_ = min(Red_ + 1, 255)}
+if (AddBlue) {Blue_ = min(Blue_ + 1, 255)}
+if (AddGreen) {Green_ = min(Green_ + 1, 255)}
+
+if (SubRed) {Red_ = max(Red_ - 1, 0)}
+if (SubBlue) {Blue_ = max(Blue_ - 1, 0)}
+if (SubGreen) {Green_ = max(Green_ - 1, 0)}
+
+Red = Red_
+Blue = Blue_
+Green = Green_
+
+Color = vec(Red, Green, Blue)
+
+Ent:setColor(Color, Ent:getAlpha())

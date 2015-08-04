@@ -1,0 +1,16 @@
+@name TurretController
+runOnTick(1)
+
+if (first())
+{
+    entity():propFreeze(0)
+}
+
+Crux = owner():shootPos() + vec(0, 0, 50)
+AngCrux = owner():eye():toAngle()
+
+Diff = Crux - entity():pos()
+AngDiff = entity():toLocal(AngCrux)
+
+applyForce(Diff*64 - entity():vel())
+applyAngForce(AngDiff)

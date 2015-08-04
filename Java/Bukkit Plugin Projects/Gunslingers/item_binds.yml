@@ -1,0 +1,34 @@
+#
+#                      Gunslingers
+#                    ---------------
+#
+#       - Default Item Binds Configuration File -
+#
+
+# -- Weapons
+shotgun: DIAMOND_AXE
+burst: DIAMOND_PICKAXE
+sniper: DIAMOND_HOE
+minigun: DIAMOND_SWORD
+launcher: DIAMOND_SPADE
+airstrike: GOLD_PICKAXE
+flamethrower: GOLD_SWORD
+dart: GOLD_HOE
+cfour: GOLD_SPADE
+mortar: GOLD_AXE
+prox_mine: FIREWORK_CHARGE
+fire_mine: BLAZE_ROD
+
+# -- Ammo
+shotgun_ammo: FLINT
+burst_ammo: STICK
+sniper_ammo: IRON_INGOT
+minigun_ammo: SEEDS
+launcher_ammo: TNT
+airstrike_ammo: SUGAR_CANE
+flamethrower_ammo: GLOWSTONE_DUST
+dart_ammo: GOLD_INGOT
+cfour_ammo: SULPHUR
+mortar_ammo: FEATHER
+prox_mine_ammo: FIREWORK_CHARGE
+fire_mine_ammo: BLAZE_ROD

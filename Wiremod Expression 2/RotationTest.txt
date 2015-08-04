@@ -1,0 +1,15 @@
+@name RotationTest
+runOnTick(1)
+
+if (first())
+{
+    holoCreate(1)
+    holoCreate(2)
+}
+
+Center = owner():shootPos()
+Forward = owner():eye()*100
+Rotate = Forward:rotateAroundAxis(Forward, 90)
+
+holoPos(1, Center + Forward)
+holoPos(2, Center + Rotate)

@@ -1,0 +1,59 @@
+@name GreenBallThing
+@model models/dav0r/hoverball.mdl
+@persist Target:entity Exploding
+@persist G J
+runOnTick(1)
+
+if (first())
+{
+    entity():setMaterial("hunter/myplastic")
+    entity():setColor(vec(0, 255, 0))
+    entity():propFreeze(0)
+    entity():propNotSolid(1)
+    entity():setTrails(16, 0, 1, "trails/tube", vec(0, 255, 0), 255)
+}
+
+TargetPos = vec()
+if (!Target:isValid()) 
+{
+    XMod = vec(1, 0, 0) * sin(curtime()*100) * 60
+    YMod = vec(0, 1, 0) * cos(curtime()*100) * 60
+    ZMod = vec(0, 0, 1) * (sin(curtime()*60) + 1.3) * 30
+    TargetPos = owner():pos() + XMod + YMod + ZMod
+}
+else
+{
+    if (Target:isPlayer()) 
+    {
+        TargetPos = Target:shootPos() + vec(0, 0, 40)
+    }
+    else
+    {
+        TargetPos = Target:pos() + vec(0, 0, 120)
+    }
+}
+PosDiff = TargetPos - entity():massCenter()
+applyForce(PosDiff*200 - entity():vel()*8) 
+
+G = owner():keyPressed("G")
+J = owner():keyPressed("J")
+
+AE = owner():aimEntity()
+if ((G && !Exploding) && (changed(G) | AE:isValid()))
+{
+    Target = AE
+}
+if (changed(J) && J && !Exploding)
+{
+    Exploding = 1
+    entity():setColor(vec(255, 0, 0))
+    entity():soundPlay(1, 1000, "alarms/klaxon1.wav")
+    timer("explode", 1000)
+}
+if (clk("explode"))
+{
+    Exploding = 0
+    entity():setColor(vec(0, 255, 0))
+    propSpawn("models/props_c17/oildrum001_explosive.mdl", Target:pos(), 0):propBreak()
+    Target = noentity()
+}

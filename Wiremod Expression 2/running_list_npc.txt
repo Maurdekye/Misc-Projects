@@ -1,0 +1,48 @@
+@name running list npc
+@outputs Debug:angle
+@persist Holos:array Clock
+interval(100)
+Clock += 1
+
+if (Clock%5 == 0 | first()) {
+    Ents = array()
+    NewHolos = array()
+    findByClass("npc_*")
+    
+    # Check for newly created npcs
+    foreach(K,V:entity=findToArray()) {
+        Ents[V:id(), entity] = V
+        if (!Holos:exists(V:id())) {
+            NewHolos[V:id(), normal] = V:id()
+            holoCreate(V:id(), vec(0, 0, 0), vec(3, 3, 0.2))
+            #holoAlpha(V:id(), 100)
+            holoModel(V:id(), "hq_tube_thin")
+        }
+    }
+    
+    # Check for removed / killed npcs
+    foreach(K,V:normal=Holos) {
+        if (Ents:exists(K)) {
+            NewHolos[K, normal] = K
+        } else {
+           holoDelete(K)
+        }
+    }
+    Holos = NewHolos
+}
+
+foreach(K,V:normal=Holos) {
+    E = entity(K)
+    if (!E:isValid()) {
+        holoDelete(K)
+        continue
+    }
+    DirVec = (E:shootPos() - owner():shootPos()):normalized()
+    holoPos(K, DirVec*10 + owner():shootPos())
+    Angle = ang(0, -atan(DirVec:x(), DirVec:y()), -atan(sqrt(DirVec:x()^2 + DirVec:y()^2), DirVec:z()))
+    Debug = Angle
+    holoAng(K, Angle)
+    ScaleAmnt = clamp(E:shootPos():distance(owner():shootPos()), 0.05, 10)
+    ScaleAmnt = 50/E:shootPos():distance(owner():shootPos())
+    holoScale(K, vec(ScaleAmnt)*vec(1, 1, 0.1))
+}

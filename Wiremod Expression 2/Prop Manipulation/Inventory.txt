@@ -1,0 +1,130 @@
+@name Inventory
+@outputs Count
+@persist Props:array
+@persist KeyM1 KeyM2 KeyR KeyX KeyRight KeyLeft KeyG
+runOnTick(1)
+runOnLast(1)
+runOnKeys(owner(), 1)
+
+function number containsEnt(Arr:array, Ent:entity)
+{
+    for (I=1,Arr:count())
+    {
+        if (Arr[I, entity] == Ent)
+        {
+            return 1
+        }
+    }
+    return 0
+}
+
+Limit = 24
+
+KeyM1 = owner():keyAttack1()
+KeyM2 = owner():keyAttack2()
+KeyR = owner():keyReload()
+KeyX = owner():keyPressed("X")
+KeyRight = owner():keyPressed("RIGHT")
+KeyLeft = owner():keyPressed("LEFT")
+KeyG = owner():keyPressed("G")
+
+C = Props:count()
+Dist = sqrt(C)*30
+Axis = owner():shootPos() + vec(0, 0, 50)
+Rot = owner():eye():toAngle():yaw() - 90
+
+if (changed(KeyG) & KeyG & C < Limit & C > 0)
+{
+    Props:pushEntity(propSpawn(Props[C, entity]:model(), Axis, 0))
+}
+
+if (owner():keyDuck())
+{
+    Dist /= 2
+}
+for (I=1, C)
+{
+    P = Props[I, entity]
+    if (!P:isValid())
+    {
+        Props:remove(I)
+        continue
+    }
+    P:setAlpha(192)
+    if (P:getAlpha() != 192)
+    {
+        Props:remove(I)
+        continue
+    }
+    TPos = vec()
+    
+    if (I == C & KeyM2)
+    {
+        TPos = owner():eye()*Dist + owner():shootPos()
+        P:setAlpha(64)
+    }
+    else
+    {
+        Wedge = ((I/C)*360 - Rot)%360
+        XPos = sin(Wedge)*Dist + Axis:x()
+        YPos = cos(Wedge)*Dist + Axis:y()
+        TPos = vec(XPos, YPos, Axis:z())  
+    }
+    
+    Diff = TPos - P:massCenter()
+    P:applyForce((Diff*32 - P:vel())*P:mass())
+    P:propNotSolid(1)
+}
+
+AE = owner():aimEntity()
+if (KeyR & C < Limit & AE:isValid() & !containsEnt(Props, AE))
+{
+    Props:pushEntity(AE)
+    AE:propNotSolid(1)
+}
+
+if (changed(KeyM1) & KeyM1 & Props:count() > 0)
+{
+    P = Props:popEntity()
+    P:setAlpha(255)
+    P:applyForce(owner():eye()*P:mass()*10000)
+    P:propNotSolid(0)
+}
+
+if (changed(KeyX) & KeyX & Props:count() > 0)
+{
+    if (owner():keySprint())
+    {
+        for (I=1,Props:count())
+        {
+            P = Props:popEntity()
+            P:setAlpha(255)
+            P:propNotSolid(0)
+        }
+    }
+    else 
+    {
+        P = Props:popEntity()
+        P:setAlpha(255)
+        P:propNotSolid(0)  
+    }
+}
+if (changed(KeyRight) & KeyRight)
+{
+    Props:insertEntity(1, Props:popEntity())
+}
+if (changed(KeyLeft) & KeyLeft)
+{
+    Ent = Props[1, entity]
+    Props:remove(1)
+    Props:pushEntity(Ent)
+}
+if (last())
+{
+    for (I=1,Props:count())
+    {
+        P:setAlpha(255)
+        P:propNotSolid(0)
+    }
+}
+Count = C

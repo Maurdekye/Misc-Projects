@@ -1,0 +1,49 @@
+@name Shield
+@persist Shield:entity Differential:vector AngDiff:angle
+runOnTick(1)
+runOnLast(1)
+interval(100)
+
+M = Shield:mass()
+
+TargetPos = owner():pos() + vec(0, 0, 73)
+Differential = TargetPos - Shield:pos()
+Shield:applyForce($Differential*60*M + Differential*20*M)
+
+TargetAngle = ang(0, (curtime()%360)*2000, 0)
+AngDiff = Shield:toLocal(TargetAngle)
+Shield:applyAngForce($AngDiff*2000*M + AngDiff*180*M)
+#Shield:applyAngForce( (Shield:toLocal(TargetAngle)*200 - Shield:angVel()*200) * shiftL(ang(Shield:inertia())) )
+
+if (first())
+{
+    Shield = propSpawn("models/hunter/tubes/tube4x4x3.mdl", TargetPos, 0)
+    Shield:setAng(ang(0, 0, 0))
+    Shield:setAlpha(1)
+    Shield:propMakePersistent(1)
+    Shield:setMass(1000)
+    noCollide(Shield, world())
+    noCollide(Shield, owner())
+}
+if (owner():keyAttack2())
+{
+    Shield:propNotSolid(1)
+    Shield:setAlpha(0)
+}
+else
+{
+    Shield:propNotSolid(0)
+    Shield:setAlpha(1)
+}
+if (last())
+{
+    Shield:propDelete()
+}
+if (clk())
+{
+    if (Shield:hasConstraints() > 0)
+    {
+        Shield:constraintBreak()
+    }
+    Shield:setMaterial("models/shadertest/predator")
+}

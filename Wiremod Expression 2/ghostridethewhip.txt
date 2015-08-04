@@ -1,0 +1,80 @@
+@name ghostridethewhip
+@persist Active Attack Num Actual
+runOnTick(1)
+
+Length = 1
+Width = 0.6
+
+if (first()) {
+    Num = 200
+    Actual = 0
+    Active = 0
+    for (I=1,Num) {
+        if (!holoCanCreate())
+        {
+            break
+        }
+        Actual++
+        holoCreate(I)
+        holoModel(I, "hq_cylinder")
+        holoScale(I, vec(Width, Width, Length))
+    }
+    holoPos(1, entity():pos() + entity():up())
+    holoAng(1, entity():angles() + ang(0, 90, 0))
+    holoParent(1, entity())
+}
+
+for (I=Actual,Num)
+{
+    if (!holoCanCreate())
+    {
+        break
+    }
+    Actual++
+    holoCreate(I)
+    holoModel(I, "hq_cylinder")
+    holoScale(I, vec(Width, Width, Length))
+    if (Active) {
+        holoColor(I, vec(0, 255, 0))
+    } else {
+        holoColor(I, vec(255, 255, 255))
+    }
+}
+
+if (owner():keyPressed("G") && Active) {
+    AE = owner():aimEntity()
+    if (AE != noentity()) {
+        Norm = (AE:massCenter() - owner():aimPos()):normalized()
+        holoPos(1, owner():aimPos() + owner():aimNormal() * 6)
+        holoAng(1, owner():aimNormal():toAngle() + ang(90, 0, 0))
+        holoUnparent(1)
+        holoParent(1, AE)
+    }
+}
+
+Attack = owner():keyAttack1()
+if (Attack && changed(Attack)) {
+    if (owner():aimEntity() == entity()) {
+        Active = 1
+        entity():setColor(vec(0, 255, 0))
+        for (I=1,Num) {
+            holoColor(I, vec(0, 255, 0))
+        }
+    } else {
+        Active = 0
+        entity():setColor(vec(255, 255, 255))
+        for (I=1,Num) {
+            holoColor(I, vec(255, 255, 255))
+        }
+    }
+}
+
+for (I=2, Num - 1) {
+    PHolo = holoEntity(I-1)
+    holoPos(I, PHolo:pos() + PHolo:up() * Length * 12)
+    holoAng(I, (holoEntity(I + 1):pos() - PHolo:pos()):toAngle() + ang(90, 0, 0))
+}
+
+LastHolo = holoEntity(Num - 1)
+holoPos(Num, LastHolo:pos() + LastHolo:up() * Length * 12)
+holoAng(Num, LastHolo:angles())

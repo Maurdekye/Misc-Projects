@@ -1,0 +1,40 @@
+name: Gunslingers
+main: mainpackage.Gunslingers
+version: 1.3.4
+description: Shooty Guns!
+
+commands:
+  togglegunsling:
+    description: Toggles gunslinger functionality on or off
+    
+permissions:
+  gunslingers.shotgun:
+    description: Allows players to use the shotgun
+    default: true
+  gunslingers.burst:
+    description: Allows players to use the quad fire gun
+    default: true
+  gunslingers.sniper:
+    description: Allows players to use the sniper rifle
+    default: true
+  gunslingers.cfour:
+    description: Allows players to use C4
+    default: true
+  gunslingers.dart:
+    description: Allows players to use the dart gun
+    default: true
+  gunslingers.mortar:
+    description: Allows players to use the orbital strike designator
+    default: true
+  gunslingers.airstrike:
+    description: Allows players to use the airstrike designator
+    default: true
+  gunslingers.minigun:
+    description: Allows players to use the minigun
+    default: true
+  gunslingers.launcher:
+    description: Allows players to use the rocket launcher
+    default: true
+  gunslingers.flamethrower:
+    description: Allows players to use the flamethrower
+    default: true

@@ -1,0 +1,9 @@
+@name AngDiffTest
+@persist AngDiff:angle
+runOnTick(1)
+
+Holding = entity():isWeldedTo()
+M = Holding:mass()
+TargetAngle = owner():eye():toAngle()
+AngDiff = Holding:toLocal(TargetAngle)
+Holding:applyAngForce($AngDiff*150*M + AngDiff*40*M)

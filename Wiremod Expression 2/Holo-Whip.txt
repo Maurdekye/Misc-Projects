@@ -1,0 +1,29 @@
+@name Holo - Whip
+@model models/hunter/plates/plate.mdl
+interval(20)
+Kinks = 90
+KLength = 0.4
+Thick = 0.5
+
+if (first()) {
+    for (I = 1, Kinks) {
+        holoCreate(I)
+        holoModel(I, "hqcylinder2")
+        holoScale(I, vec(Thick, Thick, KLength))
+    }
+}
+
+Tilt = ang(90, 0, 0)
+
+holoPos(1, entity():pos() + entity():up() * 6)
+holoAng(1, (holoEntity(2):pos() - entity():pos()):toAngle() + Tilt)
+        
+for (I = 2, Kinks - 1) {
+    PrevHolo = holoEntity(I - 1)
+    holoPos(I, PrevHolo:pos() + PrevHolo:up() * KLength * 12)
+    holoAng(I, (holoEntity(I + 1):pos() - PrevHolo:pos()):toAngle() + Tilt)
+}
+
+LastHolo = holoEntity(Kinks - 1)
+holoPos(Kinks, LastHolo:pos() + LastHolo:up() * KLength * 12)
+holoAng(Kinks, LastHolo:angles())

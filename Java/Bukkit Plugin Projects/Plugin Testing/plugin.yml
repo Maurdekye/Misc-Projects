@@ -1,0 +1,8 @@
+name: Testing
+main: mainpackage.Testing
+version: 127.0.0.1
+description: For testing purposes only.
+
+commands:
+  battlearmor:
+    description: Gives battle armor

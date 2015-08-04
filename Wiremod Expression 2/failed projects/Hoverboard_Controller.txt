@@ -1,0 +1,36 @@
+@name Hoverboard_Controller
+@outputs DeltaX DeltaY NegDeltX NegDeltY
+@inputs CornerX:vector CornerY:vector
+@persist PErrorX PErrorY IntegralX IntegralY
+
+DT = 10
+interval(DT)
+
+Center = entity():pos()
+
+CXDist = Center:distance(CornerX)
+CYDist = Center:distance(CornerY)
+
+DiffX = CornerX:z() - Center:z()
+DiffY = CornerY:z() - Center:z()
+
+RawDeltaX = DiffX / CXDist
+RawDeltaY = DiffY / CYDist
+
+#[IntegralX += RawDeltaX * DT
+IntegralY += RawDeltaY * DT
+
+DerivativeX = (RawDeltaX - PErrorX) / DT
+DerivativeY = (RawDeltaY - PErrorY) / DT
+
+DeltaX = RawDeltaX + IntegralX + DerivativeX
+DeltaY = RawDeltaY + IntegralY + DerivativeY
+
+PErrorX = RawDeltaX
+PErrorY = RawDeltaY]#
+
+DeltaX = RawDeltaX
+DeltaY = RawDeltaY
+
+NegDeltX = -DeltaX
+NegDeltY = -DeltaY

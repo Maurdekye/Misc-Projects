@@ -1,0 +1,18 @@
+@name blackout_all
+interval(10)
+
+if (first()) {
+    foreach (K,V:entity=players()) {
+        for (I=0,1) {
+            holoCreate(K*2-I, V:shootPos(), vec(-3 - 6*I, -3 - 6*I, -3 - 6*I), ang(0, 0, 0), vec(0, 0, 0)) 
+            holoModel(K*2-I, "hq_icosphere")
+        }
+    }
+    entity():setAlpha(0)
+}
+
+foreach (K,V:entity=players()) {
+    holoPos(K*2, V:shootPos() + V:vel()*0.12)
+    holoPos(K*2 - 1, V:shootPos() + V:vel()*0.12)
+}
+

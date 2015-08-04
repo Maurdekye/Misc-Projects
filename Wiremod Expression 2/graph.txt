@@ -1,0 +1,48 @@
+@name graph
+@persist Graph:array
+interval(50)
+
+Min = -4*pi()
+Max = 4*pi()
+Interval = 0.3
+Offset = vec2(0, 60)
+Scaling = vec2(5, 5)
+    
+if (first()) {
+    
+    function number equation(X) {
+        return sin(X * (180/pi()))
+    }
+    
+    function vector tovec3(V:vector2) {
+        return vec(V:x(), 0, V:y())
+    }
+    I = 2
+    for (X=Min,Max,Interval) {
+        Graph:pushVector2(vec2(X, equation(X)))
+        holoCreate(I)
+        holoScale(I, vec(1, 0.1, 0.1))
+        I = I + 1
+    }
+    holoDelete(I-1)
+    holoCreate(0)
+    holoScale(0, vec(0.05, 0.05, 5 * Scaling:y() / 12))
+    holoColor(0, vec(0, 255, 0))
+    holoCreate(1)
+    holoScale(1, vec((Max - Min) * Scaling:x() / 12, 0.05, 0.05))
+    holoColor(1, vec(0, 255, 0))
+}
+
+Crux = entity():pos() + vec(0, 0, 5)
+for (I=2,Graph:count()) {
+    C = Graph[I-1, vector2] * Scaling + Offset
+    N = Graph[I, vector2] * Scaling + Offset
+    holoPos(I, entity():toWorld(tovec3((C + N)/2)))
+    holoAng(I, entity():toWorld((tovec3(N) - tovec3(C)):toAngle()))
+    holoScale(I, vec(N:distance(C) / 11, 0.1, 0.1))
+}
+holoPos(0, entity():toWorld(tovec3(Offset)))
+holoAng(0, entity():toWorld(ang(0, 0, 0)))
+holoPos(1, entity():toWorld(tovec3(Offset)))
+holoAng(1, entity():toWorld(ang(0, 0, 0)))
+

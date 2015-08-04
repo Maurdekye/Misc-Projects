@@ -1,0 +1,180 @@
+@name Scoreboard
+@inputs Interactor:entity
+@outputs User:entity Viewing:entity DeltaTimeMillis
+@autoupdate
+DeltaTimeMillis = max(10, ops()/100)
+interval(DeltaTimeMillis)
+Screen = entity():isWeldedTo():wirelink()
+
+# --- Functions --- #
+function string getDateFormat(Seconds) {
+    S = ""
+    Breakpoint = 0
+    Days = floor(Seconds/86400)
+    if (Days > 0) {
+        Breakpoint = 1
+        S += Days:toString() + ":"
+        Seconds = Seconds % 86400
+    }
+    Hours = floor(Seconds/3600)
+    if (Hours > 0 || Breakpoint == 1) {
+        if (Hours < 10 && Breakpoint == 1) {S += "0"}
+        Breakpoint = 1
+        S += Hours + ":"
+        Seconds = Seconds % 3600
+    }
+    Minutes = floor(Seconds/60)
+    if (Minutes > 0 || Breakpoint == 1) {
+        if (Minutes < 10 && Breakpoint == 1) {S += "0"}
+        Breakpoint = 1
+        S += Minutes + ":"
+        Seconds = Seconds % 60
+    }
+    if (Seconds < 10 && Breakpoint == 1) {S += "0"}
+    return S + Seconds
+}
+
+# --- Initializations --- #
+
+if (first())
+{
+    entity():setAlpha(0)
+    entity():propNotSolid(1)
+}
+
+PC = players():count()
+TopBuffer = 2
+Front = 10
+PerPlayerItems = 7
+
+# Automatically defines interactor as the closest player looking at the screen
+# You can reduce the load by wiring in the interactor manually
+Interactor_ = noentity()
+if (!->Interactor || !Interactor:isPlayer()) {
+    findByClass("player")
+    findSortByDistance(entity():pos())
+    Pls = findToArray()
+    for (I=0,Pls:count()) {
+        if(Screen:egpCursor(Pls[I, entity]) != vec2(-1, -1)) {
+            Interactor_ = Pls[I, entity]
+            break
+        }
+    }
+} else {
+    Interactor_ = Interactor
+}
+User = Interactor_
+Viewing = noentity()
+
+# --- Renders Once Per Cycle --- #
+
+# Header
+Screen:egpBox(1, vec2(256, 22*TopBuffer/2), vec2(496, 22*TopBuffer - 16))
+Screen:egpColor(1, vec(64, 64, 64))
+Screen:egpBox(2, vec2(256, 22*(TopBuffer)), vec2(505, 1))
+Screen:egpColor(2, vec(192, 192, 192))
+
+# Header Text
+Screen:egpText(8, hostname() + " on " + map(), vec2(256, 22*TopBuffer/2))
+Screen:egpAlign(8, 1, 1)
+Screen:egpSize(8, 20)
+
+# Highlight
+Screen:egpBox(4, vec2(-512, -512), vec2(508, 40))
+Screen:egpColor(4, vec(10, 40, 100))
+Screen:egpOrder(4, 1)
+Screen:egpColor(4, vec(0, 64, 64))
+
+# Kills Highlight
+Screen:egpText(5, "Kills: NaN", vec2(-512, -512))
+
+# Deaths Highlight
+Screen:egpText(6, "Deaths: NaN", vec2(-512, -512))
+Screen:egpAlign(6, 1)
+
+# Ratio Highlight
+Screen:egpText(7, "K/D: NaN", vec2(-512, -512))
+Screen:egpAlign(7, 2)
+
+# --- Renders Once Per Player --- #
+
+foreach (K,Ply:entity=players())
+{
+    # Highlighter
+    MPos = Screen:egpCursor(Interactor_)
+    Late = 0
+    if (MPos:y() > (K+(TopBuffer-1)) * 22 && MPos:y() < (K+TopBuffer) * 22) {
+        Screen:egpPos(4, vec2(256, (K+(TopBuffer-1)) * 22 + 22))
+        Screen:egpText(5, "Kills: " + Ply:frags(), vec2(32, (K+TopBuffer) * 22))
+        Screen:egpText(6, "Deaths: " + Ply:deaths(), vec2(256, (K+TopBuffer) * 22))
+        Screen:egpText(7, "K/D: " + round(Ply:frags() / Ply:deaths(), 2), vec2(482, (K+TopBuffer) * 22))
+        PlyId = Ply:id()
+        Late = 1
+        Viewing = Ply
+    }
+    
+    # Name
+    Screen:egpText(K + Front, Ply:name(), vec2(4, (22*(K+(TopBuffer-1)))))
+    Screen:egpColor(K + Front, vec(128, 128, 128))
+    if (!Ply:isAlive()) {
+        Screen:egpColor(K + Front, vec(128, 0, 0))
+    } elseif (Ply:isAdmin()) {
+        Screen:egpColor(K + Front, vec(25, 255, 75))
+    } elseif (Ply:isSuperAdmin()) {
+        Screen:egpColor(K + Front, vec(25, 75, 255))
+    }
+    
+    # Ping
+    Screen:egpText(K + PC*2 + Front, Ply:ping():toString(), vec2(508, (22*(K+(TopBuffer-1)))))
+    Screen:egpAlign(K + PC*2 + Front, 2)
+    PingColor = 255 - min(Ply:ping()/2, 255)
+    Screen:egpColor(K + PC*2 + Front, vec(255, PingColor, PingColor))
+    
+    # Health Bar Background DISABLED
+    BarWidthMultiplier = 1.3
+    BarRightAlignDistance = 400
+    Screen:egpBox(K + PC*3 + Front, vec2(BarRightAlignDistance + 1000, (22*(K+(TopBuffer-1))) + 10), vec2(BarWidthMultiplier*100 + 4, 16))
+    Screen:egpColor(K + PC*3 + Front, vec(80, 80, 80))
+    #Screen:egpOrder(K + PC*3 + Front, 1)
+    
+    # Health Bar
+    BarSize = clamp(Ply:health(), 0, 100) * BarWidthMultiplier
+    Screen:egpBox(K + PC*4 + Front, vec2((BarRightAlignDistance + 100*BarWidthMultiplier/2) - BarSize/2, (22*(K+(TopBuffer-1))) + 10), vec2(BarSize, 12))
+    Screen:egpColor(K + PC*4 + Front, vec(255,255,255))
+    
+    # Armor Bar
+    ArmorBarSize = clamp(Ply:armor(), 0, 100) * BarWidthMultiplier - 4
+    Screen:egpBox(K + PC*5 + Front, vec2((BarRightAlignDistance - 2) + 100*BarWidthMultiplier/2 - ArmorBarSize/2, (22*(K+(TopBuffer-1))) + 10), vec2(ArmorBarSize, 8))
+    Screen:egpColor(K + PC*5 + Front, vec(50, 100, 250))
+    
+    # Time On Server
+    Screen:egpText(K + PC*6 + Front, getDateFormat(round(Ply:timeConnected())), vec2(330, (22*(K+(TopBuffer-1)))))
+    Screen:egpAlign(K + PC*6 + Front, 2)
+    Screen:egpColor(K + PC*6 + Front, vec(255, 255, 255))
+    
+    TopBuffer += Late
+    
+    # Border Box
+    Screen:egpBox(K + PC + Front, vec2(256, 22*(K+TopBuffer)), vec2(505, 1))
+    Screen:egpColor(K + PC + Front, vec(192, 192, 192))
+}
+
+# --- Renders Once Per Cycle --- #
+
+# Max Player Count
+Screen:egpText(3, PC + " / " + maxPlayers(), vec2(171, (PC+TopBuffer) * 22 + 4))
+Screen:egpColor(3, vec(192, 192, 192))
+Screen:egpAlign(3, 1)
+
+# Server Uptime
+Screen:egpText(9, getDateFormat(round(curtime())), vec2(341, (PC+TopBuffer) * 22 + 4))
+Screen:egpColor(9, vec(192, 192, 192))
+Screen:egpAlign(9, 1)
+
+# --- Garbage Disposal --- #
+
+for (I=PC*PerPlayerItems + 1 + Front,(PC+1)*PerPlayerItems + 1 + Front) {
+    Screen:egpRemove(I)
+}
+
+Debug = date(round(realtime()))

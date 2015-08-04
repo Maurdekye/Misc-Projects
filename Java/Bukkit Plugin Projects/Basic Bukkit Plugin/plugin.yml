@@ -1,0 +1,17 @@
+name: Basic
+main: mainpackage.MainFile
+version: 1.0
+description: Example of a very basic Bukkit Plugin
+commands:
+  tps:
+    description: Displays the ticks per second of the server. 20 is best.
+  givedirt:
+    description: Gives a stack of dirt.
+  checkscore:
+    description: Gives your current score.
+  save-data:
+    description: Saves all player information.
+  blockonhead:
+    description: Puts a block on your head.
+  getinfo:
+    description: Provides some info.

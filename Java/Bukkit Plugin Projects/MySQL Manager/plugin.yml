@@ -1,0 +1,63 @@
+name: MySQL Server Manager
+main: mainpackage.MySQLManager
+version: 1.0.2
+description: Custom made server manager for interacting with MySQL
+
+commands:
+  money:
+    description: gets your player balance.
+  setmoney:
+    description: sets your money to a value.
+  addmoney:
+    description: add or subtract money from yours or someone else's account.
+  givemoney:
+    description: give someone money.
+  price:
+    description: get the price of the item in your hand, if it can be sold.
+  setbuy:
+    description: sets the buying price of an item.
+  setsell:
+    description: sets the selling price of an item.
+  setprice:
+    description: sets both the buying and selling price of an item.
+  sell:
+    description: sell the items in your hand for what they're worth.
+  buy:
+    description: buy more of the item in your hand.
+  stats:
+    description: lists some statistics about you
+    
+permissions:
+  mysqlmanager.money:
+    description: Allows players to view their account balance
+    default: true
+  mysqlmanager.givemoney:
+    description: Allows players to pay other players
+    default: true
+  mysqlmanager.price:
+    description: Allows players to view the price of items
+    default: true
+  mysqlmanager.buy:
+    description: Allows players to buy items
+    default: true
+  mysqlmanager.sell:
+    description: Allows players to sell items
+    default: true
+  mysqlmanager.stats:
+    description: Allows players to view arbitrary statistics about themselves
+    default: true
+  mysqlmanager.other_stats:
+    description: Allows players to view arbitrary statistics about other players
+    default: op
+  mysqlmanager.other_money:
+    description: Allows players to view the balances of other players
+    default: op
+  mysqlmanager.setmoney:
+    description: Allows players to set the amount of money they or another person has
+    default: op
+  mysqlmanager.addmoney:
+    description: Allows players to add to their or another player's bank account
+    default: op
+  mysqlmanager.setprice:
+    description: Allows players to set the prices of items
+    default: op

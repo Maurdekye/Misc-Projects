@@ -1,0 +1,33 @@
+name: ProxyChat
+main: mainpack.ProxyChat
+version: 1.0
+author: DYNAbeast
+description: Limits chat to nearby players
+
+commands:
+  shout:
+    description: Shout to nearby players
+    usage: /shout <message>
+    aliases: [s]
+  whisper:
+    description: Whisper to nearby players
+    usage: /whisper <message>
+    aliases: [w]
+  broadcast:
+    description: Broadcast to the entire server
+    usage: /broadcast <message>
+    aliases: [b]
+
+permissions:
+  proxychat.shout:
+    default: true
+    description: Allows players to shout
+  proxychat.whisper:
+    default: true
+    description: Allows players to whisper
+  proxychat.broadcast:
+    default: op
+    description: Allows players to broadcast to the whole server
+  proxychat.eartotheground:
+    default: op
+    description: Allows players to hear all messages sent on the server

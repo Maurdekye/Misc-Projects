@@ -1,0 +1,28 @@
+@name blackout_single
+@persist Target:entity
+interval(10)
+
+if (first()) {
+    Target = noentity()
+    for (I=0,1) {
+        holoCreate(I, vec(0, 0, 0), vec(-3 - 6*I, -3 - 6*I, -3 - 6*I), ang(0, 0, 0), vec(0, 0, 0)) 
+        holoModel(I, "hq_icosphere")
+        holoAlpha(I, 0)
+    }
+    entity():setAlpha(0)
+}
+
+if (owner():keyUse()) {
+    Target = owner():aimEntity()
+}
+
+if (!Target:isValid()) {
+    for (I=0,1) {
+        holoAlpha(I, 0)
+    }
+} else {
+    for (I=0,1) {
+        holoAlpha(I, 255)
+        holoPos(I, Target:shootPos())
+    }
+}

@@ -1,0 +1,9 @@
+name: EnchantAll
+main: mainpack.EnchantAll
+version: 1.0
+description: Adds an extra enchantment command.
+
+permissions:
+  enchantall.use:
+    default: op
+    description: Enables the use of /enchant all

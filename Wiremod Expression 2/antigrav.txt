@@ -1,0 +1,10 @@
+@name antigrav
+runOnTick(1)
+
+E = entity()
+T = E:isWeldedTo()
+Grav = 9.0133
+
+E:setAlpha(0)   
+E:applyForce(vec(0, 0, Grav*E:mass()))
+T:applyForce(vec(0, 0, Grav*T:mass()))

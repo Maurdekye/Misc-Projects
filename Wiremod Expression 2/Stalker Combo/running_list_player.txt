@@ -1,0 +1,54 @@
+@name running list player
+@outputs Pre Debug:vector
+@persist Holos:array Clock
+interval(10)
+Clock += 1
+
+if (Clock%5 == 0 | first()) {
+    NewHolos = array()
+    
+    Ents = players()
+    #Ents:pushEntity(entity())
+    
+    # Check for newly joined players
+    foreach(K,V:entity=Ents) {
+        if (V == owner()) {continue}
+        Ents[V:id(), entity] = V
+        if (!Holos:exists(V:id())) {
+            NewHolos[V:id(), normal] = V:id()
+            holoCreate(V:id(), vec(0, 0, 0), vec(3, 3, 0.2))
+            holoModel(V:id(), "hq_tube_thick")
+        }
+    }
+    
+    # Check for disconnected players
+    foreach(K,V:normal=Holos) {
+        if (Ents:exists(K)) {
+            NewHolos[K, normal] = K
+        } else {
+           holoDelete(K)
+        }
+    }
+    Holos = NewHolos
+}
+
+foreach(K,V:normal=Holos) {
+    E = entity(K)
+    if (!E:isValid()) {
+        holoDelete(K)
+        continue
+    }
+    if (E == entity()) {
+        holoModel(K, "hq_tube_thick")
+    }
+    DirVec = (E:shootPos() - owner():shootPos()):normalized()*6
+    holoPos(K, DirVec + owner():shootPos())
+    holoAng(K, ang(0, -atan(DirVec:x(), DirVec:y()), -atan(sqrt(DirVec:x()^2 + DirVec:y()^2), DirVec:z())))
+    Pre = 20/E:pos():distance(owner():shootPos())
+    ScaleAmnt = clamp(Pre, 0.01, 0.5)
+    holoScale(K, vec(ScaleAmnt)*vec(1, 1, 0.1))
+    Col = (sin(curtime()*1000)+1)*127
+    Debug = vec(255, Col, Col)
+    holoColor(K, Debug)
+    #holoColor(K, vec((K*982541653)%128 + 128, (K*275604571)%128 + 128, (K*553105243)%128 + 128))
+}

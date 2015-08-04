@@ -1,0 +1,22 @@
+@name Prop Cloaking Device
+@persist Con:array
+
+if (first()) {
+    runOnChat(1)
+    Con = entity():isWeldedTo():getConstraints()
+}
+
+if(chatClk(owner())){
+    Command = owner():lastSaid()
+    if (Command == "!conceal") {
+        foreach (K,E:entity=Con) {
+            E:setAlpha(0)
+        }
+        entity():isWeldedTo():setAlpha(0)
+    } elseif (Command == "!reveal") {
+        foreach (K,E:entity=Con) {
+            E:setAlpha(255)
+        } 
+        entity():isWeldedTo():setAlpha(255)
+    }
+}

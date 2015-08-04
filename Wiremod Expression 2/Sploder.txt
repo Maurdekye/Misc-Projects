@@ -1,0 +1,20 @@
+@name Sploder
+@persist MTrack M2Track
+interval(50)
+runOnKeys(owner(), 1)
+
+MTrack = owner():keyAttack1()
+M2Track = owner():keyAttack2()
+
+if (MTrack)
+{
+    propSpawn("models/props_junk/gascan001a.mdl", owner():aimPos(), 0):propBreak()
+}
+
+if (changed(M2Track) & M2Track)
+{
+    for (I=0,2)
+    {
+        propSpawn("models/props_c17/oildrum001_explosive.mdl", owner():aimPos(), 0):propBreak()
+    }
+}

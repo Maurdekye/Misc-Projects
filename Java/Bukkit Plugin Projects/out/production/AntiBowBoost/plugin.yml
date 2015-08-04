@@ -1,0 +1,11 @@
+name: AntiBowBoost
+main: mainpack.AntiBowBoost
+version: 1.0
+author: DYNAbeast
+description: >
+  prevents players from using bow boosting to gain extra distance.
+
+permissions:
+  anti.boost:
+    default: op
+    description: Allows players to bow boost.

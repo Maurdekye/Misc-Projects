@@ -1,0 +1,52 @@
+@name chatbubbles
+@persist HoloPoses:array
+interval(10)
+
+if (first()) {
+    foreach (K,V:entity=players()) {
+    
+        # Body
+        holoCreate(K*9, vec(0, 0, 0), vec(3, 0.8, 2.2), ang(0, 0, 0), vec(0, 0, 0), "hq_rcube_thick")
+        holoCreate(K*9-1, vec(0, 0, 0), vec(3.05, 0.75, 2.25 ), ang(0, 0, 0), vec(220, 170, 60), "hq_rcube_thick")
+        holoCreate(K*9-2, vec(0, 0, 0), vec(2.93, 0.85, 2.13 ), ang(0, 0, 0), vec(240, 240, 240), "hq_rcube_thick")
+        
+        # Ellipsis
+        holoCreate(K*9-3, vec(0, 0, 0), vec(0.2, 0.2, 1), ang(0, 0, 90), vec(0, 0, 0), "hq_cylinder")
+        holoCreate(K*9-4, vec(-6, 0, 0), vec(0.2, 0.2, 1), ang(0, 0, 90), vec(0, 0, 0), "hq_cylinder")
+        holoCreate(K*9-5, vec(6, 0, 0), vec(0.2, 0.2, 1), ang(0, 0, 90), vec(0, 0, 0), "hq_cylinder")
+        
+        # Carrot
+        holoCreate(K*9-6, vec(0, 0, -16), vec(0.8, 0.59, 1.2), ang(0, 0, 180), vec(0, 0, 0), "prism")
+        holoCreate(K*9-7, vec(0, 0, -16), vec(0.6, 0.64, 1), ang(0, 0, 180), vec(240, 240, 240), "prism")
+        holoCreate(K*9-8, vec(0, 0, -16), vec(1, 0.54, 1.4), ang(0, 0, 180), vec(220, 170, 60), "prism")
+        
+        for (I=0,8) {
+            HoloPoses[K*9-I, vector]=holoEntity(I):pos()
+        }
+    }
+}
+
+Clock = curtime()*50
+
+foreach (K,V:entity=players()) {
+    if (!V:isTyping()) {
+        for (I=0,8) {
+            holoAlpha(K*9-I, 0)
+        }
+    } else {
+        Crux = V:shootPos() + vec(0, 0, 60)
+        
+        SClock = sin(Clock)
+        CClock = cos(Clock)
+        
+        for (I=0,8) {
+            holoAlpha(K*9-I, 254) # fuck
+            HE = holoEntity(I)
+            OldPos = HoloPoses[K*9-I, vector]
+            NewPos = vec(SClock*OldPos:x(), CClock*OldPos:x(), OldPos:z())
+            holoPos(I, NewPos + Crux)
+            HA = HE:angles()
+            holoAng(I, ang(HA:pitch(), -Clock+90, HA:roll()))
+        }
+    }
+}

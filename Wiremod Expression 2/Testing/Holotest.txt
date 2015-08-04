@@ -1,0 +1,62 @@
+@name YOLO
+@persist Target:entity HoloPoses:array
+interval(10)
+
+if (first()) {
+    Target = noentity()
+    
+    entity():setAlpha(0)
+    
+    # hashtag
+    holoCreate(0, vec(-100, 0, 0), vec(1, 0.2, 4), ang(0, 0, 0))
+    holoCreate(1, vec(-80, 0, 0), vec(1, 0.2, 4), ang(0, 0, 0))
+    holoCreate(2, vec(-90, 0, 10), vec(1, 0.2, 4), ang(90, 0, 0))
+    holoCreate(3, vec(-90, 0, -10), vec(1, 0.2, 4), ang(90, 0, 0))
+    
+    # Y
+    holoCreate(4, vec(-45, 0, -11), vec(0.8, 0.2, 2), ang(0, 0, 0))
+    holoCreate(5, vec(-52, 0, 10), vec(0.8, 0.2, 2.5), ang(-30, 0, 0))
+    holoCreate(6, vec(-38, 0, 10), vec(0.8, 0.2, 2.5), ang(30, 0, 0))
+    
+    # O
+    holoCreate(7, vec(0, 0, 0), vec(4, 4, 0.1), ang(0, 0, 90), vec(255, 255, 255), "hq_tube_thick")
+    
+    # L
+    holoCreate(8, vec(40, 0, 0), vec(1, 0.2, 4), ang(0, 0, 0))
+    holoCreate(9, vec(52, 0, -18), vec(3, 0.2, 1), ang(0, 0, 0))
+    
+    # O
+    holoCreate(10, vec(100, 0, 0), vec(4, 4, 0.1), ang(0, 0, 90), vec(255, 255, 255), "hq_tube_thick")
+    
+    for (I=0,10) {
+        HoloPoses[I, vector]=holoEntity(I):pos()
+    }
+}
+
+if (owner():keyUse() && owner():aimEntity():isValid()) {
+    Target = owner():aimEntity()
+}
+
+if (!Target:isValid()) {
+    for (I=0,10) {
+        holoAlpha(I, 0)
+    }
+} else {
+    Clock = curtime()*50
+    Origin = Target:pos()
+    if (Target:isPlayer()) {Origin = Target:shootPos()}
+    Crux = Origin + vec(0, 0, sin(Clock)*40 + 100)
+    
+    SinClk = sin(Clock)
+    CosClk = cos(Clock)
+    
+    for (I=0,10) {
+        holoAlpha(I, 255)
+        OldPos = HoloPoses[I, vector]
+        NewPos = vec(SinClk*OldPos:x(), CosClk*OldPos:x(), OldPos:z())
+        holoPos(I, NewPos + Crux)
+        HA = holoEntity(I):angles()
+        holoAng(I, ang(HA:pitch(), 90-Clock, HA:roll()))
+    }
+}
+

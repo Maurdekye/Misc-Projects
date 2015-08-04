@@ -1,0 +1,10 @@
+name: VS Fortress
+main: mainpackage.VSFortress
+version: 0.1
+author: DYNAbeast
+
+commands:
+  join:
+    description: Joins the active game
+  leave:
+    description: Leaves the current game

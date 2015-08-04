@@ -1,0 +1,18 @@
+name: LandMine
+main: mainpack.LandMine
+version: 1.0
+author: DYNAbeast
+description: Allows the crafting and placement of landmines.
+
+commands:
+  landmine:
+    description: Toggles landmines on or off.
+    usage: /landmine <on/off>
+
+permissions:
+  landmine.use:
+    default: true
+    description: Allows users to place landmines.
+  landmine.toggle:
+    default: op
+    description: Allows users to toggle this plugin on or off.

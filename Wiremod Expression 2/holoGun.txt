@@ -1,0 +1,49 @@
+@name holoGun
+@persist Count HoloMomentums:array HoloStuck:array Attack
+
+Max = 1000
+
+if (first()) 
+{
+    runOnTick(1)
+    rangerPersist(1)
+    rangerFilter(owner())
+}
+
+Attack = owner():keyAttack1()
+
+if (Attack && changed(Attack))
+{
+    holoCreate(Count)
+    holoPos(Count, owner():shootPos() + owner():eye() * 20)
+    holoModel(Count, "hq_cylinder")
+    holoScale(Count, vec(0.3, 0.3, 1))
+    HoloMomentums[Count, vector] = owner():eye()
+    HoloStuck[Count, number] = 0
+    holoUnparent(Count)
+    owner():soundPlay(1, 1000, "labs/chicken_tube.wav")
+    Count = (Count + 1) % Max
+}
+
+foreach (K,Pos:vector=HoloMomentums)
+{
+    if (HoloStuck[K, number] == 0)
+    {
+        NewAng = Pos:toAngle() + ang(90, 0, 0)
+        NewPos = holoEntity(K):pos() + Pos*1
+        holoAng(K, NewAng)
+        holoPos(K, NewPos)
+        holoPos(K-1, NewPos + NewAng:forward())
+        
+        Ray = rangerOffset(6, NewPos, NewAng:up()*10)
+        if (Ray:hit())
+        {
+            HoloStuck[K, number] = 1
+            if (Ray:entity() != noentity()) {
+                holoParent(K, Ray:entity())   
+            }
+            holoEntity(K):soundPlay(30, 1000, "combine mech/shieldHit.mp3")
+        }
+        HoloMomentums[K, vector] = Pos - vec(0, 0, 0.001)
+    }
+}

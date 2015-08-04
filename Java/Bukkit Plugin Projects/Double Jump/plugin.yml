@@ -1,0 +1,5 @@
+name: Double Jump
+main: mainpackage.Mainfile
+version: 1.0
+author: Maurdekye / Dynabeast
+description: Allows for a double-jump by pressing shift.

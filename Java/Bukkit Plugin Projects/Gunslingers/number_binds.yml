@@ -1,0 +1,45 @@
+#
+#                      Gunslingers
+#                    ---------------
+#
+#       - Default Number Binds Configuration File -
+#
+
+shotgun_usage: 8
+burst_usage: 1
+sniper_usage: 1
+minigun_usage: 1
+launcher_usage: 1
+airstrike_usage: 1
+flamethrower_usage: 1
+dart_usage: 1
+cfour_usage: 16
+mortar_usage: 1
+prox_mine_usage: 8
+fire_mine_usage: 8
+
+shotgun_durability: 8
+burst_durability: 8
+sniper_durability: 16
+minigun_durability: 1
+launcher_durability: 32
+airstrike_durability: 2
+flamethrower_durability: 0.03125
+dart_durability: 1
+cfour_durability: 0.5
+mortar_durability: 2
+prox_mine_durability: 1
+fire_mine_durability: 1
+
+shotgun_delay: 50
+burst_delay: 9
+sniper_delay: 45
+minigun_delay: 0
+launcher_delay: 250
+airstrike_delay: 300
+flamethrower_delay: 0
+dart_delay: 90
+cfour_delay: 20
+mortar_delay: 300
+prox_mine_delay: 35
+fire_mine_delay: 25

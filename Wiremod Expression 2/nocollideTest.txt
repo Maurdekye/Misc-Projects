@@ -1,0 +1,4 @@
+@name nocollideTest
+
+noCollide(entity():isWeldedTo(), world())
+noCollide(entity():isWeldedTo(), owner())

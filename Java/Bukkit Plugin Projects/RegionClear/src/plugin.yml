@@ -1,0 +1,9 @@
+name: RegionClear
+main: mainpack.RegionClear
+version: 1.0
+author: DYNAbeast
+depend: [WorldEdit]
+description: Allows the user to clear and save WorldEdit regions
+
+commands:
+  rc:

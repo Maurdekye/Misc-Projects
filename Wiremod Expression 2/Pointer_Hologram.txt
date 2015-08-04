@@ -1,0 +1,25 @@
+@name Pointer_Hologram
+@persist Target:entity Offset:vector
+@persist Active
+runOnTick(1)
+
+if (first()) {
+    holoCreate(1)
+    holoScale(1, vec(0.5, 0.5, 2))
+    holoColor(1, vec(255, 0, 0))
+    holoModel(1, "hq_cylinder")
+}
+
+Active = owner():keyPressed("g")
+
+if (Active) {
+    AE = owner():aimEntity()
+    if (AE != noentity()) {
+        Target = AE
+        holoParent(1, Target)
+        Norm = (Target:massCenter() - owner():aimPos()):normalized()
+        
+        holoPos(1, owner():aimPos() - Norm * 12)
+        holoAng(1, owner():aimNormal():toAngle())
+    }
+}

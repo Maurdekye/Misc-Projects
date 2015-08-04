@@ -1,0 +1,84 @@
+name: Rewind
+main: mainpack.Rewind
+version: 1.0
+description: Record block states, and rewind them.
+author: DYNAbeast
+softdepend: [WorldEdit]
+
+commands:
+  record:
+    description: Begin recording block information.
+    usage: /record [me/area] <record name>
+    aliases: [rec]
+    permission: rewind.record
+    permission-message: You're not allowed to record time.
+  endrec:
+    description: Ends a specific recording, or all current recordings.
+    usage: /endrec [record name]
+    permission: rewind.record
+    permission-message: You're not allowed to record time.
+  replay:
+    description: Plays back through a recording of events.
+    usage: /playback [record name]
+    aliases: [playfile, playback]
+    permission: rewind.playback
+    permission-message: You're not allowed to play back recordings.
+  playpause:
+    description: Pauses a recording in the middle of it's progression.
+    usage: /playpause [record name]
+    permission: rewind.playback.pause
+    permission-message: You're not allowed to pause recordings.
+  playstop:
+     description: Stops a recording, leaving it as-is, or resetting it.
+     usage: /playstop [record name] [-r]
+     permission: rewind.playback.stop
+     permission-message: You're not allowed to stop recordings.
+  rewind:
+    description: Rewinds through a recording from finish to start.
+    usage: /rewind [record name]
+    permission: rewind.playback.rewind
+    permission-message: You're not allowed to reverse recordings.
+  playspeed:
+    description: Adjusts or resets the speed of a specific recording.
+    usage: /playspeed [record name] [speed]
+    permission: rewind.playback.speed
+    permission-message: You're not allowed to speed up recordings.
+
+permissions:
+  rewind.record:
+    description: Allows block recording
+    default: op
+    children:
+      rewind.record.self: true
+      rewind.record.area: true
+  rewind.record.self:
+    description: Allows recording of personal block modifications
+    default: op
+  rewind.record.area:
+    description: Allows recording of WorldEdit regions
+    default: op
+  rewind.playback:
+    description: Allows playback of saved recordings
+    default: op
+    children:
+      rewind.playback.pause: true
+      rewind.playback.stop: true
+      rewind.playback.rewind: true
+      rewind.playback.speed: true
+  rewind.playback.pause:
+    description: Allows players to pause / unpause ongoing recordings
+    default: op
+  rewind.playback.stop:
+    description: Allows players to stop recordings in their progression
+    default: op
+    children:
+      rewind.playback.stop.reset: true
+  rewind.playback.stop.reset:
+    description: Allows players to have recordings reset to their original state after being stopped
+    default: op
+  rewind.playback.rewind:
+    description: Allows players to play recordings in reverse
+    default: op
+  rewind.playback.speed:
+    description: Allows players to adjust the speed of recordings
+    default: op

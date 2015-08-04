@@ -1,0 +1,72 @@
+@name Attractor
+@inputs DrawReticule
+@outputs Holding:entity AngDebug:angle Debug
+@persist Differential:vector AngDiff:angle
+@persist Target:entity LastTarget:entity Distance
+@persist LC RC U D R
+runOnTick(1)
+
+if (first())
+{
+    holoCreate(1)
+    holoModel(1, "hq_icosphere")
+    holoAlpha(1, 64)
+    Distance = 150
+}
+
+if (!->DrawReticule || DrawReticule)
+{
+    holoAlpha(1, 64)
+} else {
+    holoAlpha(1, 0)
+}
+
+holoAlpha(1, 0)
+
+LC = owner():keyAttack1()
+RC = owner():keyAttack2()
+U = owner():keyPressed("UP")
+D = owner():keyPressed("DOWN")
+R = owner():keyReload()
+M = Target:mass()
+V = Target:volume()/5000
+Debug = V
+
+TargetPos = owner():shootPos() + owner():eye()*Distance
+Differential = TargetPos - Target:massCenter()
+Target:applyForce($Differential*60*M + Differential*20*M)
+
+TargetAngle = (-owner():eye()):toAngle()
+AngDiff = Target:toLocal(TargetAngle)
+Target:applyAngForce($AngDiff*M*V*30 + AngDiff*M*V*5)
+
+AngDebug = AngDiff
+
+holoPos(1, TargetPos)
+holoPos(2, Target:pos())
+
+AE = owner():aimEntity()
+
+if (RC && AE:isValid() && AE != Target)
+{
+    Target:setAlpha(255)
+    Target = AE
+    Target:setAlpha(64)
+    Differential = vec()
+    AngDiff = ang()
+}
+if (LC && changed(LC))
+{
+    Target:setAlpha(255)
+    Target:applyForce(owner():eye()*M*10000)
+    Target = noentity()
+}
+if (R && changed(R))
+{
+    Target:setAlpha(255)
+    Target = noentity()
+}
+Holding = Target
+Distance += U*5
+Distance -= D*5
+Distance = max(50, Distance)

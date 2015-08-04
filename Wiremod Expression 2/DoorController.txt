@@ -1,0 +1,15 @@
+@name DoorController
+@inputs Range
+@outputs Force
+interval(100)
+
+if (->Range) {
+    RangeIn = Range
+} else {
+    RangeIn = 300
+}
+if (owner():pos():distance(entity():pos()) < Range) {
+    Force = 1
+} else {
+    Force = 0
+}

@@ -1,0 +1,9 @@
+@name KeyTest
+@persist Key
+interval(100)
+
+Key = owner():keyPressed("F")
+if (changed(Key)) 
+{
+    print(Key + " " + changed(Key) + " " + (Key && changed(Key)))
+}

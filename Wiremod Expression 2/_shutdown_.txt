@@ -1,0 +1,24 @@
+@name Invisibility
+@persist Vehicle:entity
+
+if (first()) {
+    entity():setAlpha(0)
+    owner():setMaterial("models/effects/vol_light001")
+    runOnKeys(owner(), 1)
+    runOnLast(1)
+}
+
+if (last()) {
+    owner():weapon():setAlpha(255)
+    owner():setMaterial("")
+}
+
+owner():weapon():setAlpha(0)
+
+if (owner():inVehicle()) {
+    Vehicle = owner():vehicle()
+    Vehicle:setAlpha(0)
+} elseif (Vehicle:isValid()) {
+    Vehicle:setAlpha(255)
+    Vehicle = noentity()
+}

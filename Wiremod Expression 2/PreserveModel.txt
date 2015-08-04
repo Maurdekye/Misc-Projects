@@ -1,0 +1,5 @@
+@name PreserveModel
+interval(1000)
+entity():propNotSolid(1)
+entity():setAlpha(0)
+owner():setMaterial("")
