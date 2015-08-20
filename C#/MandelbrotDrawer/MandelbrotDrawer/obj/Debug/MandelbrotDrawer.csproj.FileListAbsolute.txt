@@ -1,0 +1,9 @@
+f:\libraries\documents\visual studio 2015\Projects\MandelbrotDrawer\MandelbrotDrawer\bin\Debug\MandelbrotDrawer.exe.config
+f:\libraries\documents\visual studio 2015\Projects\MandelbrotDrawer\MandelbrotDrawer\bin\Debug\MandelbrotDrawer.exe
+f:\libraries\documents\visual studio 2015\Projects\MandelbrotDrawer\MandelbrotDrawer\bin\Debug\MandelbrotDrawer.pdb
+f:\libraries\documents\visual studio 2015\Projects\MandelbrotDrawer\MandelbrotDrawer\obj\Debug\MandelbrotDrawer.csprojResolveAssemblyReference.cache
+f:\libraries\documents\visual studio 2015\Projects\MandelbrotDrawer\MandelbrotDrawer\obj\Debug\MandelbrotDrawer.Form1.resources
+f:\libraries\documents\visual studio 2015\Projects\MandelbrotDrawer\MandelbrotDrawer\obj\Debug\MandelbrotDrawer.Properties.Resources.resources
+f:\libraries\documents\visual studio 2015\Projects\MandelbrotDrawer\MandelbrotDrawer\obj\Debug\MandelbrotDrawer.csproj.GenerateResource.Cache
+f:\libraries\documents\visual studio 2015\Projects\MandelbrotDrawer\MandelbrotDrawer\obj\Debug\MandelbrotDrawer.exe
+f:\libraries\documents\visual studio 2015\Projects\MandelbrotDrawer\MandelbrotDrawer\obj\Debug\MandelbrotDrawer.pdb

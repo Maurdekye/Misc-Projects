@@ -135,7 +135,7 @@ class imaginary:
 
 def mandelbrot(position, iterations):
     i = 0
-    change = imaginary(0, 0)
+    change = position
     while i < iterations:
         change = change * change + position
         i += 1
@@ -145,9 +145,9 @@ def mandelbrot(position, iterations):
 
 def julia(position, subposition, iterations):
     i = 0
-    change = imaginary(0, 0)
+    change = position
     while i < iterations:
-        change = change * change + position
+        change = change * change + subposition
         i += 1
         if abs(change) > 2:
             return i

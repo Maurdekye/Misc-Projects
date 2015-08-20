@@ -1,0 +1,12 @@
+F:\Libraries\Documents\Visual Studio 2015\Projects\MandelbrotDrawer\MandelbrotDrawer\bin\Release\MandelbrotDrawer.exe.config
+F:\Libraries\Documents\Visual Studio 2015\Projects\MandelbrotDrawer\MandelbrotDrawer\bin\Release\MandelbrotDrawer.exe
+F:\Libraries\Documents\Visual Studio 2015\Projects\MandelbrotDrawer\MandelbrotDrawer\bin\Release\MandelbrotDrawer.pdb
+F:\Libraries\Documents\Visual Studio 2015\Projects\MandelbrotDrawer\MandelbrotDrawer\obj\Release\MandelbrotDrawer.Form1.resources
+F:\Libraries\Documents\Visual Studio 2015\Projects\MandelbrotDrawer\MandelbrotDrawer\obj\Release\MandelbrotDrawer.Properties.Resources.resources
+F:\Libraries\Documents\Visual Studio 2015\Projects\MandelbrotDrawer\MandelbrotDrawer\obj\Release\MandelbrotDrawer.csproj.GenerateResource.Cache
+F:\Libraries\Documents\Visual Studio 2015\Projects\MandelbrotDrawer\MandelbrotDrawer\obj\Release\MandelbrotDrawer.exe
+F:\Libraries\Documents\Visual Studio 2015\Projects\MandelbrotDrawer\MandelbrotDrawer\obj\Release\MandelbrotDrawer.pdb
+f:\libraries\documents\visual studio 2015\Projects\MandelbrotDrawer\MandelbrotDrawer\obj\Release\MandelbrotDrawer.csprojResolveAssemblyReference.cache
+F:\Libraries\Documents\GitHub\Misc-Projects\C#\MandelbrotDrawer\MandelbrotDrawer\bin\Release\MandelbrotDrawer.exe.config
+F:\Libraries\Documents\GitHub\Misc-Projects\C#\MandelbrotDrawer\MandelbrotDrawer\obj\Release\MandelbrotDrawer.exe
+F:\Libraries\Documents\GitHub\Misc-Projects\C#\MandelbrotDrawer\MandelbrotDrawer\obj\Release\MandelbrotDrawer.pdb
