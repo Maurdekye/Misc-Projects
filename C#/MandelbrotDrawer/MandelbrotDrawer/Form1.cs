@@ -15,16 +15,24 @@ namespace MandelbrotDrawer
     public partial class Form1 : Form
     {
 
-        public Imaginary LowerBounds = new Imaginary(-2, -1.2);
-        public Imaginary UpperBounds = new Imaginary(2, 1.2);
-        public volatile Bitmap buffer = null;
+        public readonly uint Threads = 8;
+        public readonly double ZoomScaleFactor = 1.125;
+        public readonly Imaginary DefaultLowerBounds = new Imaginary(-2, -1.2);
+        public readonly Imaginary DefaultUpperBounds = new Imaginary(2, 1.2);
+        public readonly int DefaultCalculationIterations = 256;
+
+        public int CalculationIterations;
+        public Imaginary LowerBounds;
+        public Imaginary UpperBounds;
         public Point MandelbrotPanelSize = new Point(0, 0);
-        public Imaginary JuliaSubPosition = null;
-        public readonly uint Threads = 22;
-        public int CalculationIterations = 256;
+        public Imaginary JuliaSubPosition;
+        public Bitmap buffer;
 
         public Form1()
         {
+            LowerBounds = DefaultLowerBounds;
+            UpperBounds = DefaultUpperBounds;
+            CalculationIterations = DefaultCalculationIterations;
             InitializeComponent();
         }
 
@@ -52,9 +60,9 @@ namespace MandelbrotDrawer
             }
         }
 
-        private void splitContainer1_Panel2_Paint(object sender, PaintEventArgs e)
+        private void DisplayBox_Paint(object sender, PaintEventArgs e)
         {
-            MandelbrotPanelSize = new Point(splitContainer1.Panel2.Width, splitContainer1.Panel2.Height);
+            MandelbrotPanelSize = new Point(DisplayBox.Width, DisplayBox.Height);
             if (MandelbrotPanelSize.X <= 0 || MandelbrotPanelSize.Y <= 0)
             {
                 return;
@@ -67,27 +75,60 @@ namespace MandelbrotDrawer
             MandelRendererController render = new MandelRendererController(LowerBounds, UpperBounds, MandelbrotPanelSize, JuliaSubPosition, CalculationIterations, Threads);
             render.Activate();
             render.Compile(g);
-            //ConsoleBox.AppendText(render.Timer.ElapsedMilliseconds.ToString() + " \n");
+            ConsoleBox.AppendText((render.Timer.ElapsedMilliseconds / 1000.0).ToString() + " Seconds \n");
         }
 
-        private void splitContainer1_Panel2_MouseClick(object sender, MouseEventArgs e)
+        private void DisplayBox_MouseClick(object sender, MouseEventArgs e)
         {
-            if (e.Button == MouseButtons.Left && JuliaSubPosition == null)
+            Point pos = e.Location;
+            double newX = Util.Transform.FromPixel(LowerBounds.Real, UpperBounds.Real, pos.X, MandelbrotPanelSize.X);
+            double newY = Util.Transform.FromPixel(LowerBounds.Imag, UpperBounds.Imag, pos.Y, MandelbrotPanelSize.Y);
+            Imaginary mouseLoc = new Imaginary(newX, newY);
+            if (e.Button == MouseButtons.Left)
             {
-                Point pos = e.Location;
-                double newX = Math.Round(Util.Transform.FromPixel(LowerBounds.Real, UpperBounds.Real, pos.X, MandelbrotPanelSize.X), 2);
-                double newY = Math.Round(Util.Transform.FromPixel(LowerBounds.Imag, UpperBounds.Imag, pos.Y, MandelbrotPanelSize.Y), 2);
-                JuliaSubPosition = new Imaginary(newX, newY);
-                ConsoleBox.AppendText(JuliaSubPosition.ToString() + " \n");
-                Refresh();
+                if (JuliaSubPosition == null)
+                {
+                    ConsoleBox.AppendText(mouseLoc.ToString(2) + " \n");
+                    JuliaSubPosition = mouseLoc;
+                    Refresh();
+                }
+                else
+                {
+                    JuliaSubPosition = null;
+                    Refresh();
+                }
             }
-            else if (e.Button == MouseButtons.Right && JuliaSubPosition != null)
+            else if (e.Button == MouseButtons.Right)
             {
-                JuliaSubPosition = null;
+                ConsoleBox.AppendText(mouseLoc.ToString(2) + " \n");
+            }
+            else if (e.Button == MouseButtons.Middle)
+            {
+                LowerBounds = DefaultLowerBounds;
+                UpperBounds = DefaultUpperBounds;
+                CalculationIterations = DefaultCalculationIterations;
                 Refresh();
             }
         }
-        
+
+        private void DisplayBox_MouseWheel(object sender, MouseEventArgs e)
+        {
+            int d = -2*Math.Sign(e.Delta);
+            Point pos = e.Location;
+            double newX = Util.Transform.FromPixel(LowerBounds.Real, UpperBounds.Real, pos.X, MandelbrotPanelSize.X);
+            double newY = Util.Transform.FromPixel(LowerBounds.Imag, UpperBounds.Imag, pos.Y, MandelbrotPanelSize.Y);
+            Imaginary mouseLoc = new Imaginary(newX, newY);
+            Imaginary sizeRange = new Imaginary(UpperBounds.Real - LowerBounds.Real, UpperBounds.Imag - LowerBounds.Imag);
+            double horizontalPercentage = (mouseLoc.Real - LowerBounds.Real) / sizeRange.Real;
+            double verticalPercentage = (mouseLoc.Imag - LowerBounds.Imag) / sizeRange.Imag;
+            double multiplier = Math.Pow(ZoomScaleFactor, d);
+            sizeRange.Real *= multiplier;
+            sizeRange.Imag *= multiplier;
+            LowerBounds = new Imaginary(mouseLoc.Real - sizeRange.Real * horizontalPercentage, mouseLoc.Imag - sizeRange.Imag * verticalPercentage);
+            UpperBounds = new Imaginary(mouseLoc.Real + sizeRange.Real * (1 - horizontalPercentage), mouseLoc.Imag + sizeRange.Imag * (1 - verticalPercentage));
+            CalculationIterations = Math.Max(CalculationIterations - d*2, 1);
+            Refresh();
+        }
     }
 }
 
@@ -206,12 +247,19 @@ public class Imaginary
 
     ////    Dynamic Overloads
 
-    public override String ToString()
+    public override string ToString()
+    {
+        return PrintNumber(Real, Imag);
+    }
+
+    public string ToString(int roundLevel)
+    {
+        return PrintNumber(Math.Round(Real, roundLevel), Math.Round(Imag, roundLevel));
+    }
+
+    private string PrintNumber(double Re, double Im)
     {
         String connectingSymbol = " + ";
-        double Im = this.Imag;
-        double Re = this.Real;
-
         if (Im == 0)
         {
             return Re.ToString();
@@ -246,6 +294,7 @@ public class Imaginary
             return Re + connectingSymbol + Im + "i";
         }
     }
+
 }
 
 public static class Mandelbrot
@@ -340,7 +389,6 @@ public class MandelRendererController
                 Threads[i].Join();
                 g.DrawImage(RenderObjects[i].Production, position);
             }
-            Thread.Sleep(1);
         }
         Timer.Stop();
     }

@@ -37,15 +37,18 @@
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.MandelControlOutput = new System.Windows.Forms.SplitContainer();
             this.ConsoleBox = new System.Windows.Forms.TextBox();
+            this.DisplayBox = new System.Windows.Forms.PictureBox();
             this.tabPage1 = new System.Windows.Forms.TabPage();
             this.tabControl1.SuspendLayout();
             this.tabPage2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
+            this.splitContainer1.Panel2.SuspendLayout();
             this.splitContainer1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.MandelControlOutput)).BeginInit();
             this.MandelControlOutput.Panel1.SuspendLayout();
             this.MandelControlOutput.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.DisplayBox)).BeginInit();
             this.tabPage1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -94,7 +97,7 @@
             this.tabControl1.Location = new System.Drawing.Point(0, 0);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(1134, 663);
+            this.tabControl1.Size = new System.Drawing.Size(1167, 632);
             this.tabControl1.TabIndex = 4;
             // 
             // tabPage2
@@ -103,7 +106,7 @@
             this.tabPage2.Location = new System.Drawing.Point(4, 22);
             this.tabPage2.Name = "tabPage2";
             this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage2.Size = new System.Drawing.Size(1126, 637);
+            this.tabPage2.Size = new System.Drawing.Size(1159, 606);
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "Mandelbrot";
             this.tabPage2.UseVisualStyleBackColor = true;
@@ -121,11 +124,10 @@
             // splitContainer1.Panel2
             // 
             this.splitContainer1.Panel2.BackColor = System.Drawing.Color.Silver;
+            this.splitContainer1.Panel2.Controls.Add(this.DisplayBox);
             this.splitContainer1.Panel2.Cursor = System.Windows.Forms.Cursors.Cross;
-            this.splitContainer1.Panel2.Paint += new System.Windows.Forms.PaintEventHandler(this.splitContainer1_Panel2_Paint);
-            this.splitContainer1.Panel2.MouseClick += new System.Windows.Forms.MouseEventHandler(this.splitContainer1_Panel2_MouseClick);
-            this.splitContainer1.Size = new System.Drawing.Size(1120, 631);
-            this.splitContainer1.SplitterDistance = 145;
+            this.splitContainer1.Size = new System.Drawing.Size(1153, 600);
+            this.splitContainer1.SplitterDistance = 149;
             this.splitContainer1.TabIndex = 0;
             // 
             // MandelControlOutput
@@ -138,8 +140,8 @@
             // MandelControlOutput.Panel1
             // 
             this.MandelControlOutput.Panel1.Controls.Add(this.ConsoleBox);
-            this.MandelControlOutput.Size = new System.Drawing.Size(145, 631);
-            this.MandelControlOutput.SplitterDistance = 302;
+            this.MandelControlOutput.Size = new System.Drawing.Size(149, 600);
+            this.MandelControlOutput.SplitterDistance = 287;
             this.MandelControlOutput.TabIndex = 0;
             // 
             // ConsoleBox
@@ -149,8 +151,20 @@
             this.ConsoleBox.Multiline = true;
             this.ConsoleBox.Name = "ConsoleBox";
             this.ConsoleBox.ReadOnly = true;
-            this.ConsoleBox.Size = new System.Drawing.Size(145, 302);
+            this.ConsoleBox.Size = new System.Drawing.Size(149, 287);
             this.ConsoleBox.TabIndex = 0;
+            // 
+            // DisplayBox
+            // 
+            this.DisplayBox.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.DisplayBox.Location = new System.Drawing.Point(0, 0);
+            this.DisplayBox.Name = "DisplayBox";
+            this.DisplayBox.Size = new System.Drawing.Size(1000, 600);
+            this.DisplayBox.TabIndex = 0;
+            this.DisplayBox.TabStop = false;
+            this.DisplayBox.Paint += new System.Windows.Forms.PaintEventHandler(this.DisplayBox_Paint);
+            this.DisplayBox.MouseClick += new System.Windows.Forms.MouseEventHandler(this.DisplayBox_MouseClick);
+            this.DisplayBox.MouseWheel += new System.Windows.Forms.MouseEventHandler(this.DisplayBox_MouseWheel);
             // 
             // tabPage1
             // 
@@ -170,19 +184,21 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1134, 663);
+            this.ClientSize = new System.Drawing.Size(1167, 632);
             this.Controls.Add(this.tabControl1);
             this.Name = "Form1";
             this.Text = "Form1";
             this.tabControl1.ResumeLayout(false);
             this.tabPage2.ResumeLayout(false);
             this.splitContainer1.Panel1.ResumeLayout(false);
+            this.splitContainer1.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
             this.splitContainer1.ResumeLayout(false);
             this.MandelControlOutput.Panel1.ResumeLayout(false);
             this.MandelControlOutput.Panel1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.MandelControlOutput)).EndInit();
             this.MandelControlOutput.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.DisplayBox)).EndInit();
             this.tabPage1.ResumeLayout(false);
             this.tabPage1.PerformLayout();
             this.ResumeLayout(false);
@@ -201,6 +217,7 @@
         private System.Windows.Forms.SplitContainer splitContainer1;
         private System.Windows.Forms.TextBox ConsoleBox;
         private System.Windows.Forms.SplitContainer MandelControlOutput;
+        private System.Windows.Forms.PictureBox DisplayBox;
     }
 }
 
