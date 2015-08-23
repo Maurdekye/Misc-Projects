@@ -15,7 +15,7 @@ namespace MandelbrotDrawer
     public partial class Form1 : Form
     {
 
-        public readonly uint Threads = 8;
+        public readonly uint Threads = 24;
         public readonly double ZoomScaleFactor = 1.125;
         public readonly Imaginary DefaultLowerBounds = new Imaginary(-2, -1.2);
         public readonly Imaginary DefaultUpperBounds = new Imaginary(2, 1.2);
@@ -26,7 +26,7 @@ namespace MandelbrotDrawer
         public Imaginary UpperBounds;
         public Point MandelbrotPanelSize = new Point(0, 0);
         public Imaginary JuliaSubPosition;
-        public Bitmap buffer;
+        public Thread GlobalRenderThread;
 
         public Form1()
         {
@@ -64,18 +64,21 @@ namespace MandelbrotDrawer
         {
             MandelbrotPanelSize = new Point(DisplayBox.Width, DisplayBox.Height);
             if (MandelbrotPanelSize.X <= 0 || MandelbrotPanelSize.Y <= 0)
-            {
                 return;
-            }
-            Graphics g = e.Graphics;
-            if (buffer != null)
-            {
-                g.DrawImage(buffer, new PointF(0, 0));
-            }
             MandelRendererController render = new MandelRendererController(LowerBounds, UpperBounds, MandelbrotPanelSize, JuliaSubPosition, CalculationIterations, Threads);
             render.Activate();
-            render.Compile(g);
-            ConsoleBox.AppendText((render.Timer.ElapsedMilliseconds / 1000.0).ToString() + " Seconds \n");
+            if (GlobalRenderThread != null && GlobalRenderThread.IsAlive)
+                GlobalRenderThread.Abort();
+            GlobalRenderThread = new Thread(delegate() {
+                render.Compile(DisplayBox);
+                //WriteConsoleText((render.Timer.ElapsedMilliseconds / 1000.0).ToString() + " Seconds");
+            });
+            GlobalRenderThread.Start();
+        }
+
+        private void WriteConsoleText(string text)
+        {
+            Invoke(new Action(() => ConsoleBox.AppendText(text + " \n")));
         }
 
         private void DisplayBox_MouseClick(object sender, MouseEventArgs e)
@@ -88,7 +91,7 @@ namespace MandelbrotDrawer
             {
                 if (JuliaSubPosition == null)
                 {
-                    ConsoleBox.AppendText(mouseLoc.ToString(2) + " \n");
+                    WriteConsoleText(mouseLoc.ToString(2));
                     JuliaSubPosition = mouseLoc;
                     Refresh();
                 }
@@ -100,7 +103,7 @@ namespace MandelbrotDrawer
             }
             else if (e.Button == MouseButtons.Right)
             {
-                ConsoleBox.AppendText(mouseLoc.ToString(2) + " \n");
+                WriteConsoleText(mouseLoc.ToString(2));
             }
             else if (e.Button == MouseButtons.Middle)
             {
@@ -113,7 +116,7 @@ namespace MandelbrotDrawer
 
         private void DisplayBox_MouseWheel(object sender, MouseEventArgs e)
         {
-            int d = -2*Math.Sign(e.Delta);
+            int d = -8*Math.Sign(e.Delta);
             Point pos = e.Location;
             double newX = Util.Transform.FromPixel(LowerBounds.Real, UpperBounds.Real, pos.X, MandelbrotPanelSize.X);
             double newY = Util.Transform.FromPixel(LowerBounds.Imag, UpperBounds.Imag, pos.Y, MandelbrotPanelSize.Y);
@@ -369,8 +372,9 @@ public class MandelRendererController
         }
     }
 
-    public void Compile(Graphics g)
+    public void Compile(PictureBox p)
     {
+        Graphics g = p.CreateGraphics();
         bool[] completed = new bool[ThreadCount];
         int numCompleted = 0;
         for (int i = 0; i < ThreadCount; i++)
