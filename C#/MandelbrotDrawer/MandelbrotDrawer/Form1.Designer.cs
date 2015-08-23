@@ -37,8 +37,13 @@
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.MandelControlOutput = new System.Windows.Forms.SplitContainer();
             this.ConsoleBox = new System.Windows.Forms.TextBox();
+            this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
+            this.label2 = new System.Windows.Forms.Label();
             this.DisplayBox = new System.Windows.Forms.PictureBox();
             this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.label3 = new System.Windows.Forms.Label();
+            this.label4 = new System.Windows.Forms.Label();
+            this.label5 = new System.Windows.Forms.Label();
             this.tabControl1.SuspendLayout();
             this.tabPage2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
@@ -47,7 +52,9 @@
             this.splitContainer1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.MandelControlOutput)).BeginInit();
             this.MandelControlOutput.Panel1.SuspendLayout();
+            this.MandelControlOutput.Panel2.SuspendLayout();
             this.MandelControlOutput.SuspendLayout();
+            this.tableLayoutPanel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.DisplayBox)).BeginInit();
             this.tabPage1.SuspendLayout();
             this.SuspendLayout();
@@ -140,6 +147,10 @@
             // MandelControlOutput.Panel1
             // 
             this.MandelControlOutput.Panel1.Controls.Add(this.ConsoleBox);
+            // 
+            // MandelControlOutput.Panel2
+            // 
+            this.MandelControlOutput.Panel2.Controls.Add(this.tableLayoutPanel1);
             this.MandelControlOutput.Size = new System.Drawing.Size(149, 600);
             this.MandelControlOutput.SplitterDistance = 287;
             this.MandelControlOutput.TabIndex = 0;
@@ -153,6 +164,34 @@
             this.ConsoleBox.ReadOnly = true;
             this.ConsoleBox.Size = new System.Drawing.Size(149, 287);
             this.ConsoleBox.TabIndex = 0;
+            // 
+            // tableLayoutPanel1
+            // 
+            this.tableLayoutPanel1.ColumnCount = 1;
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel1.Controls.Add(this.label2, 0, 0);
+            this.tableLayoutPanel1.Controls.Add(this.label3, 0, 1);
+            this.tableLayoutPanel1.Controls.Add(this.label4, 0, 2);
+            this.tableLayoutPanel1.Controls.Add(this.label5, 0, 3);
+            this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 0);
+            this.tableLayoutPanel1.Name = "tableLayoutPanel1";
+            this.tableLayoutPanel1.RowCount = 4;
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 49F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 45F));
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(149, 309);
+            this.tableLayoutPanel1.TabIndex = 0;
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(3, 0);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(142, 26);
+            this.label2.TabIndex = 0;
+            this.label2.Text = "Left Click to toggle between Julia, Mandelbrot Fractals";
             // 
             // DisplayBox
             // 
@@ -175,10 +214,37 @@
             this.tabPage1.Location = new System.Drawing.Point(4, 22);
             this.tabPage1.Name = "tabPage1";
             this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage1.Size = new System.Drawing.Size(1126, 637);
+            this.tabPage1.Size = new System.Drawing.Size(1159, 606);
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "Imag Num Print";
             this.tabPage1.UseVisualStyleBackColor = true;
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(3, 107);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(124, 39);
+            this.label3.TabIndex = 1;
+            this.label3.Text = "Right Click to display imaginary coordinates at cursor position";
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(3, 214);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(123, 26);
+            this.label4.TabIndex = 2;
+            this.label4.Text = "Scroll to zoom in, out on fractal";
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(3, 263);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(133, 26);
+            this.label5.TabIndex = 3;
+            this.label5.Text = "Middle Click to reset zoom level and position";
             // 
             // Form1
             // 
@@ -196,8 +262,11 @@
             this.splitContainer1.ResumeLayout(false);
             this.MandelControlOutput.Panel1.ResumeLayout(false);
             this.MandelControlOutput.Panel1.PerformLayout();
+            this.MandelControlOutput.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.MandelControlOutput)).EndInit();
             this.MandelControlOutput.ResumeLayout(false);
+            this.tableLayoutPanel1.ResumeLayout(false);
+            this.tableLayoutPanel1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.DisplayBox)).EndInit();
             this.tabPage1.ResumeLayout(false);
             this.tabPage1.PerformLayout();
@@ -218,6 +287,11 @@
         private System.Windows.Forms.TextBox ConsoleBox;
         private System.Windows.Forms.SplitContainer MandelControlOutput;
         private System.Windows.Forms.PictureBox DisplayBox;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.Label label5;
     }
 }
 
