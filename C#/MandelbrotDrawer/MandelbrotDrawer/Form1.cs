@@ -13,6 +13,7 @@ namespace MandelbrotDrawer
         public readonly Imaginary DefaultLowerBounds = new Imaginary(-2, -1.2);
         public readonly Imaginary DefaultUpperBounds = new Imaginary(2, 1.2);
         public readonly int DefaultCalculationIterations = 256;
+        public readonly int DigitsAfterDecimal = 4;
 
         public Imaginary LowerBounds;
         public Imaginary UpperBounds;
@@ -95,7 +96,7 @@ namespace MandelbrotDrawer
             {
                 if (JuliaSubPosition == null)
                 {
-                    WriteConsoleText(mouseLoc.ToString(2));
+                    WriteConsoleText(mouseLoc.ToString(DigitsAfterDecimal));
                     JuliaSubPosition = mouseLoc;
                 }
                 else
@@ -104,7 +105,7 @@ namespace MandelbrotDrawer
             }
             else if (e.Button == MouseButtons.Right)
             {
-                WriteConsoleText(mouseLoc.ToString(2));
+                WriteConsoleText(mouseLoc.ToString(DigitsAfterDecimal));
             }
             else if (e.Button == MouseButtons.Middle)
             {
