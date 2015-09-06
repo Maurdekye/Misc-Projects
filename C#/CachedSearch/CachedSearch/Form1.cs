@@ -9,6 +9,8 @@ namespace CachedSearch
     public partial class Form1 : Form
     {
         CachedSearchManager searchManager;
+        //List<string> OtherData;
+        List<string> FullData;
 
         public Form1()
         {
@@ -16,8 +18,10 @@ namespace CachedSearch
             Assembly assembly = Assembly.GetExecutingAssembly();
             StreamReader sread = new StreamReader(assembly.GetManifestResourceStream("CachedSearch.Thesaurus.txt"));
             string[] contents = sread.ReadToEnd().Split(new char[] {'\n'});
-            List<string> data = new List<string>(contents);
-            searchManager = new CachedSearchManager(data);
+            FullData = new List<string>(contents);
+            searchManager = new CachedSearchManager(FullData);
+
+            //OtherData = new List<string> { "cake", "strawberry", "cantelope", "sugarmelon", "firehazard", "linguine", "caprece", "soup"};
         }
 
         private void searchBox_TextChanged(object sender, EventArgs e)
@@ -27,6 +31,10 @@ namespace CachedSearch
             displayLabel.Text = "";
             if (searchTerm == "")
                 return;
+            /*if (searchTerm == "cage")
+                searchManager.UpdateNewData(OtherData);
+            else if (searchTerm == "full")
+                searchManager.UpdateNewData(FullData);*/
             List<string> searchResults = searchManager.Search(searchTerm);
             for (int i=0;i<45;i++)
             {
@@ -47,6 +55,40 @@ public class CachedSearchManager
     {
         this.Dataset = dataset;
         this.Cacheset = new List<CacheItem>();
+    }
+
+    public List<string> Search(string term)
+    {
+        CacheItem fromCache = GetCacheItemForTerm(term);
+        List<string> localResults;
+        if (fromCache == null)
+            localResults = Filter(term, Dataset);
+        else if (fromCache.Term == term)
+            return fromCache.Results;
+        else
+            localResults = Filter(term, fromCache.Results);
+        Cacheset.Add(new CacheItem(term, localResults));
+        return localResults;
+    }
+
+    public void UpdateNewData(List<string> newData)
+    {
+        List<string> dataToAdd = new List<string>(newData);
+        List<string> dataToRemove = new List<string>(Dataset);
+        for (int i=0;i<newData.Count;i++)
+        {
+            if (Dataset.Contains(newData[i]))
+            {
+                dataToAdd.Remove(newData[i]);
+                dataToRemove.Remove(newData[i]);
+            }
+        }
+        for (int i = 0; i < Cacheset.Count; i++)
+        {
+            Cacheset[i].Results.AddRange(Filter(Cacheset[i].Term, dataToAdd));
+            Cacheset[i].Results.RemoveAll(delegate(string listItem) { return dataToRemove.Contains(listItem);  });
+        }
+        Dataset = new List<string>(newData);
     }
 
     private static List<string> Filter(string term, List<string> data)
@@ -76,20 +118,6 @@ public class CachedSearchManager
             return null;
         else
             return Cacheset[LongestCachedTerm];
-    }
-
-    public List<string> Search(string term)
-    {
-        CacheItem fromCache = GetCacheItemForTerm(term);
-        List<string> localResults;
-        if (fromCache == null)
-            localResults = CachedSearchManager.Filter(term, Dataset);
-        else if (fromCache.Term == term)
-            return fromCache.Results;
-        else
-            localResults = CachedSearchManager.Filter(term, fromCache.Results);
-        Cacheset.Add(new CacheItem(term, localResults));
-        return localResults;
     }
 
     public class CacheItem
