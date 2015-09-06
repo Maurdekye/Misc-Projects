@@ -1,0 +1,9 @@
+F:\Libraries\Documents\GitHub\CachedSearch\CachedSearch\bin\Debug\CachedSearch.exe.config
+F:\Libraries\Documents\GitHub\CachedSearch\CachedSearch\bin\Debug\CachedSearch.exe
+F:\Libraries\Documents\GitHub\CachedSearch\CachedSearch\bin\Debug\CachedSearch.pdb
+F:\Libraries\Documents\GitHub\CachedSearch\CachedSearch\obj\Debug\CachedSearch.csprojResolveAssemblyReference.cache
+F:\Libraries\Documents\GitHub\CachedSearch\CachedSearch\obj\Debug\CachedSearch.Form1.resources
+F:\Libraries\Documents\GitHub\CachedSearch\CachedSearch\obj\Debug\CachedSearch.Properties.Resources.resources
+F:\Libraries\Documents\GitHub\CachedSearch\CachedSearch\obj\Debug\CachedSearch.csproj.GenerateResource.Cache
+F:\Libraries\Documents\GitHub\CachedSearch\CachedSearch\obj\Debug\CachedSearch.exe
+F:\Libraries\Documents\GitHub\CachedSearch\CachedSearch\obj\Debug\CachedSearch.pdb
