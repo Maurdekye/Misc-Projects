@@ -1,8 +1,10 @@
 import math
 from PIL import Image
 import time
+import re
 
-import cProfile
+vertfetch_obj = re.compile("v ([^\s]*) ([^\s]*) ([^\s]*)")
+facefetch_obj = re.compile("f ([^\s]*) ([^\s]*) ([^\s]*)")
 
 class Point:
     def __init__(my, x, y, z):
@@ -192,6 +194,26 @@ class Poly:
     def distance(my, other):
         return my.normal.dot(other - my.p1)
 
+class Model:
+    def __init__(my, param):
+        my.tris = []
+        if type(param) is list:
+            my.tris = param
+        elif type(param) is str:
+            with open(param, "r") as f:
+                if param.endswith(".obj"):
+                    verts = []
+                    for line in f:
+                        if line.startswith("#"):
+                            continue
+                        elif line.startswith("v"):
+                            m = re.search(vertfetch_obj, line)
+                            verts.append(Point(float(m.group(1)), float(m.group(2)), float(m.group(3))))
+                        elif line.startswith("f"):
+                            m = re.search(facefetch_obj, line)
+                            a, b, c = int(m.group(1)) - 1, int(m.group(2)) - 1, int(m.group(3)) - 1
+                            my.tris.append(Poly(verts[a], verts[b], verts[c]))
+
 
 class Point2d:
     def __init__(my, x, y, oldpoint=None):
@@ -294,6 +316,7 @@ class Poly2d:
         return my.l1.side(other) >= 0 and my.l2.side(other) >= 0 and my.l3.side(other) >= 0
 
 
+
 class Camera:
     def __init__(my, p1, p2, p3, focus, resx=100, resy=None):
         assert(type(p1) is Point)
@@ -344,8 +367,17 @@ class Camera:
         my.buff.flush(filename, track_progress)
         my.buff.clear()
 
-    def render(my, other, shader=lambda t, r, xy: (t, t, t)):
+    def _raw_render(my, other, shader=lambda d, pol, pix: (255, 255, 255), track_progress=False, ignore_z=False, old_depth_test=False):
         pass
+
+    def render(my, other, shader=lambda d, pol, pix: (255, 255, 255), track_progress=False, ignore_z=False, old_depth_test=False):
+        if type(other) is Model:
+            for i, tri in enumerate(other.tris):
+                # print("tracing tri {} of {}".format(i+1, len(other.tris)))
+                my._raw_render(tri, shader, track_progress, ignore_z, old_depth_test)
+        else:
+            my._raw_render(other, shader, track_progress, ignore_z, old_depth_test)
+
 
 class RayTracer(Camera):
     def __iter__(my):
@@ -387,7 +419,7 @@ class RayTracer(Camera):
                 my.buff.imprint_ignorezbuffer(x, y, scol)
             #percount.incr()
 
-    def render(my, other, shader=lambda t, r, xy: (t, t, t), track_progress=False):
+    def _raw_render(my, other, shader=lambda d, pol, pix: (255, 255, 255), track_progress=False, ignore_z=False, old_depth_test=False):
         counter = PercentCounter(my.pcount)
         if type(other) is Poly:
             for (x, y), ray in my.fetch_rays():
@@ -468,6 +500,8 @@ class Rasterizer(Camera):
 
         x_range = range(max(pdn.x, 0), min(pup.x+1, my.resx))
         y_range = range(max(pdn.y, 0), min(pup.y+1, my.resy))
+        if len(x_range) == 0 or len(y_range) == 0:
+            return []
 
         x_incr = 1/len(x_range)
         y_incr = 1/len(y_range)
@@ -485,7 +519,7 @@ class Rasterizer(Camera):
 
         return flist
 
-    def render(my, other, shader=lambda d, pol, pix: (255, 255, 255), track_progress=False, ignore_z=False, old_depth_test=False):
+    def _raw_render(my, other, shader=lambda d, pol, pix: (255, 255, 255), track_progress=False, ignore_z=False, old_depth_test=False):
         if type(other) is Poly:
             pl = my.flatten(other)
             counter = PercentCounter(pl.brange.x * pl.brange.y * my.resx * my.resy)
@@ -630,6 +664,18 @@ cameras = {
         Point(3, 4, -4),
         1, 500
     ),
+    'buncam_rs' : Rasterizer(
+        Point(-0.1, 0, -0.5),
+        Point(0.1, 0, -0.5),
+        Point(-0.1, 0.2, -0.5),
+        1, 500
+    ),
+    'buncam2_rs' : Rasterizer(
+        Point(0.1, 0, 0.5),
+        Point(-0.1, 0, 0.5),
+        Point(0.1, 0.2, 0.5),
+        1, 500
+    ),
     'sidecam_rs' : Rasterizer(
         Point(-1, 5, -4),
         Point(1, 5, -4),
@@ -684,43 +730,64 @@ def print_table(t, end="\n"):
         print()
     print(end, end="")
 
+factor = 1.1
 def logshader(d, pol, pix):
-    v = 255 / math.log(max(d, 0) + 3, 3)
+    v = 255 / math.log(max(-d, 0) + factor, factor)
     if type(pol) is Poly:
         return v, v, v
     else:
         return v, 0, 0
 
+mult = 200
 def basicshader(d, pol, pix):
-    return (d*64, d*64, d*64)
+    return (d*mult, d*mult, d*mult)
 
+loc = Point(0, -1, 0)
+def dirshader(d, pol, pix):
+    v = pol.normal.dot(loc) * 127 + 128
+    return (v, v, v)
 
 def main():
     import os
     storedir = "renders"
     if not os.path.isdir(storedir):
         os.mkdir(storedir)
-    for cname in ["sidecam_rs"]:
-        print("rendering camera " + cname)
-        cam = cameras[cname]
-        start = time.clock()
-        print("tracing background")
-        cam.buff.fill((32, 32, 32))
-        for i, t in enumerate(tris):
-            print("tracing tri {} of {}".format(i+1, len(tris)))
-            cam.render(t, basicshader)
-        print("Total render time: {} seconds".format(round(time.clock() - start, 3)))
-        print("Flushing results")
-        cam.flush(storedir + "/{}_newdepth.png".format(cname))
-        start = time.clock()
-        print("tracing background")
-        cam.buff.fill((32, 32, 32))
-        for i, t in enumerate(tris):
-            print("tracing tri {} of {}".format(i+1, len(tris)))
-            cam.render(t, basicshader, old_depth_test=True)
-        print("Total render time: {} seconds".format(round(time.clock() - start, 3)))
-        print("Flushing results")
-        cam.flush(storedir + "/{}_olddepth.png".format(cname))
+    # for cname in ["farcam_rs"]:
+    #     print("rendering camera " + cname)
+    #     cam = cameras[cname]
+    #     start = time.clock()
+    #     print("tracing background")
+    #     cam.buff.fill((32, 32, 32))
+    #     for i, t in enumerate(tris):
+    #         print("tracing tri {} of {}".format(i+1, len(tris)))
+    #         cam.render(t, basicshader)
+    #     print("Total render time: {} seconds".format(round(time.clock() - start, 3)))
+    #     print("Flushing results")
+    #     cam.flush(storedir + "/{}.png".format(cname))
+
+    #     start = time.clock()
+    #     print("tracing background")
+    #     cam.buff.fill((32, 32, 32))
+    #     for i, t in enumerate(tris):
+    #         print("tracing tri {} of {}".format(i+1, len(tris)))
+    #         cam.render(t, basicshader, old_depth_test=True)
+    #     print("Total render time: {} seconds".format(round(time.clock() - start, 3)))
+    #     print("Flushing results")
+    #     cam.flush(storedir + "/{}_olddepth.png".format(cname))
+
+    print("loading model")
+    bunbun = Model("models/bunny.obj")
+
+    cname = "buncam2_rs"
+    print("rendering camera " + cname)
+    cam = cameras[cname]
+    start = time.clock()
+    print("tracing background")
+    cam.buff.fill((32, 32, 32))
+    cam.render(bunbun, dirshader, old_depth_test=False)
+    print("Total render time: {} seconds".format(round(time.clock() - start, 3)))
+    print("Flushing results")
+    cam.flush(storedir + "/{}.png".format(cname))
 
 if __name__ == "__main__":
     main()
