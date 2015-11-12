@@ -2,7 +2,7 @@ import math
 from PIL import Image
 import time
 
-class Point(object):
+class Point:
     def __init__(my, x, y, z):
         assert(type(x) in [int, float])
         assert(type(y) in [int, float])
@@ -190,10 +190,12 @@ class Poly:
     def distance(my, other):
         return my.normal.dot(other - my.p1)
 
+
 class Point2d:
-    def __init__(my, x, y):
+    def __init__(my, x, y, oldpoint=None):
         my.x = x
         my.y = y
+        my.oldpoint = oldpoint
 
     def __sub__(my, other):
         return Point2d(my.x - other.x, my.y - other.y)
@@ -219,9 +221,10 @@ class Point2d:
         return Point2d(newx, newy)
 
 class Segment2d:
-    def __init__(my, p1, p2):
+    def __init__(my, p1, p2, oldseg=None):
         my.p1 = p1
         my.p2 = p2
+        my.oldseg = oldseg
 
         my.lower = Point2d(0, 0)
         my.upper = Point2d(0, 0)
@@ -258,10 +261,11 @@ class Segment2d:
         return slope * (x - my.p1.x) + my.p1.y
 
 class Poly2d:
-    def __init__(my, p1, p2, p3):
+    def __init__(my, p1, p2, p3, focal_analogue=None):
         my.p1 = p1
         my.p2 = p2
         my.p3 = p3
+        my.focal_analogue = focal_analogue
 
         my.l1 = Segment2d(p1, p2)
         my.l2 = Segment2d(p2, p3)
@@ -286,6 +290,7 @@ class Poly2d:
 
     def contains(my, other):
         return my.l1.side(other) >= 0 and my.l2.side(other) >= 0 and my.l3.side(other) >= 0
+
 
 class Camera:
     def __init__(my, p1, p2, p3, focus, resx=100, resy=None):
@@ -393,18 +398,18 @@ class Rasterizer(Camera):
         collision = ray.intersection(my.poly1)
         x = Segment(my.p1, my.p2)._raw_closest(collision)
         y = Segment(my.p1, my.p3)._raw_closest(collision)
-        return Point2d(x, y)
+        return Point2d(x, y, other)
 
     def flatten(my, other):
         if type(other) is Poly:
             p1 = my.get_2d_point(other.p1)
             p2 = my.get_2d_point(other.p2)
             p3 = my.get_2d_point(other.p3)
-            return Poly2d(p1, p2, p3)
+            return Poly2d(p1, p2, p3, other)
         elif type(other) is Segment:
             p1 = my.get_2d_point(other.p1)
             p2 = my.get_2d_point(other.p2)
-            return Segment2d(p1, p2)
+            return Segment2d(p1, p2, other)
         elif type(other) is Point:
             return my.get_2d_point(other)
 
@@ -422,25 +427,48 @@ class Rasterizer(Camera):
         elif type(other) is Poly2d:
             pup = my.pixelate(other.upper)
             pdn = my.pixelate(other.lower)
-            for y in range(max(pdn.y, 0), min(pup.y+1, my.resy)):
-                for x in range(max(pdn.x, 0), min(pup.x+1, my.resx)):
-                    yield Point2d(x, y), Point2d(x / my.resx, y / my.resy)
 
-    def render(my, other, shader=lambda d, ry, pol, pix: (255, 255, 255), track_progress=False, ignore_z=False):
+            downleft_corner = Point2d(other.upper.x, other.lower.y)
+            upright_corner = Point2d(other.lower.x, other.upper.y)
+
+            upleft_raycast = Ray(my.get_realpos(other.upper), my.focus)
+            downright_raycast = Ray(my.get_realpos(other.lower), my.focus)
+            downleft_raycast = Ray(my.get_realpos(downleft_corner), my.focus)
+            upright_raycast = Ray(my.get_realpos(upright_corner), my.focus)
+
+            upleft_tvalue = upleft_raycast._raw_intersect(other.focal_analogue)
+            downright_tvalue = downright_raycast._raw_intersect(other.focal_analogue)
+            downleft_tvalue = downleft_raycast._raw_intersect(other.focal_analogue)
+            upright_tvalue = upright_raycast._raw_intersect(other.focal_analogue)
+
+            left_diff = downleft_tvalue - upleft_tvalue
+            right_diff = downright_tvalue - upright_tvalue
+
+            x_range = range(max(pdn.x, 0), min(pup.x+1, my.resx))
+            y_range = range(max(pdn.y, 0), min(pup.y+1, my.resy))
+
+            x_incr = 1/len(x_range)
+            y_incr = 1/len(y_range)
+            for yi, y in enumerate(y_range):
+                l_tvalue = yi * y_incr + upleft_tvalue
+                r_tvalue = yi * y_incr + upright_tvalue
+                t_diff = r_tvalue - l_tvalue
+                for xi, x in enumerate(x_range):
+                    t = l_tvalue + t_diff * (xi * x_incr)
+                    yield Point2d(x, y), Point2d(x / my.resx, y / my.resy), t
+
+    def render(my, other, shader=lambda d, pol, pix: (255, 255, 255), track_progress=False, ignore_z=False):
         if type(other) is Poly:
             pl = my.flatten(other)
             counter = PercentCounter(pl.brange.x * pl.brange.y * my.resx * my.resy)
-            for pixel, rpos in my.fetch_boundbox_pixels(pl):
+            for pixel, rpos, t in my.fetch_boundbox_pixels(pl):
                 if track_progress:
                     counter.incr()
                 if pl.contains(rpos):
                     if ignore_z:
                         my.buff.imprint_ignorezbuffer(pixel.x, pixel.y, shader(other, pixel))
                     else:
-                        worldpos = my.get_realpos(pixel)
-                        raycast = Ray(worldpos, my.focus)
-                        idist = raycast._raw_intersect(other)
-                        my.buff.imprint(pixel.x, pixel.y, shader(idist, raycast, other, pixel), idist)
+                        my.buff.imprint(pixel.x, pixel.y, shader(t, other, pixel), t)
 
 class FrameBuffer:
     def __init__(my, wid, hih):
@@ -546,25 +574,19 @@ cameras = {
         Point(-1, 3, 1),
         Point(1, 3, 1),
         Point(-1, 3, -1),
-        1, 500
+        1, 2000
     ),
     'isocam_rs' : Rasterizer(
         Point(2, 5, -3),
         Point(3, 5, -2),
         Point(3, 4, -4),
-        1, 500
+        1, 2000
     ),
     'sidecam_rs' : Rasterizer(
         Point(-1, 5, -4),
         Point(1, 5, -4),
         Point(-1, 4, -5),
-        2, 500
-    ),
-    'undercam_rs' : Rasterizer(
-        Point(-1, -4, -4),
-        Point(1, -4, -4),
-        Point(-1, -5, -3),
-        1, 500
+        2, 2000
     )
 }
 
@@ -596,6 +618,12 @@ cameras = {
         Point(-1, -5, -3),
         1, 500
     ),
+    'undercam_rs' : Rasterizer(
+        Point(-1, -4, -4),
+        Point(1, -4, -4),
+        Point(-1, -5, -3),
+        1, 500
+    )
 '''
 
 def print_table(t, end="\n"):
@@ -608,7 +636,7 @@ def print_table(t, end="\n"):
         print()
     print(end, end="")
 
-def depthshader(d, ry, pol, pix):
+def depthshader(d, pol, pix):
     v = min(40/(math.log(2, d+1)), 255)
     return v, v, v
 
@@ -625,9 +653,7 @@ if __name__ == "__main__":
         cam.buff.fill((32, 32, 32))
         for i, t in enumerate(tris):
             print("tracing tri {} of {}".format(i+1, len(tris)))
-            #cam.render_ignorezbuffer(t)
             cam.render(t, depthshader)
         print("Total render time: {} seconds".format(round(time.clock() - start, 3)))
         print("Flushing results")
         cam.flush(storedir + "/{}.png".format(cname))
-        #cam.buff.view()
