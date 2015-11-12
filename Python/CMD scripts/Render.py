@@ -2,6 +2,8 @@ import math
 from PIL import Image
 import time
 
+import cProfile
+
 class Point:
     def __init__(my, x, y, z):
         assert(type(x) in [int, float])
@@ -321,11 +323,14 @@ class Camera:
         else:
             my.focus = midpoint + my.poly1.normal * focus
 
-    def get_realpos(my, pt):
+    def get_realpos(my, pt, from_pixel=True):
         leftrail = Segment(my.p1, my.p3)
         rightrail = Segment(my.p2, my.p4)
-        ydist = pt.y / my.resy 
-        xdist = pt.x / my.resx
+        ydist = pt.y
+        xdist = pt.x
+        if from_pixel:
+            ydist = pt.y / my.resy 
+            xdist = pt.x / my.resx
         ladderstep = Segment(leftrail.get_point(ydist), rightrail.get_point(ydist))
         return ladderstep.get_point(xdist)
 
@@ -418,46 +423,69 @@ class Rasterizer(Camera):
         newy = int(other.y * my.resy)
         return Point2d(newx, newy)
 
+    def fetch_segment_slices(my, other):
+        flist = []
+        bottom = my.pixelate(other.lower)
+        top = my.pixelate(other.upper)
+        diff = other.oldseg.p2 - other.oldseg.p1
+
+        lowreal = my.get_realpos(other.p1)
+        highreal = my.get_realpos(other.p2)
+        lowtvalue = lowreal.distance(other.oldseg.p1) / lowreal.distance(my.focus)
+        hightvalue = highreal.distance(other.oldseg.p2) / highreal.distance(my.focus)
+        tdiff = hightvalue - lowtvalue
+        startdist = lowtvalue
+
+        lengthrange = range(max(bottom.x, 0), min(top.x+1, my.resx))
+        incr = 1/len(lengthrange) * tdiff
+        t = lowtvalue
+
+        for x in lengthrange:
+            t += incr
+            flist.append((x, x / my.resx, t))
+        return flist
+
     def fetch_boundbox_pixels(my, other):
-        if type(other) is Segment2d:
-            bottom = my.pixelate(other.lower)
-            top = my.pixelate(other.upper)
-            for x in range(max(bottom.x, 0), min(top.x+1, my.resx)):
-                yield x, x / my.resx
-        elif type(other) is Poly2d:
-            pup = my.pixelate(other.upper)
-            pdn = my.pixelate(other.lower)
+        flist = []
+        pup = my.pixelate(other.upper)
+        pdn = my.pixelate(other.lower)
 
-            downleft_corner = Point2d(other.upper.x, other.lower.y)
-            upright_corner = Point2d(other.lower.x, other.upper.y)
+        downleft_corner = Point2d(other.upper.x, other.lower.y)
+        upright_corner = Point2d(other.lower.x, other.upper.y)
 
-            upleft_raycast = Ray(my.get_realpos(other.upper), my.focus)
-            downright_raycast = Ray(my.get_realpos(other.lower), my.focus)
-            downleft_raycast = Ray(my.get_realpos(downleft_corner), my.focus)
-            upright_raycast = Ray(my.get_realpos(upright_corner), my.focus)
+        upleft_raycast = Ray(my.get_realpos(other.upper, False), my.focus)
+        downright_raycast = Ray(my.get_realpos(other.lower, False), my.focus)
+        downleft_raycast = Ray(my.get_realpos(downleft_corner, False), my.focus)
+        upright_raycast = Ray(my.get_realpos(upright_corner, False), my.focus)
 
-            upleft_tvalue = upleft_raycast._raw_intersect(other.focal_analogue)
-            downright_tvalue = downright_raycast._raw_intersect(other.focal_analogue)
-            downleft_tvalue = downleft_raycast._raw_intersect(other.focal_analogue)
-            upright_tvalue = upright_raycast._raw_intersect(other.focal_analogue)
+        upleft_tvalue = upleft_raycast._raw_intersect(other.focal_analogue)
+        downright_tvalue = downright_raycast._raw_intersect(other.focal_analogue)
+        downleft_tvalue = downleft_raycast._raw_intersect(other.focal_analogue)
+        upright_tvalue = upright_raycast._raw_intersect(other.focal_analogue)
 
-            left_diff = downleft_tvalue - upleft_tvalue
-            right_diff = downright_tvalue - upright_tvalue
+        left_diff = downleft_tvalue - upleft_tvalue
+        right_diff = downright_tvalue - upright_tvalue
 
-            x_range = range(max(pdn.x, 0), min(pup.x+1, my.resx))
-            y_range = range(max(pdn.y, 0), min(pup.y+1, my.resy))
+        x_range = range(max(pdn.x, 0), min(pup.x+1, my.resx))
+        y_range = range(max(pdn.y, 0), min(pup.y+1, my.resy))
 
-            x_incr = 1/len(x_range)
-            y_incr = 1/len(y_range)
-            for yi, y in enumerate(y_range):
-                l_tvalue = yi * y_incr + upleft_tvalue
-                r_tvalue = yi * y_incr + upright_tvalue
-                t_diff = r_tvalue - l_tvalue
-                for xi, x in enumerate(x_range):
-                    t = l_tvalue + t_diff * (xi * x_incr)
-                    yield Point2d(x, y), Point2d(x / my.resx, y / my.resy), t
+        x_incr = 1/len(x_range)
+        y_incr = 1/len(y_range)
+        l_tvalue = downleft_tvalue - y_incr
+        r_tvalue = downright_tvalue - y_incr
 
-    def render(my, other, shader=lambda d, pol, pix: (255, 255, 255), track_progress=False, ignore_z=False):
+        for y in y_range:
+            l_tvalue -= y_incr * left_diff
+            r_tvalue -= y_incr * right_diff
+            t_diff_incr = (r_tvalue - l_tvalue) * x_incr
+            t = r_tvalue - t_diff_incr
+            for x in x_range:
+                t -= t_diff_incr
+                flist.append((Point2d(x, y), Point2d(x / my.resx, y / my.resy), t))
+
+        return flist
+
+    def render(my, other, shader=lambda d, pol, pix: (255, 255, 255), track_progress=False, ignore_z=False, old_depth_test=False):
         if type(other) is Poly:
             pl = my.flatten(other)
             counter = PercentCounter(pl.brange.x * pl.brange.y * my.resx * my.resy)
@@ -466,9 +494,25 @@ class Rasterizer(Camera):
                     counter.incr()
                 if pl.contains(rpos):
                     if ignore_z:
-                        my.buff.imprint_ignorezbuffer(pixel.x, pixel.y, shader(other, pixel))
+                        my.buff.imprint_ignorezbuffer(pixel.x, pixel.y, shader(0, other, pixel))
                     else:
+                        if old_depth_test:
+                            n = t
+                            t = Ray(my.get_realpos(pixel), my.focus)._raw_intersect(other)
+                            # print(pixel, t - n)
                         my.buff.imprint(pixel.x, pixel.y, shader(t, other, pixel), t)
+                        # print(pixel, t)
+        if type(other) is Segment:
+            sg = my.flatten(other)
+            for x, rx, t in my.fetch_segment_slices(sg):
+                if track_progress:
+                    counter.incr()
+                ry = sg.formula(rx)
+                pixel = my.pixelate(Point2d(rx, ry))
+                if ignore_z:
+                    my.buff.imprint_ignorezbuffer(pixel.x, pixel.y, shader(0, other, pixel))
+                else:
+                    my.buff.imprint(pixel.x, pixel.y, shader(t, other, pixel), t)
 
 class FrameBuffer:
     def __init__(my, wid, hih):
@@ -567,6 +611,10 @@ tris = [
         Point(1, -1, 1),
         Point(1, -1, -1)
     )
+    # Segment(
+    #     Point(-2, -0.5, 2),
+    #     Point(2, -0.5, -2)
+    # )
 ]
 
 cameras = {
@@ -574,19 +622,19 @@ cameras = {
         Point(-1, 3, 1),
         Point(1, 3, 1),
         Point(-1, 3, -1),
-        1, 2000
+        1, 500
     ),
     'isocam_rs' : Rasterizer(
         Point(2, 5, -3),
         Point(3, 5, -2),
         Point(3, 4, -4),
-        1, 2000
+        1, 500
     ),
     'sidecam_rs' : Rasterizer(
         Point(-1, 5, -4),
         Point(1, 5, -4),
         Point(-1, 4, -5),
-        2, 2000
+        2, 500
     )
 }
 
@@ -636,16 +684,23 @@ def print_table(t, end="\n"):
         print()
     print(end, end="")
 
-def depthshader(d, pol, pix):
-    v = min(40/(math.log(2, d+1)), 255)
-    return v, v, v
+def logshader(d, pol, pix):
+    v = 255 / math.log(max(d, 0) + 3, 3)
+    if type(pol) is Poly:
+        return v, v, v
+    else:
+        return v, 0, 0
 
-if __name__ == "__main__":
+def basicshader(d, pol, pix):
+    return (d*64, d*64, d*64)
+
+
+def main():
     import os
     storedir = "renders"
     if not os.path.isdir(storedir):
         os.mkdir(storedir)
-    for cname in cameras:
+    for cname in ["sidecam_rs"]:
         print("rendering camera " + cname)
         cam = cameras[cname]
         start = time.clock()
@@ -653,7 +708,19 @@ if __name__ == "__main__":
         cam.buff.fill((32, 32, 32))
         for i, t in enumerate(tris):
             print("tracing tri {} of {}".format(i+1, len(tris)))
-            cam.render(t, depthshader)
+            cam.render(t, basicshader)
         print("Total render time: {} seconds".format(round(time.clock() - start, 3)))
         print("Flushing results")
-        cam.flush(storedir + "/{}.png".format(cname))
+        cam.flush(storedir + "/{}_newdepth.png".format(cname))
+        start = time.clock()
+        print("tracing background")
+        cam.buff.fill((32, 32, 32))
+        for i, t in enumerate(tris):
+            print("tracing tri {} of {}".format(i+1, len(tris)))
+            cam.render(t, basicshader, old_depth_test=True)
+        print("Total render time: {} seconds".format(round(time.clock() - start, 3)))
+        print("Flushing results")
+        cam.flush(storedir + "/{}_olddepth.png".format(cname))
+
+if __name__ == "__main__":
+    main()
