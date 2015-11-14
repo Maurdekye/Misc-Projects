@@ -371,12 +371,15 @@ class Camera:
         pass
 
     def render(my, other, shader=lambda d, pol, pix: (255, 255, 255), track_progress=False, ignore_z=False, old_depth_test=False):
+        l = []
         if type(other) is Model:
+            counter = PercentCounter(len(other.tris))
             for i, tri in enumerate(other.tris):
-                # print("tracing tri {} of {}".format(i+1, len(other.tris)))
-                my._raw_render(tri, shader, track_progress, ignore_z, old_depth_test)
+                l += list(my._raw_render(tri, shader, track_progress, ignore_z, old_depth_test))
+                counter.incr()
         else:
-            my._raw_render(other, shader, track_progress, ignore_z, old_depth_test)
+            return list(my._raw_render(other, shader, track_progress, ignore_z, old_depth_test))
+        return l
 
 
 class RayTracer(Camera):
@@ -495,8 +498,8 @@ class Rasterizer(Camera):
         downleft_tvalue = downleft_raycast._raw_intersect(other.focal_analogue)
         upright_tvalue = upright_raycast._raw_intersect(other.focal_analogue)
 
-        left_diff = downleft_tvalue - upleft_tvalue
-        right_diff = downright_tvalue - upright_tvalue
+        left_diff =  upleft_tvalue - downleft_tvalue
+        right_diff = upright_tvalue - downright_tvalue
 
         x_range = range(max(pdn.x, 0), min(pup.x+1, my.resx))
         y_range = range(max(pdn.y, 0), min(pup.y+1, my.resy))
@@ -505,25 +508,26 @@ class Rasterizer(Camera):
 
         x_incr = 1/len(x_range)
         y_incr = 1/len(y_range)
-        l_tvalue = downleft_tvalue - y_incr
-        r_tvalue = downright_tvalue - y_incr
 
-        for y in y_range:
-            l_tvalue -= y_incr * left_diff
-            r_tvalue -= y_incr * right_diff
-            t_diff_incr = (r_tvalue - l_tvalue) * x_incr
-            t = r_tvalue - t_diff_incr
-            for x in x_range:
-                t -= t_diff_incr
-                flist.append((Point2d(x, y), Point2d(x / my.resx, y / my.resy), t))
-
+        for yi, y in enumerate(y_range):
+            yv = y_incr * yi * 0.829
+            # yv = math.log(yv + 1, 2)
+            l_tvalue = left_diff * yv + downleft_tvalue
+            r_tvalue = right_diff * yv + downright_tvalue
+            t_diff = r_tvalue - l_tvalue
+            for xi, x in enumerate(x_range):
+                xv = (xi * x_incr)
+                t = t_diff * xv + r_tvalue
+                flist.append((Point2d(x, y), Point2d(x / my.resx, y / my.resy), t, (xi, yi)))
         return flist
 
     def _raw_render(my, other, shader=lambda d, pol, pix: (255, 255, 255), track_progress=False, ignore_z=False, old_depth_test=False):
         if type(other) is Poly:
+            yield 0, str(other)
             pl = my.flatten(other)
             counter = PercentCounter(pl.brange.x * pl.brange.y * my.resx * my.resy)
-            for pixel, rpos, t in my.fetch_boundbox_pixels(pl):
+            for pixel, rpos, t, xy in my.fetch_boundbox_pixels(pl):
+                x, y = xy
                 if track_progress:
                     counter.incr()
                 if pl.contains(rpos):
@@ -531,11 +535,10 @@ class Rasterizer(Camera):
                         my.buff.imprint_ignorezbuffer(pixel.x, pixel.y, shader(0, other, pixel))
                     else:
                         if old_depth_test:
-                            n = t
                             t = Ray(my.get_realpos(pixel), my.focus)._raw_intersect(other)
-                            # print(pixel, t - n)
+                        if x == 20:
+                            yield y, t
                         my.buff.imprint(pixel.x, pixel.y, shader(t, other, pixel), t)
-                        # print(pixel, t)
         if type(other) is Segment:
             sg = my.flatten(other)
             for x, rx, t in my.fetch_segment_slices(sg):
@@ -605,53 +608,41 @@ class PercentCounter:
     def __init__(my, maxnum):
         my.maxnum = maxnum
 
-        my.increment = 0
+        my.increment = 0.0
         my.goalnum = 1
         my.starttime = time.clock()
         my.endditme = -1
         my.done = False
 
-    def incr(my, amount=1):
+    def incr(my, amount=1.0):
         if my.done:
             return
         my.increment += amount
         percent = my.increment/my.maxnum * 100
         if percent > my.goalnum:
             print("{}%".format(my.goalnum))
-            if my.goalnum == 100:
+            if percent >= 100:
                 my.endtime = time.clock()
                 my.done = True
                 print("Took {} seconds.".format(round(my.endtime - my.starttime, 3)))
-            my.goalnum += 1
-
-tris = [
-    Poly(
-        Point(-1.5, 0, 1.5),
-        Point(0, 0, 1.5),
-        Point(-1.5, 0, 0)
-    ),
-    Poly(
-        Point(1.5, 0, -1.5),
-        Point(0, 0, -1.5),
-        Point(1.5, 0, 0)
-    ),
-    Poly(
-        Point(-1, -1, -1),
-        Point(-1, -1, 1),
-        Point(1, -1, 1)
-    ),
-    Poly(
-        Point(-1, -1, -1),
-        Point(1, -1, 1),
-        Point(1, -1, -1)
-    )
-    # Segment(
-    #     Point(-2, -0.5, 2),
-    #     Point(2, -0.5, -2)
-    # )
-]
+            my.goalnum = math.ceil(percent)
 
 cameras = {
+    'buncam_rs' : Rasterizer(
+        Point(-0.1, 0, -0.19),
+        Point(0.1, 0, -0.19),
+        Point(-0.1, 0.2, -0.19),
+        0.5, 1000
+    ),
+    'sidecam_rs' : Rasterizer(
+        Point(-1, 5, -4),
+        Point(1, 5, -4),
+        Point(-1, 4, -5),
+        2, 500
+    )
+}
+
+'''
     'topcam_rs' : Rasterizer(
         Point(-1, 3, 1),
         Point(1, 3, 1),
@@ -664,27 +655,12 @@ cameras = {
         Point(3, 4, -4),
         1, 500
     ),
-    'buncam_rs' : Rasterizer(
-        Point(-0.1, 0, -0.5),
-        Point(0.1, 0, -0.5),
-        Point(-0.1, 0.2, -0.5),
-        1, 500
-    ),
     'buncam2_rs' : Rasterizer(
         Point(0.1, 0, 0.5),
         Point(-0.1, 0, 0.5),
         Point(0.1, 0.2, 0.5),
         1, 500
     ),
-    'sidecam_rs' : Rasterizer(
-        Point(-1, 5, -4),
-        Point(1, 5, -4),
-        Point(-1, 4, -5),
-        2, 500
-    )
-}
-
-'''
     'topcam_rt' : RayTracer(
         Point(-1, 3, 1),
         Point(1, 3, 1),
@@ -730,7 +706,7 @@ def print_table(t, end="\n"):
         print()
     print(end, end="")
 
-factor = 1.1
+factor = 1.5
 def logshader(d, pol, pix):
     v = 255 / math.log(max(-d, 0) + factor, factor)
     if type(pol) is Poly:
@@ -738,7 +714,7 @@ def logshader(d, pol, pix):
     else:
         return v, 0, 0
 
-mult = 200
+mult = 2000
 def basicshader(d, pol, pix):
     return (d*mult, d*mult, d*mult)
 
@@ -752,42 +728,39 @@ def main():
     storedir = "renders"
     if not os.path.isdir(storedir):
         os.mkdir(storedir)
-    # for cname in ["farcam_rs"]:
-    #     print("rendering camera " + cname)
-    #     cam = cameras[cname]
-    #     start = time.clock()
-    #     print("tracing background")
-    #     cam.buff.fill((32, 32, 32))
-    #     for i, t in enumerate(tris):
-    #         print("tracing tri {} of {}".format(i+1, len(tris)))
-    #         cam.render(t, basicshader)
-    #     print("Total render time: {} seconds".format(round(time.clock() - start, 3)))
-    #     print("Flushing results")
-    #     cam.flush(storedir + "/{}.png".format(cname))
-
-    #     start = time.clock()
-    #     print("tracing background")
-    #     cam.buff.fill((32, 32, 32))
-    #     for i, t in enumerate(tris):
-    #         print("tracing tri {} of {}".format(i+1, len(tris)))
-    #         cam.render(t, basicshader, old_depth_test=True)
-    #     print("Total render time: {} seconds".format(round(time.clock() - start, 3)))
-    #     print("Flushing results")
-    #     cam.flush(storedir + "/{}_olddepth.png".format(cname))
 
     print("loading model")
     bunbun = Model("models/bunny.obj")
+    sampletris = Model("models/testpolys.obj")
 
-    cname = "buncam2_rs"
-    print("rendering camera " + cname)
+    # 1st pass
+    cname = "sidecam_rs"
+    print("rendering camera " + cname + " with new depth pass model")
     cam = cameras[cname]
     start = time.clock()
     print("tracing background")
     cam.buff.fill((32, 32, 32))
-    cam.render(bunbun, dirshader, old_depth_test=False)
+    items = cam.render(sampletris, basicshader, old_depth_test=False)
+    with open(storedir + "/new.txt", "w") as f:
+        for y, n, in items:
+            f.write("{},{},\n".format(y, n))
+
     print("Total render time: {} seconds".format(round(time.clock() - start, 3)))
     print("Flushing results")
-    cam.flush(storedir + "/{}.png".format(cname))
+    cam.flush(storedir + "/{}_old.png".format(cname))
+
+    # 2nd pass
+    print("rendering camera " + cname + " with old depth pass model")
+    start = time.clock()
+    print("tracing background")
+    cam.buff.fill((32, 32, 32))
+    items = cam.render(sampletris, basicshader, old_depth_test=True)
+    with open(storedir + "/old.txt", "w") as f:
+        for y, n in items:
+            f.write("{},{},\n".format(y, n))
+    print("Total render time: {} seconds".format(round(time.clock() - start, 3)))
+    print("Flushing results")
+    cam.flush(storedir + "/{}_old.png".format(cname))
 
 if __name__ == "__main__":
     main()
