@@ -367,18 +367,18 @@ class Camera:
         my.buff.flush(filename, track_progress)
         my.buff.clear()
 
-    def _raw_render(my, other, shader=lambda d, pol, pix: (255, 255, 255), track_progress=False, ignore_z=False, old_depth_test=False):
+    def _raw_render(my, other, shader=lambda d, pol, pix: (255, 255, 255), track_progress=False, ignore_z=False, new_depth_test=False):
         pass
 
-    def render(my, other, shader=lambda d, pol, pix: (255, 255, 255), track_progress=False, ignore_z=False, old_depth_test=False):
+    def render(my, other, shader=lambda d, pol, pix: (255, 255, 255), track_progress=False, ignore_z=False, new_depth_test=False):
         l = []
         if type(other) is Model:
             counter = PercentCounter(len(other.tris)-1)
             for i, tri in enumerate(other.tris):
-                l += list(my._raw_render(tri, shader, track_progress, ignore_z, old_depth_test))
+                l += list(my._raw_render(tri, shader, track_progress, ignore_z, new_depth_test))
                 counter.incr()
         else:
-            return list(my._raw_render(other, shader, track_progress, ignore_z, old_depth_test))
+            return list(my._raw_render(other, shader, track_progress, ignore_z, new_depth_test))
         return l
 
 
@@ -521,7 +521,7 @@ class Rasterizer(Camera):
                 flist.append((Point2d(x, y), Point2d(x / my.resx, y / my.resy), t, (xi, yi)))
         return flist
 
-    def _raw_render(my, other, shader=lambda d, pol, pix: (255, 255, 255), track_progress=False, ignore_z=False, new_depth_test=True):
+    def _raw_render(my, other, shader=lambda d, pol, pix: (255, 255, 255), track_progress=False, ignore_z=False, new_depth_test=False):
         if type(other) is Poly:
             yield -1, -1, str(other)
             pl = my.flatten(other)
@@ -747,7 +747,7 @@ def main():
     start = time.clock()
     print("tracing background")
     cam.buff.fill((32, 32, 32))
-    items = cam.render(sampletris, markshader, old_depth_test=False)
+    items = cam.render(sampletris, markshader, new_depth_test=True)
     with open(storedir + "/new.txt", "w") as f:
         for x, y, n, in items:
             if x == csec:
@@ -762,7 +762,7 @@ def main():
     start = time.clock()
     print("tracing background")
     cam.buff.fill((32, 32, 32))
-    items = cam.render(sampletris, markshader, old_depth_test=True)
+    items = cam.render(sampletris, markshader, new_depth_test=False)
     with open(storedir + "/old.txt", "w") as f:
         for x, y, n in items:
             if x == csec:
