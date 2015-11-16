@@ -718,7 +718,7 @@ def basicshader(d, pol, pix):
     v = d*mult
     return v, v, v
 
-loc = Point(0, -1, 0)
+loc = Point(0, 1, 0)
 def dirshader(d, pol, pix):
     v = pol.normal.dot(loc) * 127 + 128
     return v, v, v
