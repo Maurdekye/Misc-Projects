@@ -373,7 +373,7 @@ class Camera:
     def render(my, other, shader=lambda d, pol, pix: (255, 255, 255), track_progress=False, ignore_z=False, old_depth_test=False):
         l = []
         if type(other) is Model:
-            counter = PercentCounter(len(other.tris))
+            counter = PercentCounter(len(other.tris)-1)
             for i, tri in enumerate(other.tris):
                 l += list(my._raw_render(tri, shader, track_progress, ignore_z, old_depth_test))
                 counter.incr()
@@ -510,8 +510,8 @@ class Rasterizer(Camera):
         y_incr = 1/len(y_range)
 
         for yi, y in enumerate(y_range):
-            yv = y_incr * yi * 0.829
-            # yv = math.log(yv + 1, 2)
+            yv = y_incr * yi
+            yv = math.log(yv + 1, 2)
             l_tvalue = left_diff * yv + downleft_tvalue
             r_tvalue = right_diff * yv + downright_tvalue
             t_diff = r_tvalue - l_tvalue
@@ -521,9 +521,9 @@ class Rasterizer(Camera):
                 flist.append((Point2d(x, y), Point2d(x / my.resx, y / my.resy), t, (xi, yi)))
         return flist
 
-    def _raw_render(my, other, shader=lambda d, pol, pix: (255, 255, 255), track_progress=False, ignore_z=False, old_depth_test=False):
+    def _raw_render(my, other, shader=lambda d, pol, pix: (255, 255, 255), track_progress=False, ignore_z=False, new_depth_test=True):
         if type(other) is Poly:
-            yield 0, str(other)
+            yield -1, -1, str(other)
             pl = my.flatten(other)
             counter = PercentCounter(pl.brange.x * pl.brange.y * my.resx * my.resy)
             for pixel, rpos, t, xy in my.fetch_boundbox_pixels(pl):
@@ -534,10 +534,9 @@ class Rasterizer(Camera):
                     if ignore_z:
                         my.buff.imprint_ignorezbuffer(pixel.x, pixel.y, shader(0, other, pixel))
                     else:
-                        if old_depth_test:
+                        if not new_depth_test:
                             t = Ray(my.get_realpos(pixel), my.focus)._raw_intersect(other)
-                        if x == 20:
-                            yield y, t
+                        yield pixel.x, pixel.y, t
                         my.buff.imprint(pixel.x, pixel.y, shader(t, other, pixel), t)
         if type(other) is Segment:
             sg = my.flatten(other)
@@ -608,8 +607,8 @@ class PercentCounter:
     def __init__(my, maxnum):
         my.maxnum = maxnum
 
-        my.increment = 0.0
-        my.goalnum = 1
+        my.increment = 0
+        my.goalnum = 0
         my.starttime = time.clock()
         my.endditme = -1
         my.done = False
@@ -621,7 +620,7 @@ class PercentCounter:
         percent = my.increment/my.maxnum * 100
         if percent > my.goalnum:
             print("{}%".format(my.goalnum))
-            if percent >= 100:
+            if my.goalnum >= 100:
                 my.endtime = time.clock()
                 my.done = True
                 print("Took {} seconds.".format(round(my.endtime - my.starttime, 3)))
@@ -716,12 +715,20 @@ def logshader(d, pol, pix):
 
 mult = 2000
 def basicshader(d, pol, pix):
-    return (d*mult, d*mult, d*mult)
+    v = d*mult
+    return v, v, v
 
 loc = Point(0, -1, 0)
 def dirshader(d, pol, pix):
     v = pol.normal.dot(loc) * 127 + 128
-    return (v, v, v)
+    return v, v, v
+
+csec = 335
+def markshader(d, pol, pix):
+    v = d*mult
+    if pix.x == csec:
+        return v, 0, 0
+    return v, v, v
 
 def main():
     import os
@@ -740,24 +747,26 @@ def main():
     start = time.clock()
     print("tracing background")
     cam.buff.fill((32, 32, 32))
-    items = cam.render(sampletris, basicshader, old_depth_test=False)
+    items = cam.render(sampletris, markshader, old_depth_test=False)
     with open(storedir + "/new.txt", "w") as f:
-        for y, n, in items:
-            f.write("{},{},\n".format(y, n))
+        for x, y, n, in items:
+            if x == csec:
+                f.write("{},{},\n".format(y, n))
 
     print("Total render time: {} seconds".format(round(time.clock() - start, 3)))
     print("Flushing results")
-    cam.flush(storedir + "/{}_old.png".format(cname))
+    cam.flush(storedir + "/{}_new.png".format(cname))
 
     # 2nd pass
     print("rendering camera " + cname + " with old depth pass model")
     start = time.clock()
     print("tracing background")
     cam.buff.fill((32, 32, 32))
-    items = cam.render(sampletris, basicshader, old_depth_test=True)
+    items = cam.render(sampletris, markshader, old_depth_test=True)
     with open(storedir + "/old.txt", "w") as f:
-        for y, n in items:
-            f.write("{},{},\n".format(y, n))
+        for x, y, n in items:
+            if x == csec:
+                f.write("{},{},\n".format(y, n))
     print("Total render time: {} seconds".format(round(time.clock() - start, 3)))
     print("Flushing results")
     cam.flush(storedir + "/{}_old.png".format(cname))
