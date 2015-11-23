@@ -87,9 +87,10 @@ def diamond(text):
         f += spc + spaceout(text[i:]) + "\n"
     return f
     
-def diamond2(text):
+def crossdiamond(text):
     f = ""
     text = text.upper()
+    text = text[-1] + text[:-1]
     for i, _ in enumerate(text):
         f += spaceout(text[:i]) + "\n"
         text = text[1:] + text[0]
