@@ -155,14 +155,19 @@ public class ProxyChat extends JavaPlugin implements Listener {
             return message;
         double scale = 0.1;
         double falloff = 1 - (Math.pow(scale, percentage) - 1) / (scale - 1);
+        double scale2 = 0.01;
+        double falloff2 = 1 - (Math.pow(scale2, percentage) - 1) / (scale2 - 1);
         int charstoprint = (int) (falloff * (double) message.length());
-        String shortmessage = message.substring(charstoprint/2, message.length() - charstoprint/2);
         String newmessage = "...";
-        for (int i=0;i<shortmessage.length();i++) {
-            if (Math.random() < 1 - falloff)
-                newmessage += shortmessage.charAt(i);
-            else {
-                newmessage += muffledCharacters[(int)(muffledCharacters.length * Math.random())];
+        for (int i=0;i<message.length();i++) {
+            if (Math.random() > falloff2 ) {
+                if (Math.random() < 1 - falloff) {
+                    if (Math.random() > falloff ) {
+                        newmessage += message.charAt(i);
+                    }
+                } else {
+                    newmessage += muffledCharacters[(int)(muffledCharacters.length * Math.random())];
+                }
             }
         }
         return newmessage + "...";
