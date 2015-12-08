@@ -16,10 +16,10 @@ if (first())
 TargetPos = vec()
 if (!Target:isValid()) 
 {
-    XMod = vec(1, 0, 0) * sin(curtime()*100) * 60
-    YMod = vec(0, 1, 0) * cos(curtime()*100) * 60
-    ZMod = vec(0, 0, 1) * (sin(curtime()*60) + 1.3) * 30
-    TargetPos = owner():pos() + XMod + YMod + ZMod
+    XMod = sin(curtime()*100) * 60
+    YMod = cos(curtime()*100) * 60
+    ZMod = (sin(curtime()*60) + 1.3) * 30
+    TargetPos = owner():pos() + vec3(XMod, YMod, ZMod)
 }
 else
 {
