@@ -8,42 +8,44 @@ def parseanyvalue(v):
     try:
         return float(v)
     except ValueError: pass
-    tftable = {"true":True, "false":False, "t":True, "f":False}
+    tftable = {"true":True, "false":False}
     cleanstr = str(v).lower().strip()
     if cleanstr in tftable:
         return tftable[cleanstr]
     return str(v)
 
+def checkvalid(name):
+    if not "." in name or len(name) < 3:
+        raise Exception("must be in block-key format (contain a .)")
+    return name.split(".", 1)
+
 def getflag(fname, name):
-    if not "." in name:
-        raise Exception("must be in block-key format (contains a .)")
-    block, key = name.split(".", 1)
+    block, key = checkvalid(name)
     try:
         with open(fname, "r") as f:
             inblock = False
             for line in f.read().split("\n"):
-                print(line)
-                print("\[{}\]".format(block))
+                #print(line)
                 if inblock:
                     if line.startswith("["):
-                        print("found block, value nonexistant")
+                        #print("found block, value nonexistant")
                         return None
                     else:
-                        m = re.match(key + "\w*=(.+)", line)
+                        m = re.match(key + "\s*=(.+)", line)
+                        #print(True, line, m)
                         if m:
-                            return parseanyvalue(m.group(1))
+                            return parseanyvalue(m.group(1).strip())
                 elif re.search("\[{}\]".format(block), line):
+                    #print(False, line, re.search("\[{}\]".format(block), line))
                     inblock = True
-            print("block nonexistant")
+            #print("block nonexistant")
             return None
     except IOError:
-        print("file nonexistant")
+        #print("file nonexistant")
         return None
 
 def setflag(fname, name, value):
-    if not "." in name:
-        raise Exception("must be in block-key format (contains a .)")
-    block, key = name.split(".", 1)
+    block, key = checkvalid(name)
     ingestion = ""
     if os.path.isfile(fname):
         with open(fname, "r") as f:
@@ -66,14 +68,9 @@ def setflag(fname, name, value):
             lines.append("")
             lines.append("[{}]".format(block))
         lines.append(key + " = " + str(value))
-    while len(lines) > 0:
-        if lines[0] == "":
-            lines = lines[1:]
-        elif lines[-1] == "":
-            lines = lines[-1]
-        else:
-            break
-    print(lines)
+    while len(lines) > 0 and lines[0] == "":
+        lines = lines[1:]
+    #print(lines)
     ingestion = "\n".join(lines)
     with open(fname, "w") as f:
         f.write(ingestion)
@@ -89,7 +86,7 @@ def getBlock(fname, block):
                     if line.startswith("["):
                         break
                     else:
-                        m = pairpat.match(line)
+                        m = pairpat.search(line)
                         if m:
                             pairs[parseanyvalue(m.group(1))] = parseanyvalue(m.group(2))
                 elif line.startswith("[{}]".format(block)):
