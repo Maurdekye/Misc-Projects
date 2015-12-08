@@ -49,21 +49,20 @@ PerPlayerItems = 7
 
 # Automatically defines interactor as the closest player looking at the screen
 # You can reduce the load by wiring in the interactor manually
-Interactor_ = noentity()
+User = noentity()
 if (!->Interactor || !Interactor:isPlayer()) {
     findByClass("player")
     findSortByDistance(entity():pos())
     Pls = findToArray()
     for (I=0,Pls:count()) {
         if(Screen:egpCursor(Pls[I, entity]) != vec2(-1, -1)) {
-            Interactor_ = Pls[I, entity]
+            User = Pls[I, entity]
             break
         }
     }
 } else {
-    Interactor_ = Interactor
+    User = Interactor
 }
-User = Interactor_
 Viewing = noentity()
 
 # --- Renders Once Per Cycle --- #
