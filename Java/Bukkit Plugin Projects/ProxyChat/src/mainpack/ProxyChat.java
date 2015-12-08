@@ -160,13 +160,14 @@ public class ProxyChat extends JavaPlugin implements Listener {
         int charstoprint = (int) (falloff * (double) message.length());
         String newmessage = "...";
         for (int i=0;i<message.length();i++) {
-            if (Math.random() > falloff2 ) {
+            double a = Math.random();
+            if (a > falloff2 ) {
                 if (Math.random() < 1 - falloff) {
                     if (Math.random() > falloff ) {
                         newmessage += message.charAt(i);
                     }
                 } else {
-                    newmessage += muffledCharacters[(int)(muffledCharacters.length * Math.random())];
+                    newmessage += muffledCharacters[(int)(muffledCharacters.length * a)];
                 }
             }
         }
