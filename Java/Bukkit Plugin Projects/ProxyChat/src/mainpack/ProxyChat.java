@@ -159,7 +159,7 @@ public class ProxyChat extends JavaPlugin implements Listener {
         String shortmessage = message.substring(charstoprint/2, message.length() - charstoprint/2);
         String newmessage = "...";
         for (int i=0;i<shortmessage.length();i++) {
-            if (Math.random() > falloff)
+            if (Math.random() < 1 - falloff)
                 newmessage += shortmessage.charAt(i);
             else {
                 newmessage += muffledCharacters[(int)(muffledCharacters.length * Math.random())];
