@@ -18,7 +18,7 @@ public class ProxyChat extends JavaPlugin implements Listener {
     public double mult;
     
     public char[] muffledCharacters = {
-        '!', '@', '#', '$', '%', '^', '&', '*', '-', '+', '=', '|', '~'};
+        '@', '#', '$', '%','&', '*', '^', '+', '=', '~', '-', '.'};
 
     @Override
     public void onEnable() {
