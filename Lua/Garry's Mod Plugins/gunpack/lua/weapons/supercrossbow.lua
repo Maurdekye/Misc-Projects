@@ -52,7 +52,6 @@ function fire(self)
 		bolt:SetAngles( aimvec:Angle() )
 		bolt:SetOwner(self.Owner)
 		bolt.damage = self.Primary.Damage
-		cone = self.Primary.Cone
 		bolt:Spawn()
 
 		bolt:SetVelocity(aimvec)
