@@ -153,11 +153,12 @@ public class ProxyChat extends JavaPlugin implements Listener {
     public String muffleMessage(String message, double percentage) {
         if (percentage >= 1.0)
             return message;
+        if (percentage <= 0.0)
+            return "....";
         double scale = 0.1;
         double falloff = 1 - (Math.pow(scale, percentage) - 1) / (scale - 1);
         double scale2 = 0.01;
         double falloff2 = 1 - (Math.pow(scale2, percentage) - 1) / (scale2 - 1);
-        int charstoprint = (int) (falloff * (double) message.length());
         String newmessage = "...";
         for (int i=0;i<message.length();i++) {
             double a = Math.random();
