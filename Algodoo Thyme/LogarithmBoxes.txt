@@ -1,0 +1,21 @@
+size = 10.0;
+offset = 0.0;
+number = 1.0;
+counter = 1.0;
+Sim.frequency = {
+    {size < 0.01} ? {600} : {
+        b = Scene.addBox {
+            size := [size, size];
+        };
+        b.pos = [offset + size/2, size * counter - size/2];
+        Console.print(counter + ", " + size);
+        counter = counter - 1;
+        {counter == 0} ? {
+            number = number * 2;
+            counter = number;
+            offset = offset + size;
+            size = size / 2;
+        } : {};
+        600
+    }
+};
