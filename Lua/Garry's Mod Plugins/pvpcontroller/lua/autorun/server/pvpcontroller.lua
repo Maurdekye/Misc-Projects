@@ -36,7 +36,7 @@ function preTakeDmg(ply, att)
 			return not metainfo[ply:GetName()].god or GetConVarNumber("pc_admin_damage_god") == 1
 		end
 		ungod(att, false)
-		if att.god then return false end
+		if metainfo[att:GetName()].god then return false end
 	end
 	return not metainfo[ply:GetName()].god
 end
@@ -49,8 +49,7 @@ function chat(ply, text, isTeamChat, isDead)
 	stop = true
 	isT = com == "!fray"
 	target = ply
-	nomencA = "You"
-	nomencA2 = " are"
+	nomencA = "You are"
 	nomencB = "you"
 	force = false
 	if ply:IsAdmin() and #sp > 1 and com:sub(1, 1) == "!" then
@@ -62,8 +61,7 @@ function chat(ply, text, isTeamChat, isDead)
 			checkValues(tarp)
 			tarp.time_out = 0
 			target = tarp
-			nomencA = target:GetName() 
-			nomencA2 = " is"
+			nomencA = target:GetName() .. " is"
 			nomencB = "they"
 			force = true
 		end
@@ -74,7 +72,7 @@ function chat(ply, text, isTeamChat, isDead)
 		if metainfo[target:GetName()].god then
 			ungod(target, force)
 		else
-			coloredMessage(ply, nomencA .. nomencA2 .. " already in PvP mode.", r)
+			coloredMessage(ply, nomencA .. " already in PvP mode.", r)
 		end
 	elseif com == "!query" then
 		if metainfo[target:GetName()].god then
@@ -82,14 +80,14 @@ function chat(ply, text, isTeamChat, isDead)
 			if timeleft > 0 then
 				cantLeaveGod(ply, timeleft, nomencA, nomencB)
 			else
-				coloredMessage(ply, nomencA .. nomencA2 .. " currently in godmode, but " .. nomencB .. " may leave at any time.", b)
+				coloredMessage(ply, nomencA .. " currently in godmode, but " .. nomencB .. " may leave at any time.", b)
 			end
 		else
 			timeleft = math.floor((metainfo[target:GetName()].time_out + TIME_IN_FRAY()) - CurTime())
 			if timeleft > 0 then
 				cantEnterGod(ply, timeleft, nomencA, nomencB)
 			else
-				coloredMessage(ply, nomencA .. nomencA2 .. " open to PvP, but " .. nomencB .. " may re-enable godmode at any time.", r)
+				coloredMessage(ply, nomencA .. " open to PvP, but " .. nomencB .. " may re-enable godmode at any time.", r)
 			end
 		end
 	else
@@ -113,7 +111,7 @@ local function noclip(ply, state)
 	end
 	return result
 end
-hook.Add("PlayerNoClip", "PlayerNoClip_pvpcontrollery", noclip)
+hook.Add("PlayerNoClip", "PlayerNoClip_pvpcontroller", noclip)
 
 -- other
 
@@ -167,7 +165,7 @@ function getPlayer(name)
 	name = string.lower(name);
 	for _,v in pairs(player.GetAll()) do
 		if string.find(string.lower(v:Name()),name,1,true) != nil then 
-			return v;
+			return v
 		end
 	end
 end
@@ -224,4 +222,4 @@ function disabledPVP(ply)
 	net.Broadcast()
 end
 
-PrintMessage(2, " --- PvP Controller v1.1 Loaded --- ")
+PrintMessage(2, " --- PvP Controller v1.1.1 Loaded --- ")

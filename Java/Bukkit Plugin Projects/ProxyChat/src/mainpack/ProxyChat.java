@@ -16,6 +16,9 @@ import org.bukkit.plugin.java.JavaPlugin;
 public class ProxyChat extends JavaPlugin implements Listener {
 
     public double mult;
+    
+    public char[] muffledCharacters = {
+        '@', '#', '$', '%','&', '*', '^', '+', '=', '~', '-', '.'};
 
     @Override
     public void onEnable() {
@@ -91,30 +94,22 @@ public class ProxyChat extends JavaPlugin implements Listener {
     public void sendOut(Player origin, String message, double range, String formatType) {
         for (Player receiving : Bukkit.getOnlinePlayers()) {
             double distance = receiving.getLocation().distance(origin.getLocation());
-            if (receiving.getWorld().equals(origin.getWorld()) && distance < range * mult) {
+            if (receiving.hasPermission("proxychat.eartotheground") && distance >= range) {
+                receiving.sendMessage(getFormat(origin, receiving, message, "outofrange_format"));
+            } else if (receiving.getWorld().equals(origin.getWorld()) && distance < range * mult) {
                 if (distance < range) {
                     receiving.sendMessage(getFormat(origin, receiving, message, formatType));
                 } else if (getConfig().getBoolean("distance_muffle", true)) {
-                    if (receiving.hasPermission("proxychat.eartotheground")) {
-                        receiving.sendMessage(getFormat(origin, receiving, message, "outofrange_format"));
-                    } else {
-                        double percent = ((range * mult) - distance) / (range * (mult - 1)); // TODO fix this formula
-                        message = muffleMessage(message, percent);
-                        receiving.sendMessage(getFormat(origin, receiving, message, "muffle_format"));
-                    }
-                } else {
-                    if (receiving.hasPermission("proxychat.eartotheground"))
-                        receiving.sendMessage(getFormat(origin, receiving, message, "outofrange_format"));
+                    double percent = ((range * mult) - distance) / (range * (mult - 1));
+                    message = muffleMessage(message, percent);
+                    receiving.sendMessage(getFormat(origin, receiving, message, "muffle_format"));
                 }
-            } else if (receiving.hasPermission("proxychat.eartotheground")) {
-                receiving.sendMessage(getFormat(origin, receiving, message, "outofrange_format"));
             }
         }
         Bukkit.getConsoleSender().sendMessage(getFormat(origin, null, message, formatType));
     }
 
     public String getFormat(Player sender, Player receiver, String message, String formatType) {
-
         String toGive = getConfig().getString(formatType, "<{name}> {message}");
         toGive = toGive.replaceAll("\\{name\\}", sender.getDisplayName());
         toGive = toGive.replaceAll("\\{message\\}", message);
@@ -155,9 +150,29 @@ public class ProxyChat extends JavaPlugin implements Listener {
         return pretty.substring(0, pretty.length()-1);
     }
 
-    // TODO finish message muffler
     public String muffleMessage(String message, double percentage) {
-        return "..." + message.substring((int) percentage * message.length());
+        if (percentage >= 1.0)
+            return message;
+        if (percentage <= 0.0)
+            return "....";
+        double scale = 0.1;
+        double falloff = 1 - (Math.pow(scale, percentage) - 1) / (scale - 1);
+        double scale2 = 0.01;
+        double falloff2 = 1 - (Math.pow(scale2, percentage) - 1) / (scale2 - 1);
+        String newmessage = "...";
+        for (int i=0;i<message.length();i++) {
+            double a = Math.random();
+            if (a > falloff2 ) {
+                if (Math.random() < 1 - falloff) {
+                    if (Math.random() > falloff ) {
+                        newmessage += message.charAt(i);
+                    }
+                } else {
+                    newmessage += muffledCharacters[(int)(muffledCharacters.length * a)];
+                }
+            }
+        }
+        return newmessage + "...";
     }
 
 }

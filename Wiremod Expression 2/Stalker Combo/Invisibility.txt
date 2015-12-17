@@ -11,6 +11,9 @@ if (first()) {
 if (last()) {
     owner():weapon():setAlpha(255)
     owner():setMaterial("")
+    if (Vehicle:IsValid()) {
+        Vehicle:SetAlpha(255)
+    }
 }
 
 owner():weapon():setAlpha(0)
