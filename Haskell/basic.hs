@@ -14,7 +14,7 @@ pascal a b
 	| b <= 0 	= 1
 	| otherwise = pascal (a - 1) b + pascal (a - 1) (b - 1)
 fibs = [fibonacci n | n <- [1..]]
-isprime n = if null [0 | i <- init [2..n], mod n i == 0] then True else False
+isprime n = null [0 | i <- init [2..n], mod n i == 0] then True else False
 primes = 1:[i | i <- [2..], isprime i]
 addNotIn item list =  if item `elem` list then list else item:list
 bmi height weight = weight / (height * height)
