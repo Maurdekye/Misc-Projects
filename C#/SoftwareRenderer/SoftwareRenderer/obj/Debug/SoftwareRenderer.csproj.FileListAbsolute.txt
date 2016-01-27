@@ -1,0 +1,9 @@
+C:\Users\ncolaprete\Desktop\scripts\Misc-Projects\C#\SoftwareRenderer\SoftwareRenderer\bin\Debug\SoftwareRenderer.exe.config
+C:\Users\ncolaprete\Desktop\scripts\Misc-Projects\C#\SoftwareRenderer\SoftwareRenderer\obj\Debug\SoftwareRenderer.csprojResolveAssemblyReference.cache
+C:\Users\ncolaprete\Desktop\scripts\Misc-Projects\C#\SoftwareRenderer\SoftwareRenderer\obj\Debug\SoftwareRenderer.MainForm.resources
+C:\Users\ncolaprete\Desktop\scripts\Misc-Projects\C#\SoftwareRenderer\SoftwareRenderer\obj\Debug\SoftwareRenderer.Properties.Resources.resources
+C:\Users\ncolaprete\Desktop\scripts\Misc-Projects\C#\SoftwareRenderer\SoftwareRenderer\obj\Debug\SoftwareRenderer.csproj.GenerateResource.Cache
+C:\Users\ncolaprete\Desktop\scripts\Misc-Projects\C#\SoftwareRenderer\SoftwareRenderer\bin\Debug\SoftwareRenderer.exe
+C:\Users\ncolaprete\Desktop\scripts\Misc-Projects\C#\SoftwareRenderer\SoftwareRenderer\bin\Debug\SoftwareRenderer.pdb
+C:\Users\ncolaprete\Desktop\scripts\Misc-Projects\C#\SoftwareRenderer\SoftwareRenderer\obj\Debug\SoftwareRenderer.exe
+C:\Users\ncolaprete\Desktop\scripts\Misc-Projects\C#\SoftwareRenderer\SoftwareRenderer\obj\Debug\SoftwareRenderer.pdb

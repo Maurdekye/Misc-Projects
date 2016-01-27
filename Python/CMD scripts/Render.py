@@ -315,8 +315,6 @@ class Poly2d:
     def contains(my, other):
         return my.l1.side(other) >= 0 and my.l2.side(other) >= 0 and my.l3.side(other) >= 0
 
-
-
 class Camera:
     def __init__(my, p1, p2, p3, focus, resx=100, resy=None):
         assert(type(p1) is Point)
