@@ -15,11 +15,7 @@ namespace SoftwareRenderer
         public MainForm()
         {
             InitializeComponent();
-            Graphics g = RenderTarget.CreateGraphics();
-            float a = RenderTarget.Width;
-            float b = RenderTarget.Height;
         }
-
     }
 }
 
@@ -540,28 +536,39 @@ namespace Geometry
     public abstract class Camera
     {
         public Triangle Frame;
-        public Graphics Target;
+        public PictureBox Target;
 
         private float Width, Height;
         private float Ratio;
+        private Point UpperRightCorner, UpperLeftCorner, LowerRightCorner, LowerLeftCorner;
 
         // Constructors
 
-        public Camera(Triangle Frame, Graphics Target)
+        public Camera(Triangle Frame, PictureBox Target)
         {
             Init(Frame, Target);
         }
 
-        public void Init(Triangle Frame, Graphics Target)
+        public void Init(Triangle Frame, PictureBox Target)
         {
             this.Frame = Frame;
             this.Target = Target;
 
-            this.Height = new Segment(Frame.A, Frame.C).Length() * 2;
-            this.Ratio = Target.DpiY / Target.DpiX;
+            Segment VerticalSegment = new Segment(Frame.A, Frame.C);
+
+            this.Height = VerticalSegment.Length() * 2;
+            this.Ratio = (float)Target.Height / Target.Width;
             this.Width = Height * Ratio;
 
-            // TODO: Finish This Class
+            Point RightSideMidpoint = Frame.A + Frame.Normal() * Width;
+            Point LeftSideMidpoint = Frame.A - Frame.Normal() * Width;
+            Point VerticalDifference = VerticalSegment.Differernce();
+            this.UpperRightCorner = RightSideMidpoint + VerticalDifference;
+            this.LowerRightCorner = RightSideMidpoint - VerticalDifference;
+            this.UpperLeftCorner = LeftSideMidpoint + VerticalDifference;
+            this.LowerRightCorner = LeftSideMidpoint - VerticalDifference;
+
+            // TODO: Finish this initializer
         }
     }
 }
