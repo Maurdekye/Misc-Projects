@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -15,6 +16,12 @@ namespace SoftwareRenderer
         public MainForm()
         {
             InitializeComponent();
+            Geometry.Point A = new Geometry.Point(0f, 0f, 0f);
+            Geometry.Point B = new Geometry.Point(1f, 0f, 0f);
+            Geometry.Point C = new Geometry.Point(0f, 1f, 0f);
+            Geometry.Triangle T = new Geometry.Triangle(A, B, C);
+            Geometry.Raytracer RT = new Geometry.Raytracer(T, RenderTarget);
+            int a = 5;
         }
     }
 }
@@ -535,12 +542,16 @@ namespace Geometry
 
     public abstract class Camera
     {
+        public readonly uint RenderThreads = 24;
+
         public Triangle Frame;
         public PictureBox Target;
 
-        private float Width, Height;
-        private float Ratio;
-        private Point UpperRightCorner, UpperLeftCorner, LowerRightCorner, LowerLeftCorner;
+        protected float Width, Height;
+        protected float Ratio;
+        protected Point UpperRightCorner, UpperLeftCorner, LowerRightCorner, LowerLeftCorner;
+
+        protected BufferElement[,] ImageBuffer;
 
         // Constructors
 
@@ -548,16 +559,23 @@ namespace Geometry
         {
             Init(Frame, Target);
         }
+        
+        public Camera()
+        {
+            Init(new Triangle(), new PictureBox());
+        }
 
         public void Init(Triangle Frame, PictureBox Target)
         {
             this.Frame = Frame;
             this.Target = Target;
 
+            this.ImageBuffer = new BufferElement[Target.Width, Target.Height];
+
             Segment VerticalSegment = new Segment(Frame.A, Frame.C);
 
             this.Height = VerticalSegment.Length() * 2;
-            this.Ratio = (float)Target.Height / Target.Width;
+            this.Ratio = (float)Target.Width / Target.Height;
             this.Width = Height * Ratio;
 
             Point RightSideMidpoint = Frame.A + Frame.Normal() * Width;
@@ -566,9 +584,150 @@ namespace Geometry
             this.UpperRightCorner = RightSideMidpoint + VerticalDifference;
             this.LowerRightCorner = RightSideMidpoint - VerticalDifference;
             this.UpperLeftCorner = LeftSideMidpoint + VerticalDifference;
-            this.LowerRightCorner = LeftSideMidpoint - VerticalDifference;
+            this.LowerLeftCorner = LeftSideMidpoint - VerticalDifference;
+        }
 
-            // TODO: Finish this initializer
+        // Utilities
+
+        public void Impress(uint X, uint Y, BufferElement Elem)
+        {
+            if (X >= Target.Width || Y >= Target.Height)
+                return;
+            if (Elem.ZElement < 0 || Elem.ZElement < ImageBuffer[X, Y].ZElement)
+                ImageBuffer[X, Y] = Elem;
+        }
+
+        public Bitmap Compile()
+        {
+            Bitmap Image = new Bitmap(Target.Width, Target.Height);
+            for (int x = 0; x < Target.Width; x++)
+            {
+                for (int y = 0; y < Target.Height; y++)
+                {
+                    if (ImageBuffer == null)
+                    {
+                        Image.SetPixel(x, y, Color.Black);
+                    }
+                    else
+                    {
+                        Image.SetPixel(x, y, ImageBuffer[x, y].VisualElement);
+                    }
+                }
+            }
+            return Image;
+        }
+
+        public void Flush()
+        {
+            Target.CreateGraphics().DrawImage(Compile(), new PointF(0, 0));
+        }
+
+        public abstract void Render(Triangle Tri);
+
+        // Embedded Structures
+
+        public struct PointPixelPair
+        {
+            public Point Point { get; private set; }
+            public int X { get; private set; }
+            public int Y { get; private set; }
+
+            // Constructors
+
+            public PointPixelPair(Point Point, int X, int Y)
+            {
+                this.Point = Point;
+                this.X = X;
+                this.Y = Y;
+            }
+
+            // Overloads
+
+            public override string ToString()
+            {
+                return String.Format("[{0}, {1}] | {2}", X, Y, Point);
+            }
+        }
+
+        public struct BufferElement
+        {
+            public Color VisualElement;
+            public float ZElement;
+
+            // Constructors
+
+            public BufferElement(Color VisualElement, float ZElement)
+            {
+                this.VisualElement = VisualElement;
+                this.ZElement = ZElement;
+            }
+
+            public BufferElement(Color VisualElement)
+            {
+                this.VisualElement = VisualElement;
+                this.ZElement = -1;
+            }
+        }
+
+        public abstract class RenderProcess
+        {
+            public Camera Parent;
+            public PointF UpperCornerSubsection;
+            public PointF LowerCornerSubsection;
+
+            public bool Finished = false;
+            public BufferElement[,] ImageBuffer;
+
+            // Constructors
+
+            public RenderProcess(Camera Parent, PointF UpperCornerSubsection, PointF LowerCornerSubsection)
+            {
+                this.Parent = Parent;
+                this.UpperCornerSubsection = UpperCornerSubsection;
+                this.LowerCornerSubsection = LowerCornerSubsection;
+                this.ImageBuffer = new BufferElement[(int)(UpperCornerSubsection.X - LowerCornerSubsection.X), (int)(UpperCornerSubsection.Y - LowerCornerSubsection.Y)];
+            }
+
+            // Utilities
+
+            public abstract void Render(Triangle Tri);
+
+            public void Initiate()
+            {
+
+            }
+        }
+
+    }
+
+    public class Raytracer : Camera, IEnumerable
+    {
+        // Superclass Implementations
+
+        public Raytracer(Triangle Frame, PictureBox Target) : base(Frame, Target) { }
+
+        public IEnumerator GetEnumerator()
+        {
+            Segment LeftRail = new Segment(UpperLeftCorner, LowerLeftCorner);
+            Segment RightRail = new Segment(UpperRightCorner, LowerRightCorner);
+            float PositionY = 0f;
+            for (int PixelY = 0; PixelY < Target.Height; PixelY += 1, PositionY += 1f / Target.Height)
+            {
+                Segment Step = new Segment(LeftRail.Extrapolate(PositionY), RightRail.Extrapolate(PositionY));
+                float PositionX = 0f;
+                for (int PixelX = 0; PixelX < Target.Width; PixelX += 1, PositionX += 1f / Target.Width)
+                {
+                    yield return new PointPixelPair(Step.Extrapolate(PositionX), PixelX, PixelY);
+                }
+            }
+        }
+
+        public override void Render(Triangle Tri)
+        {
+            foreach (PointPixelPair Pair in this)
+            {
+
+            }
         }
     }
 }
