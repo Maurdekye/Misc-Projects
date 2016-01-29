@@ -10,49 +10,60 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
+using Utility;
+using Render;
+using Geometry;
+
 namespace SoftwareRenderer
 {
     public partial class MainForm : Form
     {
+
+        Raytracer Cam;
+        List<Triangle> Polys;
+
+        Thread RenderThread;
+
         public MainForm()
         {
             InitializeComponent();
-            Geometry.Point A = new Geometry.Point(0f, 0f, 0f);
-            Geometry.Point B = new Geometry.Point(1f, 0f, 0f);
-            Geometry.Point C = new Geometry.Point(0f, 1f, 0f);
-            Geometry.Triangle T = new Geometry.Triangle(A, B, C);
-            Geometry.Raytracer RT = new Geometry.Raytracer(T, RenderTarget);
-            int a = 5;
+
+            Cam = new Raytracer(new Triangle(
+                new Geometry.Point(0, 3, 0),
+                new Geometry.Point(0, 2, 0),
+                new Geometry.Point(1, 3, 0)
+                ), RenderTarget);
+
+            Polys = new List<Triangle>();
+            Polys.Add(new Triangle(
+                new Geometry.Point(0,0,-1),
+                new Geometry.Point(1,0,0),
+                new Geometry.Point(0,0,1)
+                ));
+
+        }
+
+        private void RenderTarget_Paint(object sender, PaintEventArgs e)
+        {
+            if (RenderThread != null && RenderThread.IsAlive)
+            {
+                RenderThread.Abort();
+                Cam.Clean();
+            }
+            RenderThread = new Thread(delegate ()
+            {
+                foreach (Triangle Poly in Polys)
+                    Cam.Render(Poly);
+                Cam.Draw();
+            });
+            RenderThread.Start();
+
         }
     }
 }
 
 namespace Geometry
 {
-    public class Maybe<T>
-    {
-        private T ActualValue;
-        public bool IsNull { get; private set; }
-
-        public Maybe(T ActualValue)
-        {
-            this.ActualValue = ActualValue;
-            this.IsNull = false;
-        }
-
-        public Maybe()
-        {
-            this.ActualValue = default(T);
-            this.IsNull = true;
-        }
-        
-        public T Value()
-        {
-            if (IsNull)
-                throw new Exception("Value does not exist");
-            return ActualValue;
-        }
-    }
 
     public class Point
     {
@@ -80,7 +91,7 @@ namespace Geometry
             this.Y = 0;
             this.Z = 0;
         }
-        
+
         // Overrides
 
         public override string ToString()
@@ -187,7 +198,7 @@ namespace Geometry
 
         public override string ToString()
         {
-            return String.Format("[{0}={1}]", A, B);
+            return String.Format("{0}={1}", A, B);
         }
 
         // Self Utilities
@@ -238,7 +249,7 @@ namespace Geometry
             float Denominator = Normal.Dot(Differernce());
             if (Denominator == 0)
                 return new Maybe<float>();
-            return new Maybe<float>(-Normal.Dot(A - T.A));
+            return new Maybe<float>(-Normal.Dot(A - T.A) / Denominator);
         }
 
         public bool IsUnextrapolationInTriangle(Maybe<float> F, Triangle Tri)
@@ -275,16 +286,18 @@ namespace Geometry
 
     public class Ray : Segment
     {
+        public Ray(Point A, Point B) : base(A, B) { }
+
         // Overrides
 
         public override string ToString()
         {
-            return String.Format("[{0}={1}>", A, B);
+            return String.Format("{0}>{1}", A, B);
         }
 
         public override bool IsUnextrapolationInLine(float F)
         {
-            return F >= 0;
+            return F >= 1;
         }
     }
 
@@ -333,7 +346,7 @@ namespace Geometry
     public class Point2D
     {
         public float X, Y;
-        
+
         // Constructors
 
         public Point2D(float X, float Y)
@@ -541,6 +554,79 @@ namespace Geometry
         }
     }
 
+}
+
+namespace Utility
+{
+    public class Maybe<T>
+    {
+        private T ActualValue;
+        public bool IsNull { get; private set; }
+
+        public Maybe(T ActualValue)
+        {
+            this.ActualValue = ActualValue;
+            this.IsNull = false;
+        }
+
+        public Maybe()
+        {
+            this.ActualValue = default(T);
+            this.IsNull = true;
+        }
+
+        public T Value()
+        {
+            if (IsNull)
+                throw new Exception("Value does not exist");
+            return ActualValue;
+        }
+
+        public override string ToString()
+        {
+            if (IsNull)
+                return "Nothing";
+            return "Just " + ActualValue.ToString();
+        }
+    }
+
+    public class Pixel
+    {
+        public int X, Y;
+
+        // Constructors
+
+        public Pixel(int X, int Y)
+        {
+            this.X = X;
+            this.Y = Y;
+        }
+
+        public Pixel()
+        {
+            this.X = 0;
+            this.Y = 0;
+        }
+
+        // Overrides
+
+        public override string ToString()
+        {
+            return String.Format("[{0}, {1}]", X, Y);
+        }
+
+        // Utilities
+
+        public PointF PointF()
+        {
+            return new PointF((float)X, (float)Y);
+        }
+    }
+
+}
+
+namespace Render
+{
     public abstract class Camera
     {
         public readonly uint ThreadCount = 24;
@@ -550,7 +636,7 @@ namespace Geometry
 
         internal float Width, Height;
         internal float Ratio;
-        internal Point UpperRightCorner, UpperLeftCorner, LowerRightCorner, LowerLeftCorner;
+        internal Geometry.Point UpperRightCorner, UpperLeftCorner, LowerRightCorner, LowerLeftCorner;
 
         internal BufferElement[,] ImageBuffer;
         internal GenericRenderThreadManager[] RenderThreadManagers;
@@ -577,7 +663,7 @@ namespace Geometry
             {
                 for (int y = 0; y < Target.Height; y++)
                 {
-                    ImageBuffer[x, y] = new BufferElement(Color.Black, -1);
+                    ImageBuffer[x, y] = new BufferElement();
                 }
             }
 
@@ -587,9 +673,9 @@ namespace Geometry
             this.Ratio = (float)Target.Width / Target.Height;
             this.Width = Height * Ratio;
 
-            Point RightSideMidpoint = Frame.A + Frame.Normal() * Width;
-            Point LeftSideMidpoint = Frame.A - Frame.Normal() * Width;
-            Point VerticalDifference = VerticalSegment.Differernce();
+            Geometry.Point RightSideMidpoint = Frame.A + Frame.Normal() * Width;
+            Geometry.Point LeftSideMidpoint = Frame.A - Frame.Normal() * Width;
+            Geometry.Point VerticalDifference = VerticalSegment.Differernce();
             this.UpperRightCorner = RightSideMidpoint + VerticalDifference;
             this.LowerRightCorner = RightSideMidpoint - VerticalDifference;
             this.UpperLeftCorner = LeftSideMidpoint + VerticalDifference;
@@ -621,28 +707,30 @@ namespace Geometry
             }
         }
 
-        private void Compile()
+        public void Compile()
         {
+            Wait();
             foreach (GenericRenderThreadManager Thread in RenderThreadManagers)
             {
-                for (int x = (int)Thread.LowerCorner.X; x < Thread.UpperCorner.X; x++)
+                for (int x = 0; x < Thread.ImageBuffer.GetLength(0); x++)
                 {
-                    for (int y = (int)Thread.LowerCorner.Y; y < Thread.UpperCorner.Y; y++)
+                    for (int y = 0; y < Thread.ImageBuffer.GetLength(1); y++)
                     {
-                        ImageBuffer[x, y] = Thread.ImageBuffer[x - (int)Thread.LowerCorner.X, y - (int)Thread.LowerCorner.Y];
+                        ImageBuffer[x + Thread.LowerCorner.X, y + Thread.LowerCorner.Y] = Thread.ImageBuffer[x, y];
                     }
                 }
             }
         }
 
-        private Bitmap CreateBitmap()
+        public Bitmap CreateBitmap()
         {
+            Compile();
             Bitmap Image = new Bitmap(Target.Width, Target.Height);
             for (int x = 0; x < Target.Width; x++)
             {
                 for (int y = 0; y < Target.Height; y++)
                 {
-                    if (ImageBuffer == null)
+                    if (ImageBuffer[x, y] == null)
                     {
                         Image.SetPixel(x, y, Color.Black);
                     }
@@ -655,29 +743,54 @@ namespace Geometry
             return Image;
         }
 
-        public void Flush()
+        public void Draw()
         {
-            Wait();
-            Compile();
             Bitmap Production = CreateBitmap();
             Target.CreateGraphics().DrawImage(Production, new PointF(0, 0));
+        }
+
+        public void Clean()
+        {
+            for (int x = 0; x < Target.Width; x++)
+            {
+                for (int y = 0; y < Target.Height; y++)
+                {
+                    ImageBuffer[x, y] = new BufferElement();
+                }
+            }
+            foreach (GenericRenderThreadManager GRTM in RenderThreadManagers)
+            {
+                for (int x = 0; x < GRTM.ImageBuffer.GetLength(0); x++)
+                {
+                    for (int y = 0; y < GRTM.ImageBuffer.GetLength(1); y++)
+                    {
+                        GRTM.ImageBuffer[x, y] = new BufferElement();
+                    }
+                }
+            }
         }
 
         public abstract void Render(Triangle Tri);
 
         // Embedded Structures
 
-        public struct PointPixelPair
+        public class PointPixelPair
         {
-            public Point Point { get; private set; }
-            public PointF Pixel { get; private set; }
+            public Geometry.Point Point { get; private set; }
+            public Pixel Pixel { get; private set; }
 
             // Constructors
 
-            public PointPixelPair(Point Point, PointF Pixel)
+            public PointPixelPair(Geometry.Point Point, Pixel Pixel)
             {
                 this.Point = Point;
                 this.Pixel = Pixel;
+            }
+
+            public PointPixelPair()
+            {
+                this.Point = new Geometry.Point();
+                this.Pixel = new Pixel();
             }
 
             // Overloads
@@ -688,7 +801,7 @@ namespace Geometry
             }
         }
 
-        public struct BufferElement
+        public class BufferElement
         {
             public Color VisualElement;
             public float ZElement;
@@ -706,44 +819,57 @@ namespace Geometry
                 this.VisualElement = VisualElement;
                 this.ZElement = -1;
             }
+
+            public BufferElement()
+            {
+                this.VisualElement = Color.Black;
+                this.ZElement = -1;
+            }
         }
 
         public abstract class GenericRenderThreadManager
         {
             public Camera Parent;
-            public PointF LowerCorner, UpperCorner;
+            public Pixel LowerCorner, UpperCorner;
             public volatile BufferElement[,] ImageBuffer;
             internal Thread RenderThread;
 
             // Constructors
 
-            public GenericRenderThreadManager(Camera Parent, PointF LowerCorner, BufferElement[,] ImageBuffer)
+            public GenericRenderThreadManager(Camera Parent, Pixel LowerCorner, BufferElement[,] ImageBuffer)
             {
                 this.Parent = Parent;
                 this.LowerCorner = LowerCorner;
                 this.ImageBuffer = ImageBuffer;
 
-                this.UpperCorner = new PointF(LowerCorner.X + ImageBuffer.Length, LowerCorner.Y + ImageBuffer.GetLength(0));
+                this.UpperCorner = new Pixel(LowerCorner.X + ImageBuffer.GetLength(0), LowerCorner.Y + ImageBuffer.GetLength(1));
             }
 
             public GenericRenderThreadManager()
             {
                 this.Parent = null;
-                this.LowerCorner = new PointF();
-                this.UpperCorner = new PointF();
+                this.LowerCorner = new Pixel();
+                this.UpperCorner = new Pixel();
                 this.ImageBuffer = new BufferElement[1, 1];
             }
 
             // Utilities
 
-            private void Impress(uint X, uint Y, BufferElement Elem)
+            internal void Impress(Pixel Pixel, BufferElement Elem)
             {
-                if (X >= UpperCorner.X || Y >= UpperCorner.Y)
+                if (Pixel.X >= UpperCorner.X || Pixel.Y >= UpperCorner.Y)
                     return;
-                if (X < LowerCorner.X || Y < LowerCorner.Y)
+                if (Pixel.X < LowerCorner.X || Pixel.Y < LowerCorner.Y)
                     return;
-                if (Elem.ZElement < 0 || ImageBuffer[X, Y].ZElement < 0 || Elem.ZElement < ImageBuffer[X, Y].ZElement)
-                    ImageBuffer[X, Y] = Elem;
+                BufferElement CurrentBufferElement = ImageBuffer[Pixel.X - LowerCorner.X, Pixel.Y - LowerCorner.Y];
+                if (CurrentBufferElement == null)
+                {
+                    ImageBuffer[Pixel.X - LowerCorner.X, Pixel.Y - LowerCorner.Y] = Elem;
+                    return;
+                }
+                float OldZElement = CurrentBufferElement.ZElement;
+                if (Elem.ZElement < 0 || OldZElement < 0 || Elem.ZElement < OldZElement)
+                    ImageBuffer[Pixel.X - LowerCorner.X, Pixel.Y - LowerCorner.Y] = Elem;
             }
 
             public bool Finished()
@@ -754,7 +880,7 @@ namespace Geometry
             public abstract void Render(Triangle Tri);
         }
 
-        public virtual IEnumerable<PointPixelPair> GetPixels(PointF LowerBounds, PointF UpperBounds)
+        public virtual IEnumerable<PointPixelPair> GetPixels(Pixel LowerBounds, Pixel UpperBounds)
         {
             yield return new PointPixelPair();
         }
@@ -762,7 +888,7 @@ namespace Geometry
 
     public class Raytracer : Camera
     {
-        // Superclass Implementations
+        // Constructors
 
         public Raytracer(Triangle Frame, PictureBox Target) : base(Frame, Target) { }
         
@@ -777,22 +903,25 @@ namespace Geometry
                 Division += (Target.Width + 1.0f) / (float)ThreadCount;
                 float RightBounds = (float)Math.Floor(Division) - 1;
                 int BufferWidth = (int)(RightBounds - LeftBounds);
-                RenderThreadManagers[i] = new RaytracerRenderThreadManager(this, new PointF(LeftBounds, 0), new BufferElement[BufferWidth, Target.Height]);
+                RenderThreadManagers[i] = new RaytracerRenderThreadManager(this, new Pixel((int)LeftBounds, 0), new BufferElement[BufferWidth, Target.Height]);
             }
         }
 
-        public override IEnumerable<PointPixelPair> GetPixels(PointF LowerBounds, PointF UpperBounds)
+        // Utilities
+
+        public override IEnumerable<PointPixelPair> GetPixels(Pixel LowerBounds, Pixel UpperBounds)
         {
             Segment LeftRail = new Segment(UpperLeftCorner, LowerLeftCorner);
             Segment RightRail = new Segment(UpperRightCorner, LowerRightCorner);
-            float PositionY = LowerBounds.Y / Target.Height;
-            for (int PixelY = (int)LowerBounds.Y; PixelY <= UpperBounds.Y; PixelY += 1, PositionY += 1f / Target.Height)
+            float PositionY = LowerBounds.Y / (float)Target.Height;
+            for (int PixelY = LowerBounds.Y; PixelY <= UpperBounds.Y; PixelY += 1, PositionY += 1f / Target.Height)
             {
                 Segment Step = new Segment(LeftRail.Extrapolate(PositionY), RightRail.Extrapolate(PositionY));
-                float PositionX = LowerBounds.X / Target.Width;
-                for (int PixelX = (int)LowerBounds.X; PixelX <= UpperBounds.X; PixelX += 1, PositionX += 1f / Target.Width)
+                float PositionX = LowerBounds.X / (float)Target.Width;
+                for (int PixelX = LowerBounds.X; PixelX <= UpperBounds.X; PixelX += 1, PositionX += 1f / Target.Width)
                 {
-                    yield return new PointPixelPair(Step.Extrapolate(PositionX), new PointF(PixelX, PixelY));
+                    Geometry.Point a = Step.Extrapolate(PositionX);
+                    yield return new PointPixelPair(Step.Extrapolate(PositionX), new Pixel(PixelX, PixelY));
                 }
             }
         }
@@ -806,20 +935,36 @@ namespace Geometry
             Wait();
         }
 
+        // Embedded Structures
+
         public class RaytracerRenderThreadManager : GenericRenderThreadManager
         {
-            public RaytracerRenderThreadManager(Camera Parent, PointF LowerCorner, BufferElement[,] ImageBuffer) : base(Parent, LowerCorner, ImageBuffer) { }
+            // Constructors
+
+            public RaytracerRenderThreadManager(Camera Parent, Pixel LowerCorner, BufferElement[,] ImageBuffer) : base(Parent, LowerCorner, ImageBuffer) { }
+
+            // Utilities
 
             public override void Render(Triangle Tri)
             {
                 RenderThread = new Thread(delegate()
                 {
-                    foreach (PointPixelPair Pair in Parent.GetPixels(UpperCorner, LowerCorner))
-                    {
-                        // TODO: Implement Rendering Calculations
-                    }
                 });
                 RenderThread.Start();
+                
+                foreach (PointPixelPair Pair in Parent.GetPixels(LowerCorner, UpperCorner))
+                {
+                    Ray R = new Ray(Pair.Point, Parent.Frame.B);
+                    Maybe<float> MaybeDepth = R.UnextrapolatedUncontainedIntersection(Tri);
+                    if (MaybeDepth.IsNull)
+                        continue;
+                    float Depth = MaybeDepth.Value();
+                    if (!R.IsUnextrapolationInLine(Depth))
+                        continue;
+                    if (!R.IsUnextrapolationInTriangle(Depth, Tri))
+                        continue;
+                    Impress(Pair.Pixel, new BufferElement(Color.White, Depth));
+                }
             }
         }
 
