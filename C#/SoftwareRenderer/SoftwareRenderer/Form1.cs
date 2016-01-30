@@ -770,6 +770,23 @@ namespace Render
             }
         }
 
+        public override IEnumerable<PointPixelPair> GetPixels(Pixel LowerBounds, Pixel UpperBounds)
+        {
+            Segment LeftRail = new Segment(UpperLeftCorner, LowerLeftCorner);
+            Segment RightRail = new Segment(UpperRightCorner, LowerRightCorner);
+            float PositionY = LowerBounds.Y / (float)Target.Height;
+            for (int PixelY = LowerBounds.Y; PixelY <= UpperBounds.Y; PixelY += 1, PositionY += 1f / Target.Height)
+            {
+                Segment Step = new Segment(LeftRail.Extrapolate(PositionY), RightRail.Extrapolate(PositionY));
+                float PositionX = LowerBounds.X / (float)Target.Width;
+                for (int PixelX = LowerBounds.X; PixelX <= UpperBounds.X; PixelX += 1, PositionX += 1f / Target.Width)
+                {
+                    Geometry.Point a = Step.Extrapolate(PositionX);
+                    yield return new PointPixelPair(Step.Extrapolate(PositionX), new Pixel(PixelX, PixelY));
+                }
+            }
+        }
+
         public abstract void Render(Triangle Tri);
 
         // Embedded Structures
@@ -879,11 +896,6 @@ namespace Render
 
             public abstract void Render(Triangle Tri);
         }
-
-        public virtual IEnumerable<PointPixelPair> GetPixels(Pixel LowerBounds, Pixel UpperBounds)
-        {
-            yield return new PointPixelPair();
-        }
     }
 
     public class Raytracer : Camera
@@ -908,23 +920,6 @@ namespace Render
         }
 
         // Utilities
-
-        public override IEnumerable<PointPixelPair> GetPixels(Pixel LowerBounds, Pixel UpperBounds)
-        {
-            Segment LeftRail = new Segment(UpperLeftCorner, LowerLeftCorner);
-            Segment RightRail = new Segment(UpperRightCorner, LowerRightCorner);
-            float PositionY = LowerBounds.Y / (float)Target.Height;
-            for (int PixelY = LowerBounds.Y; PixelY <= UpperBounds.Y; PixelY += 1, PositionY += 1f / Target.Height)
-            {
-                Segment Step = new Segment(LeftRail.Extrapolate(PositionY), RightRail.Extrapolate(PositionY));
-                float PositionX = LowerBounds.X / (float)Target.Width;
-                for (int PixelX = LowerBounds.X; PixelX <= UpperBounds.X; PixelX += 1, PositionX += 1f / Target.Width)
-                {
-                    Geometry.Point a = Step.Extrapolate(PositionX);
-                    yield return new PointPixelPair(Step.Extrapolate(PositionX), new Pixel(PixelX, PixelY));
-                }
-            }
-        }
 
         public override void Render(Triangle Tri)
         {
