@@ -1,63 +1,63 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
 using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-
-using Utility;
 using Render;
 using Geometry;
+using static Utility;
+using System.Text.RegularExpressions;
 
 namespace SoftwareRenderer
 {
     public partial class MainForm : Form
     {
+        Raytracer OverheadCamera;
+        Raytracer IsometricCamera;
 
-        Raytracer Cam;
-        List<Triangle> Polys;
+        List<Triangle> TestTriangles;
+        List<Triangle> Bunny;
 
         Thread RenderThread;
 
         public MainForm()
         {
             InitializeComponent();
+            
+            Bunny = Import("bunny.obj");
+            TestTriangles = Import("testtris.obj");
+        }
 
-            Cam = new Raytracer(new Triangle(
+        private void RenderTarget_Paint(object sender, PaintEventArgs e)
+        {
+            OverheadCamera = new Raytracer(new Triangle(
                 new Geometry.Point(0, 3, 0),
                 new Geometry.Point(0, 2, 0),
                 new Geometry.Point(1, 3, 0)
                 ), RenderTarget);
 
-            Polys = new List<Triangle>();
-            Polys.Add(new Triangle(
-                new Geometry.Point(0,0,-1),
-                new Geometry.Point(1,0,0),
-                new Geometry.Point(0,0,1)
-                ));
+            IsometricCamera = new Raytracer(new Triangle(
+                new Geometry.Point(3, 3, -3),
+                new Geometry.Point(2, 2, -2),
+                new Geometry.Point(2, 4, -2)
+                ), RenderTarget);
 
-        }
-
-        private void RenderTarget_Paint(object sender, PaintEventArgs e)
-        {
             if (RenderThread != null && RenderThread.IsAlive)
             {
                 RenderThread.Abort();
-                Cam.Clean();
+                OverheadCamera.Clean();
             }
             RenderThread = new Thread(delegate ()
             {
-                foreach (Triangle Poly in Polys)
-                    Cam.Render(Poly);
-                Cam.Draw();
+                IsometricCamera.AsyncMultipleRender(TestTriangles, delegate(float Depth, Ray Raycast, Triangle Tri)
+                {
+                    int C = (int)(Depth * 32) % 256;
+                    return Color.FromArgb(C, C, C);
+                });
+                IsometricCamera.AsyncDraw();
             });
             RenderThread.Start();
-
         }
     }
 }
@@ -556,12 +556,14 @@ namespace Geometry
 
 }
 
-namespace Utility
+public static class Utility
 {
     public class Maybe<T>
     {
         private T ActualValue;
         public bool IsNull { get; private set; }
+
+        // Constructors
 
         public Maybe(T ActualValue)
         {
@@ -575,12 +577,7 @@ namespace Utility
             this.IsNull = true;
         }
 
-        public T Value()
-        {
-            if (IsNull)
-                throw new Exception("Value does not exist");
-            return ActualValue;
-        }
+        // Overrides
 
         public override string ToString()
         {
@@ -588,6 +585,16 @@ namespace Utility
                 return "Nothing";
             return "Just " + ActualValue.ToString();
         }
+
+        // Utilities
+
+        public T Value()
+        {
+            if (IsNull)
+                throw new Exception("Value does not exist");
+            return ActualValue;
+        }
+
     }
 
     public class Pixel
@@ -623,6 +630,45 @@ namespace Utility
         }
     }
 
+    public static List<Triangle> Import(string Filepath)
+    {
+        List<Triangle> Polygon = new List<Triangle>();
+        if (Filepath.EndsWith(".obj"))
+        {
+            List<Geometry.Point> Verticies = new List<Geometry.Point>();
+            foreach (string Line in System.IO.File.ReadLines(Filepath))
+            {
+                if (Line.StartsWith("#"))
+                    continue;
+                else if (Line.StartsWith("v"))
+                {
+                    List<Match> Matches = Regex.Matches(Line, @"\s+?\S+").Cast<Match>().ToList();
+                    if (Matches.Count < 3)
+                        continue;
+                    float X = float.Parse(Matches[0].ToString());
+                    float Y = float.Parse(Matches[1].ToString());
+                    float Z = float.Parse(Matches[2].ToString());
+                    Verticies.Add(new Geometry.Point(X, Y, Z));
+                }
+                else if (Line.StartsWith("f"))
+                {
+                    List<Match> Matches = Regex.Matches(Line, @"\s+?\S+").Cast<Match>().ToList();
+                    if (Matches.Count < 3)
+                        continue;
+                    int X = int.Parse(Matches[0].ToString());
+                    int Y = int.Parse(Matches[1].ToString());
+                    int Z = int.Parse(Matches[2].ToString());
+                    Polygon.Add(new Triangle(Verticies[X-1], Verticies[Y-1], Verticies[Z-1]));
+                }
+            }
+        }
+        else
+        {
+            throw new NotImplementedException("Unsupported file type");
+        }
+        return Polygon;
+    }
+
 }
 
 namespace Render
@@ -640,6 +686,7 @@ namespace Render
 
         internal BufferElement[,] ImageBuffer;
         internal GenericRenderThreadManager[] RenderThreadManagers;
+        public delegate Color PixelShader(float Depth, Ray Raycast, Triangle Tri);
 
         // Constructors
 
@@ -659,13 +706,6 @@ namespace Render
             this.Target = Target;
 
             this.ImageBuffer = new BufferElement[Target.Width, Target.Height];
-            for (int x = 0; x < Target.Width; x++)
-            {
-                for (int y = 0; y < Target.Height; y++)
-                {
-                    ImageBuffer[x, y] = new BufferElement();
-                }
-            }
 
             Segment VerticalSegment = new Segment(Frame.A, Frame.C);
 
@@ -682,6 +722,8 @@ namespace Render
             this.LowerLeftCorner = LeftSideMidpoint - VerticalDifference;
 
             InitializeRenderThreadManagers();
+
+            Clean();
         }
 
         internal abstract void InitializeRenderThreadManagers();
@@ -749,13 +791,45 @@ namespace Render
             Target.CreateGraphics().DrawImage(Production, new PointF(0, 0));
         }
 
+        public void AsyncDraw()
+        {
+            Graphics G = Target.CreateGraphics();
+            uint Running = ThreadCount;
+            bool[] Finished = new bool[ThreadCount];
+            for (int i = 0; i < ThreadCount; i++)
+                Finished[i] = false;
+            while (Running > 0)
+            {
+                for (int t = 0; t < ThreadCount; t++)
+                {
+                    if (RenderThreadManagers[t].Finished() && !Finished[t])
+                    {
+                        Running--;
+                        Finished[t] = true;
+                        Bitmap Slice = new Bitmap(RenderThreadManagers[t].ImageBuffer.GetLength(0), RenderThreadManagers[t].ImageBuffer.GetLength(1));
+                        for (int x = 0; x < RenderThreadManagers[t].ImageBuffer.GetLength(0); x++)
+                        {
+                            for (int y = 0; y < RenderThreadManagers[t].ImageBuffer.GetLength(1); y++)
+                            {
+                                if (RenderThreadManagers[t].ImageBuffer[x, y] == null)
+                                    Slice.SetPixel(x, y, Color.Black);
+                                else
+                                    Slice.SetPixel(x, y, RenderThreadManagers[t].ImageBuffer[x, y].VisualElement);
+                            }
+                        }
+                        G.DrawImage(Slice, RenderThreadManagers[t].LowerCorner.PointF());
+                    }
+                }
+            }
+        }
+
         public void Clean()
         {
             for (int x = 0; x < Target.Width; x++)
             {
                 for (int y = 0; y < Target.Height; y++)
                 {
-                    ImageBuffer[x, y] = new BufferElement();
+                    ImageBuffer[x, y] = new BufferElement(Color.Goldenrod);
                 }
             }
             foreach (GenericRenderThreadManager GRTM in RenderThreadManagers)
@@ -770,14 +844,14 @@ namespace Render
             }
         }
 
-        public override IEnumerable<PointPixelPair> GetPixels(Pixel LowerBounds, Pixel UpperBounds)
+        public IEnumerable<PointPixelPair> GetPixels(Pixel LowerBounds, Pixel UpperBounds)
         {
-            Segment LeftRail = new Segment(UpperLeftCorner, LowerLeftCorner);
-            Segment RightRail = new Segment(UpperRightCorner, LowerRightCorner);
+            Segment LeftRail = new Segment(LowerLeftCorner, UpperLeftCorner);
+            Segment RightRail = new Segment(LowerRightCorner, UpperRightCorner);
             float PositionY = LowerBounds.Y / (float)Target.Height;
             for (int PixelY = LowerBounds.Y; PixelY <= UpperBounds.Y; PixelY += 1, PositionY += 1f / Target.Height)
             {
-                Segment Step = new Segment(LeftRail.Extrapolate(PositionY), RightRail.Extrapolate(PositionY));
+                Segment Step = new Segment(RightRail.Extrapolate(PositionY), LeftRail.Extrapolate(PositionY));
                 float PositionX = LowerBounds.X / (float)Target.Width;
                 for (int PixelX = LowerBounds.X; PixelX <= UpperBounds.X; PixelX += 1, PositionX += 1f / Target.Width)
                 {
@@ -787,7 +861,25 @@ namespace Render
             }
         }
 
-        public abstract void Render(Triangle Tri);
+        public void Render(Triangle Tri)
+        {
+            Render(Tri, delegate (float D, Ray R, Triangle T)
+            {
+                return Color.White;
+            });
+        }
+
+        public abstract void Render(Triangle Tri, PixelShader Shader);
+
+        public void AsyncMultipleRender(List<Triangle> Polygon)
+        {
+            AsyncMultipleRender(Polygon, delegate (float D, Ray R, Triangle T)
+            {
+                return Color.White;
+            });
+        }
+
+        public abstract void AsyncMultipleRender(List<Triangle> Polygon, PixelShader Shader);
 
         // Embedded Structures
 
@@ -894,7 +986,39 @@ namespace Render
                 return !RenderThread.IsAlive;
             }
 
-            public abstract void Render(Triangle Tri);
+            public abstract void RenderSingleTriangle(Triangle Tri, PixelShader Shader);
+
+            public void Render(Triangle Tri)
+            {
+                Render(Tri, delegate (float D, Ray R, Triangle T)
+                {
+                    return Color.White;
+                });
+            }
+            
+            public void Render(Triangle Tri, PixelShader Shader)
+            {
+                RenderThread = new Thread(delegate () { RenderSingleTriangle(Tri, Shader); });
+                RenderThread.Start();
+            }
+            
+            public void AsyncMultipleRender(List<Triangle> Polygon)
+            {
+                AsyncMultipleRender(Polygon, delegate (float D, Ray R, Triangle T)
+                {
+                    return Color.White;
+                });
+            }
+
+            public void AsyncMultipleRender(List<Triangle> Polygon, PixelShader Shader)
+            {
+                RenderThread = new Thread(delegate ()
+                {
+                    foreach (Triangle Tri in Polygon)
+                        RenderSingleTriangle(Tri, Shader);
+                });
+                RenderThread.Start();
+            }
         }
     }
 
@@ -912,8 +1036,10 @@ namespace Render
             for (int i = 0; i < ThreadCount; i++)
             {
                 float LeftBounds = (float)Math.Floor(Division);
-                Division += (Target.Width + 1.0f) / (float)ThreadCount;
-                float RightBounds = (float)Math.Floor(Division) - 1;
+                Division += Target.Width / (float)ThreadCount;
+                float RightBounds = (float)Math.Floor(Division);
+                if (i == ThreadCount - 1)
+                    RightBounds = Target.Width;
                 int BufferWidth = (int)(RightBounds - LeftBounds);
                 RenderThreadManagers[i] = new RaytracerRenderThreadManager(this, new Pixel((int)LeftBounds, 0), new BufferElement[BufferWidth, Target.Height]);
             }
@@ -921,13 +1047,20 @@ namespace Render
 
         // Utilities
 
-        public override void Render(Triangle Tri)
+        public override void Render(Triangle Tri, PixelShader Shader)
         {
             foreach (RaytracerRenderThreadManager ThreadManager in RenderThreadManagers)
             {
-                ThreadManager.Render(Tri);
+                ThreadManager.Render(Tri, Shader);
             }
-            Wait();
+        }
+
+        public override void AsyncMultipleRender(List<Triangle> Polygon, PixelShader Shader)
+        {
+            foreach (RaytracerRenderThreadManager ThreadManager in RenderThreadManagers)
+            {
+                ThreadManager.AsyncMultipleRender(Polygon, Shader);
+            }
         }
 
         // Embedded Structures
@@ -940,13 +1073,8 @@ namespace Render
 
             // Utilities
 
-            public override void Render(Triangle Tri)
+            public override void RenderSingleTriangle(Triangle Tri, PixelShader Shader)
             {
-                RenderThread = new Thread(delegate()
-                {
-                });
-                RenderThread.Start();
-                
                 foreach (PointPixelPair Pair in Parent.GetPixels(LowerCorner, UpperCorner))
                 {
                     Ray R = new Ray(Pair.Point, Parent.Frame.B);
@@ -958,7 +1086,7 @@ namespace Render
                         continue;
                     if (!R.IsUnextrapolationInTriangle(Depth, Tri))
                         continue;
-                    Impress(Pair.Pixel, new BufferElement(Color.White, Depth));
+                    Impress(Pair.Pixel, new BufferElement(Shader(Depth, R, Tri), Depth));
                 }
             }
         }
