@@ -20,10 +20,15 @@ namespace SoftwareRenderer
 
         Thread RenderThread;
 
+        public readonly float Pi = (float)Math.PI;
+
         public MainForm()
         {
             InitializeComponent();
-            
+
+            Geometry.Point PT = new Geometry.Point(0, 0, 1);
+            Line RLine = new Line(new Geometry.Point(0, 0, 0), new Geometry.Point(1, 0, 0));
+
             Bunny = Import("bunny.obj");
             TestTriangles = Import("testtris.obj");
 
@@ -67,6 +72,16 @@ namespace SoftwareRenderer
             });
             RenderThread.Start();
         }
+
+        private void LeftButton_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void RightButton_Click(object sender, EventArgs e)
+        {
+
+        }
     }
 }
 
@@ -98,6 +113,13 @@ namespace Geometry
             this.X = 0;
             this.Y = 0;
             this.Z = 0;
+        }
+
+        public Point(Point P)
+        {
+            this.X = P.X;
+            this.Y = P.Y;
+            this.Z = P.Z;
         }
 
         // Overrides
@@ -175,38 +197,98 @@ namespace Geometry
                 return this * (1f / Abs);
             }
         }
+
+        public float Angle(Point P)
+        {
+            return (float)(Math.Acos(Dot(P) / (AbsoluteValue() * P.AbsoluteValue())));
+        }
+
+        public Point Rotate(Line Seg, float Radians)
+        {
+            Point Rotation = new Point(this);
+            Line Line = new Line(Seg);
+            //(1) Translate space so that the rotation axis passes through the origin.
+            Line.B -= Line.A;
+            Rotation -= Line.A;
+            Line.A = new Point();
+            //(2) Rotate space about the z axis so that the rotation axis lies in the xz plane.
+            float Placeholder = Line.B.Z;
+            Line.B.Z = 0;
+            Point XVector = new Point(1, 0, 0);
+            float RotAngle = Line.B.Angle(XVector);
+            Line.B.Z = Placeholder;
+            float Sin = (float)Math.Sin(RotAngle);
+            float Cos = (float)Math.Cos(RotAngle);
+            Line.B.X = Line.B.X * Cos - Line.B.Y * Sin;
+            Line.B.Y = Line.B.X * Sin + Line.B.Y * Cos;
+            Rotation.X = Rotation.X * Cos - Rotation.Y * Sin;
+            Rotation.Y = Rotation.X * Sin + Rotation.Y * Cos;
+            //(3) Rotate space about the y axis so that the rotation axis lies along the z axis.
+            Point ZVector = new Point(0, 0, 1);
+            float RotAngle2 = Line.B.Angle(ZVector);
+            float Sin2 = (float)Math.Sin(RotAngle2);
+            float Cos2 = (float)Math.Cos(RotAngle2);
+            Line.B.X = Line.B.X * Cos2 - Line.B.Z * Sin2;
+            Line.B.Z = Line.B.X * Sin2 + Line.B.Z * Cos2;
+            Rotation.X = Rotation.X * Cos2 - Rotation.Z * Sin2;
+            Rotation.Z = Rotation.X * Sin2 + Rotation.Z * Cos2;
+            //(4) Perform the desired rotation by θ about the z axis.
+            float Sin3 = (float)Math.Sin(Radians);
+            float Cos3 = (float)Math.Cos(Radians);
+            Rotation.X = Rotation.X * Cos3 - Rotation.Y * Sin3;
+            Rotation.Y = Rotation.X * Sin3 + Rotation.Y * Cos3;
+            //(5) Apply the inverse of step(3).
+            float NSin2 = (float)Math.Sin(-RotAngle2);
+            float NCos2 = (float)Math.Cos(-RotAngle2);
+            Rotation.X = Rotation.X * NCos2 - Rotation.Z * NSin2;
+            Rotation.Z = Rotation.X * NSin2 + Rotation.Z * NCos2;
+            //(6) Apply the inverse of step(2).
+            float NSin = (float)Math.Sin(-RotAngle);
+            float NCos = (float)Math.Cos(-RotAngle);
+            Rotation.X = Rotation.X * NCos - Rotation.Y * NSin;
+            Rotation.Y = Rotation.X * NSin + Rotation.Y * NCos;
+            //(7) Apply the inverse of step(1).
+            Rotation += Seg.A;
+            return Rotation;
+        }
     }
 
-    public class Segment
+    public class Line
     {
 
         public Point A, B;
 
         // Constructors
 
-        public Segment(Point A, Point B)
+        public Line(Point A, Point B)
         {
             this.A = A;
             this.B = B;
         }
 
-        public Segment(Point P)
+        public Line(Point P)
         {
             this.A = new Point();
             this.B = P;
         }
 
-        public Segment()
+        public Line()
         {
             this.A = new Point();
             this.B = new Point();
+        }
+
+        public Line(Line S)
+        {
+            this.A = S.A;
+            this.B = S.B;
         }
 
         // Overrides
 
         public override string ToString()
         {
-            return String.Format("{0}={1}", A, B);
+            return String.Format("-{0}={1}-", A, B);
         }
 
         // Self Utilities
@@ -221,6 +303,11 @@ namespace Geometry
             return Differernce().AbsoluteValue();
         }
 
+        public Line Rotate(Line Line, float Radians)
+        {
+            return new Line(A.Rotate(Line, Radians), B.Rotate(Line, Radians));
+        }
+
         // Scalar Utilities
 
         public Point Extrapolate(float F)
@@ -230,7 +317,7 @@ namespace Geometry
 
         public virtual bool IsUnextrapolationInLine(float F)
         {
-            return F >= 0 && F <= 1;
+            return true;
         }
 
         // Point Utilities
@@ -292,7 +379,7 @@ namespace Geometry
         }
     }
 
-    public class Ray : Segment
+    public class Ray : Line
     {
         public Ray(Point A, Point B) : base(A, B) { }
 
@@ -306,6 +393,26 @@ namespace Geometry
         public override bool IsUnextrapolationInLine(float F)
         {
             return F >= 0;
+        }
+    }
+
+    public class Segment : Line
+    {
+
+        public Segment(Point A, Point B) : base(A, B) { }
+
+        public Segment() { }
+
+        // Overrides
+
+        public override string ToString()
+        {
+            return String.Format("{0}={1}", A, B);
+        }
+
+        public override bool IsUnextrapolationInLine(float F)
+        {
+            return F >= 0 && F <= 1;
         }
     }
 
@@ -349,6 +456,15 @@ namespace Geometry
         {
             return Normal().Dot(P - A);
         }
+
+        public Triangle Rotate(Line Line, float Radians)
+        {
+            return new Triangle(
+                A.Rotate(Line, Radians),
+                B.Rotate(Line, Radians),
+                C.Rotate(Line, Radians)
+                );
+        }
     }
 
     public class Point2D
@@ -373,6 +489,12 @@ namespace Geometry
         {
             this.X = 0;
             this.Y = 0;
+        }
+
+        public Point2D(Point2D P)
+        {
+            this.X = P.X;
+            this.Y = P.Y;
         }
 
         // Overrides
@@ -422,6 +544,17 @@ namespace Geometry
         public Pixel Pixel()
         {
             return new Utility.Pixel((int)Math.Round(X), (int)Math.Round(Y));
+        }
+
+        public Point2D Rotate(Point2D P, float Radians)
+        {
+            Point2D Rotation = new Point2D(this);
+            Rotation -= P;
+            float S = (float)Math.Sin(Radians);
+            float C = (float)Math.Cos(Radians);
+            Rotation.X = Rotation.X * C - Rotation.Y * S;
+            Rotation.Y = Rotation.X * S + Rotation.Y * C;
+            return Rotation;
         }
     }
 
