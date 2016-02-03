@@ -13,8 +13,7 @@ namespace SoftwareRenderer
 {
     public partial class MainForm : Form
     {
-        Raytracer OverheadCamera;
-        Raytracer IsometricCamera;
+        Camera.PixelShader DefaultShader;
 
         List<Triangle> TestTriangles;
         List<Triangle> Bunny;
@@ -27,20 +26,32 @@ namespace SoftwareRenderer
             
             Bunny = Import("bunny.obj");
             TestTriangles = Import("testtris.obj");
+
+            DefaultShader = delegate (float Depth, Ray Raycast, Triangle Tri)
+            {
+                int C = (int)(Depth * 32) % 256;
+                return Color.FromArgb(C, C, C);
+            };
         }
 
         private void RenderTarget_Paint(object sender, PaintEventArgs e)
         {
-            OverheadCamera = new Raytracer(new Triangle(
+            Raytracer OverheadCamera = new Raytracer(new Triangle(
                 new Geometry.Point(0, 3, 0),
                 new Geometry.Point(0, 2, 0),
                 new Geometry.Point(1, 3, 0)
                 ), RenderTarget);
 
-            IsometricCamera = new Raytracer(new Triangle(
+            Raytracer IsometricCamera = new Raytracer(new Triangle(
                 new Geometry.Point(3, 3, -3),
                 new Geometry.Point(2, 2, -2),
                 new Geometry.Point(2, 4, -2)
+                ), RenderTarget);
+
+            Rasterizer RasterCam = new Rasterizer(new Triangle(
+                new Geometry.Point(0, 3, 0),
+                new Geometry.Point(0, 2, 0),
+                new Geometry.Point(1, 3, 0)
                 ), RenderTarget);
 
             if (RenderThread != null && RenderThread.IsAlive)
@@ -48,14 +59,11 @@ namespace SoftwareRenderer
                 RenderThread.Abort();
                 OverheadCamera.Clean();
             }
+
             RenderThread = new Thread(delegate ()
             {
-                IsometricCamera.AsyncMultipleRender(TestTriangles, delegate(float Depth, Ray Raycast, Triangle Tri)
-                {
-                    int C = (int)(Depth * 32) % 256;
-                    return Color.FromArgb(C, C, C);
-                });
-                IsometricCamera.AsyncDraw();
+                RasterCam.AsyncMultipleRender(TestTriangles, DefaultShader);
+                RasterCam.AsyncDraw();
             });
             RenderThread.Start();
         }
@@ -233,7 +241,7 @@ namespace Geometry
             float Denominator = Diff.Dot(Diff);
             if (Denominator == 0)
                 return 0;
-            return -Diff.Dot(A - P);
+            return -Diff.Dot(A - P) / Denominator;
         }
 
         public Point ClosestPoint(Point P)
@@ -297,7 +305,7 @@ namespace Geometry
 
         public override bool IsUnextrapolationInLine(float F)
         {
-            return F >= 1;
+            return F >= 0;
         }
     }
 
@@ -386,7 +394,7 @@ namespace Geometry
 
         public static Point2D operator +(Point2D A, Point2D B)
         {
-            return new Point2D(A.X - B.X, A.Y - B.Y);
+            return new Point2D(A.X + B.X, A.Y + B.Y);
         }
 
         public static Point2D operator +(Point2D P, float F)
@@ -409,6 +417,11 @@ namespace Geometry
         public float Cross(Point2D P)
         {
             return (X * P.Y) - (Y * P.X);
+        }
+
+        public Pixel Pixel()
+        {
+            return new Utility.Pixel((int)Math.Round(X), (int)Math.Round(Y));
         }
     }
 
@@ -615,6 +628,12 @@ public static class Utility
             this.Y = 0;
         }
 
+        public Pixel(Pixel P)
+        {
+            this.X = P.X;
+            this.Y = P.Y;
+        }
+
         // Overrides
 
         public override string ToString()
@@ -675,7 +694,7 @@ namespace Render
 {
     public abstract class Camera
     {
-        public readonly uint ThreadCount = 24;
+        public readonly uint ThreadCount = 64;
 
         public Triangle Frame;
         public PictureBox Target;
@@ -694,7 +713,7 @@ namespace Render
         {
             Init(Frame, Target);
         }
-        
+
         public Camera()
         {
             Init(new Triangle(), new PictureBox());
@@ -738,7 +757,7 @@ namespace Render
                 Finished[i] = false;
             while (Running > 0)
             {
-                for (int t = 0;t < ThreadCount;t++)
+                for (int t = 0; t < ThreadCount; t++)
                 {
                     if (RenderThreadManagers[t].Finished() && !Finished[t])
                     {
@@ -843,7 +862,7 @@ namespace Render
                 }
             }
         }
-
+        
         public IEnumerable<PointPixelPair> GetPixels(Pixel LowerBounds, Pixel UpperBounds)
         {
             Segment LeftRail = new Segment(LowerLeftCorner, UpperLeftCorner);
@@ -855,8 +874,7 @@ namespace Render
                 float PositionX = LowerBounds.X / (float)Target.Width;
                 for (int PixelX = LowerBounds.X; PixelX <= UpperBounds.X; PixelX += 1, PositionX += 1f / Target.Width)
                 {
-                    Geometry.Point a = Step.Extrapolate(PositionX);
-                    yield return new PointPixelPair(Step.Extrapolate(PositionX), new Pixel(PixelX, PixelY));
+                    yield return new PointPixelPair(Step.Extrapolate(PositionX), new Point2D(PositionX, PositionY), new Pixel(PixelX, PixelY));
                 }
             }
         }
@@ -868,9 +886,7 @@ namespace Render
                 return Color.White;
             });
         }
-
-        public abstract void Render(Triangle Tri, PixelShader Shader);
-
+        
         public void AsyncMultipleRender(List<Triangle> Polygon)
         {
             AsyncMultipleRender(Polygon, delegate (float D, Ray R, Triangle T)
@@ -878,35 +894,61 @@ namespace Render
                 return Color.White;
             });
         }
+        public void Render(Triangle Tri, PixelShader Shader)
+        {
+            foreach (GenericRenderThreadManager ThreadManager in RenderThreadManagers)
+            {
+                ThreadManager.Render(Tri, Shader);
+            }
+        }
 
-        public abstract void AsyncMultipleRender(List<Triangle> Polygon, PixelShader Shader);
+        public void AsyncMultipleRender(List<Triangle> Polygon, PixelShader Shader)
+        {
+            foreach (GenericRenderThreadManager ThreadManager in RenderThreadManagers)
+            {
+                ThreadManager.AsyncMultipleRender(Polygon, Shader);
+            }
+        }
+
+        public void DebugThreadlessRender(Triangle Tri, PixelShader Shader)
+        {
+            foreach (GenericRenderThreadManager ThreadManager in RenderThreadManagers)
+            {
+                ThreadManager.RenderSingleTriangle(Tri, Shader);
+                ThreadManager.RenderThread = new Thread(delegate () { });
+                ThreadManager.RenderThread.Start();
+            }
+        }
 
         // Embedded Structures
 
         public class PointPixelPair
         {
             public Geometry.Point Point { get; private set; }
+            public Point2D Point2D { get; private set; }
             public Pixel Pixel { get; private set; }
 
             // Constructors
 
-            public PointPixelPair(Geometry.Point Point, Pixel Pixel)
+            public PointPixelPair(Geometry.Point Point, Point2D Point2D, Pixel Pixel)
             {
                 this.Point = Point;
                 this.Pixel = Pixel;
+                this.Point2D = Point2D;
             }
 
             public PointPixelPair()
             {
                 this.Point = new Geometry.Point();
                 this.Pixel = new Pixel();
+                this.Point2D = new Point2D();
             }
 
             // Overloads
 
             public override string ToString()
             {
-                return String.Format("{0} | {1}", Pixel, Point);
+                return String.Format("{0}:{1} | {2}", Pixel, Point2D, Point);
             }
         }
 
@@ -945,13 +987,13 @@ namespace Render
 
             // Constructors
 
-            public GenericRenderThreadManager(Camera Parent, Pixel LowerCorner, BufferElement[,] ImageBuffer)
+            public GenericRenderThreadManager(Camera Parent, Pixel LowerCorner, Pixel UpperCorner)
             {
                 this.Parent = Parent;
                 this.LowerCorner = LowerCorner;
-                this.ImageBuffer = ImageBuffer;
+                this.UpperCorner = UpperCorner;
 
-                this.UpperCorner = new Pixel(LowerCorner.X + ImageBuffer.GetLength(0), LowerCorner.Y + ImageBuffer.GetLength(1));
+                this.ImageBuffer = new BufferElement[UpperCorner.X - LowerCorner.X, UpperCorner.Y - LowerCorner.Y];
             }
 
             public GenericRenderThreadManager()
@@ -986,7 +1028,7 @@ namespace Render
                 return !RenderThread.IsAlive;
             }
 
-            public abstract void RenderSingleTriangle(Triangle Tri, PixelShader Shader);
+            internal abstract void RenderSingleTriangle(Triangle Tri, PixelShader Shader);
 
             public void Render(Triangle Tri)
             {
@@ -995,13 +1037,13 @@ namespace Render
                     return Color.White;
                 });
             }
-            
+
             public void Render(Triangle Tri, PixelShader Shader)
             {
                 RenderThread = new Thread(delegate () { RenderSingleTriangle(Tri, Shader); });
                 RenderThread.Start();
             }
-            
+
             public void AsyncMultipleRender(List<Triangle> Polygon)
             {
                 AsyncMultipleRender(Polygon, delegate (float D, Ray R, Triangle T)
@@ -1024,10 +1066,8 @@ namespace Render
 
     public class Raytracer : Camera
     {
-        // Constructors
-
         public Raytracer(Triangle Frame, PictureBox Target) : base(Frame, Target) { }
-        
+
         internal override void InitializeRenderThreadManagers()
         {
             this.RenderThreadManagers = new RaytracerRenderThreadManager[ThreadCount];
@@ -1035,45 +1075,18 @@ namespace Render
             float Division = 0;
             for (int i = 0; i < ThreadCount; i++)
             {
-                float LeftBounds = (float)Math.Floor(Division);
+                float LeftBounds = (float)Math.Round(Division);
                 Division += Target.Width / (float)ThreadCount;
-                float RightBounds = (float)Math.Floor(Division);
-                if (i == ThreadCount - 1)
-                    RightBounds = Target.Width;
-                int BufferWidth = (int)(RightBounds - LeftBounds);
-                RenderThreadManagers[i] = new RaytracerRenderThreadManager(this, new Pixel((int)LeftBounds, 0), new BufferElement[BufferWidth, Target.Height]);
+                float RightBounds = (float)Math.Round(Division);
+                RenderThreadManagers[i] = new RaytracerRenderThreadManager(this, new Pixel((int)LeftBounds, 0), new Pixel((int)RightBounds, Target.Height));
             }
         }
 
-        // Utilities
-
-        public override void Render(Triangle Tri, PixelShader Shader)
+        internal class RaytracerRenderThreadManager : GenericRenderThreadManager
         {
-            foreach (RaytracerRenderThreadManager ThreadManager in RenderThreadManagers)
-            {
-                ThreadManager.Render(Tri, Shader);
-            }
-        }
+            public RaytracerRenderThreadManager(Camera Parent, Pixel LowerCorner, Pixel UpperCorner) : base(Parent, LowerCorner, UpperCorner) { }
 
-        public override void AsyncMultipleRender(List<Triangle> Polygon, PixelShader Shader)
-        {
-            foreach (RaytracerRenderThreadManager ThreadManager in RenderThreadManagers)
-            {
-                ThreadManager.AsyncMultipleRender(Polygon, Shader);
-            }
-        }
-
-        // Embedded Structures
-
-        public class RaytracerRenderThreadManager : GenericRenderThreadManager
-        {
-            // Constructors
-
-            public RaytracerRenderThreadManager(Camera Parent, Pixel LowerCorner, BufferElement[,] ImageBuffer) : base(Parent, LowerCorner, ImageBuffer) { }
-
-            // Utilities
-
-            public override void RenderSingleTriangle(Triangle Tri, PixelShader Shader)
+            internal override void RenderSingleTriangle(Triangle Tri, PixelShader Shader)
             {
                 foreach (PointPixelPair Pair in Parent.GetPixels(LowerCorner, UpperCorner))
                 {
@@ -1091,5 +1104,134 @@ namespace Render
             }
         }
 
+    }
+
+    public class Rasterizer : Camera
+    {
+        public Rasterizer(Triangle Frame, PictureBox Target) : base(Frame, Target) { }
+
+        internal override void InitializeRenderThreadManagers()
+        {
+            this.RenderThreadManagers = new RasterizerRenderThreadManager[ThreadCount];
+
+            int GridHeight = (int)Math.Sqrt(ThreadCount);
+            while (GridHeight > 1 && ThreadCount % GridHeight != 0)
+                GridHeight--;
+            int GridWidth = (int)ThreadCount / GridHeight;
+            Point2D BoxSize = new Point2D((float)Target.Width / GridWidth, (float)Target.Height / GridHeight);
+            Point2D Division = new Point2D();
+            int t = 0;
+            for (int x = 0; x < GridWidth; x++)
+            {
+                Division.Y = 0;
+                for (int y = 0; y < GridHeight; y++)
+                {
+                    Pixel LowerBounds = Division.Pixel();
+                    Division += BoxSize;
+                    Pixel UpperBounds = Division.Pixel();
+                    Division.X -= BoxSize.X;
+                    RenderThreadManagers[t] = new RasterizerRenderThreadManager(this, LowerBounds, UpperBounds);
+                    t++;
+                }
+                Division.X += BoxSize.X;
+            }
+        }
+
+        internal class RasterizerRenderThreadManager : GenericRenderThreadManager
+        {
+            private Triangle ScreenTri;
+            private Segment VerticalMargin, HorizontalMargin;
+
+            public RasterizerRenderThreadManager(Camera Parent, Pixel LowerCorner, Pixel UpperCorner) : base(Parent, LowerCorner, UpperCorner)
+            {
+                this.ScreenTri = new Triangle(Parent.UpperLeftCorner, Parent.UpperRightCorner, Parent.LowerLeftCorner);
+                this.VerticalMargin = new Segment(Parent.LowerLeftCorner, Parent.UpperLeftCorner);
+                this.HorizontalMargin = new Segment(Parent.UpperLeftCorner, Parent.UpperRightCorner);
+            }
+            
+            internal override void RenderSingleTriangle(Triangle Tri, PixelShader Shader)
+            {
+                Ray PointARayCast = new Ray(Tri.A, Parent.Frame.B);
+                Ray PointBRayCast = new Ray(Tri.B, Parent.Frame.B);
+                Ray PointCRayCast = new Ray(Tri.C, Parent.Frame.B);
+
+                Maybe<float> PossiblePointAIntersection = PointARayCast.UnextrapolatedUncontainedIntersection(ScreenTri);
+                if (PossiblePointAIntersection.IsNull) return;
+                Geometry.Point PointAScreenIntersection = PointARayCast.Extrapolate(PossiblePointAIntersection.Value());
+
+                Maybe<float> PossiblePointBIntersection = PointBRayCast.UnextrapolatedUncontainedIntersection(ScreenTri);
+                if (PossiblePointBIntersection.IsNull) return;
+                Geometry.Point PointBScreenIntersection = PointBRayCast.Extrapolate(PossiblePointBIntersection.Value());
+
+                Maybe<float> PossiblePointCIntersection = PointCRayCast.UnextrapolatedUncontainedIntersection(ScreenTri);
+                if (PossiblePointCIntersection.IsNull) return;
+                Geometry.Point PointCScreenIntersection = PointCRayCast.Extrapolate(PossiblePointCIntersection.Value());
+
+                Point2D PointA2DPosition = new Point2D(
+                    HorizontalMargin.ClosestPointUnextrapolated(PointAScreenIntersection),
+                    VerticalMargin.ClosestPointUnextrapolated(PointAScreenIntersection)
+                    );
+                if (PointA2DPosition.X < 0 || PointA2DPosition.Y < 0 || PointA2DPosition.X > 1 || PointA2DPosition.Y > 1) return;
+
+                Point2D PointB2DPosition = new Point2D(
+                    HorizontalMargin.ClosestPointUnextrapolated(PointBScreenIntersection),
+                    VerticalMargin.ClosestPointUnextrapolated(PointBScreenIntersection)
+                    );
+                if (PointB2DPosition.X < 0 || PointB2DPosition.Y < 0 || PointB2DPosition.X > 1 || PointB2DPosition.Y > 1) return;
+
+                Point2D PointC2DPosition = new Point2D(
+                    HorizontalMargin.ClosestPointUnextrapolated(PointCScreenIntersection),
+                    VerticalMargin.ClosestPointUnextrapolated(PointCScreenIntersection)
+                    );
+                if (PointC2DPosition.X < 0 || PointC2DPosition.Y < 0 || PointC2DPosition.X > 1 || PointC2DPosition.Y > 1) return;
+
+                Triangle2D ProjectedTriangle = new Triangle2D(
+                    PointA2DPosition,
+                    PointB2DPosition,
+                    PointC2DPosition
+                    );
+
+                Point2D UpperBoundBoxCorner = new Point2D(
+                    Math.Max(PointA2DPosition.X, Math.Max(PointB2DPosition.X, PointC2DPosition.X)),
+                    Math.Max(PointA2DPosition.Y, Math.Max(PointB2DPosition.Y, PointC2DPosition.Y))
+                    );
+
+                Point2D LowerBoundBoxCorner = new Point2D(
+                    Math.Min(PointA2DPosition.X, Math.Min(PointB2DPosition.X, PointC2DPosition.X)),
+                    Math.Min(PointA2DPosition.Y, Math.Min(PointB2DPosition.Y, PointC2DPosition.Y))
+                    );
+
+                Pixel UpperPixel = new Pixel(
+                    (int)Math.Round(UpperBoundBoxCorner.X * Parent.Target.Width),
+                    (int)Math.Round(UpperBoundBoxCorner.Y * Parent.Target.Height)
+                    );
+
+                Pixel LowerPixel = new Pixel(
+                    (int)Math.Round(LowerBoundBoxCorner.X * Parent.Target.Width),
+                    (int)Math.Round(LowerBoundBoxCorner.Y * Parent.Target.Height)
+                    );
+
+                if (UpperPixel.X < LowerCorner.X) return;
+                if (UpperPixel.Y < LowerCorner.Y) return;
+                if (LowerPixel.X > UpperCorner.X) return;
+                if (LowerPixel.Y > UpperCorner.Y) return;
+
+                UpperPixel.X = Math.Max(LowerCorner.X, Math.Min(UpperPixel.X, UpperCorner.X));
+                UpperPixel.Y = Math.Max(LowerCorner.Y, Math.Min(UpperPixel.Y, UpperCorner.Y));
+                LowerPixel.X = Math.Max(LowerCorner.X, Math.Min(LowerPixel.X, UpperCorner.X));
+                LowerPixel.Y = Math.Max(LowerCorner.Y, Math.Min(LowerPixel.Y, UpperCorner.Y));
+
+                foreach (PointPixelPair Pair in Parent.GetPixels(LowerPixel, UpperPixel))
+                {
+                    if (ProjectedTriangle.Contains(Pair.Point2D))
+                    {
+                        Ray Raycast = new Ray(Pair.Point, Parent.Frame.B);
+                        Maybe<float> Depth = Raycast.UnextrapolatedUncontainedIntersection(Tri);
+                        if (Depth.IsNull) continue;
+                        Impress(Pair.Pixel, new BufferElement(Shader(Depth.Value(), Raycast, Tri), Depth.Value()));
+                    }
+                }
+            }
+        }
     }
 }
