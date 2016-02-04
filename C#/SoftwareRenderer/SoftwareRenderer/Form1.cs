@@ -20,7 +20,7 @@ namespace SoftwareRenderer
 
         Thread RenderThread;
 
-        public readonly float Pi = (float)Math.PI;
+        public readonly double Pi = Math.PI;
 
         public MainForm()
         {
@@ -29,10 +29,18 @@ namespace SoftwareRenderer
             Geometry.Point PT = new Geometry.Point(0, 0, 1);
             Line RLine = new Line(new Geometry.Point(0, 0, 0), new Geometry.Point(1, 0, 0));
 
+            Point2D P2 = new Point2D(0, 1);
+            Point2D OP = new Point2D(0, 0);
+
+            P2 = P2.Rotate(OP, Pi / 4).RoundOff();
+            P2 = P2.Rotate(OP, Pi / 4).RoundOff();
+            P2 = P2.Rotate(OP, Pi / 4).RoundOff();
+            P2 = P2.Rotate(OP, Pi / 4).RoundOff();
+
             Bunny = Import("bunny.obj");
             TestTriangles = Import("testtris.obj");
 
-            DefaultShader = delegate (float Depth, Ray Raycast, Triangle Tri)
+            DefaultShader = delegate (double Depth, Ray Raycast, Triangle Tri)
             {
                 int C = (int)(Depth * 32) % 256;
                 return Color.FromArgb(C, C, C);
@@ -90,18 +98,18 @@ namespace Geometry
 
     public class Point
     {
-        public float X, Y, Z;
+        public double X, Y, Z;
 
         // Constructors
 
-        public Point(float X, float Y, float Z)
+        public Point(double X, double Y, double Z)
         {
             this.X = X;
             this.Y = Y;
             this.Z = Z;
         }
 
-        public Point(float F)
+        public Point(double F)
         {
             this.X = F;
             this.Y = F;
@@ -126,7 +134,7 @@ namespace Geometry
 
         public override string ToString()
         {
-            return String.Format("({0}, {1}, {2})", X, Y, Z);
+            return string.Format("({0}, {1}, {2})", X, Y, Z);
         }
 
         public static Point operator -(Point A, Point B)
@@ -134,7 +142,7 @@ namespace Geometry
             return new Point(A.X - B.X, A.Y - B.Y, A.Z - B.Z);
         }
 
-        public static Point operator -(Point P, float F)
+        public static Point operator -(Point P, double F)
         {
             return P - new Point(F);
         }
@@ -144,34 +152,34 @@ namespace Geometry
             return new Point(A.X + B.X, A.Y + B.Y, A.Z + B.Z);
         }
 
-        public static Point operator +(Point P, float F)
+        public static Point operator +(Point P, double F)
         {
             return P + new Point(F);
         }
 
-        public static Point operator *(Point P, float F)
+        public static Point operator *(Point P, double F)
         {
             return new Point(P.X * F, P.Y * F, P.Z * F);
         }
 
-        public static Point operator /(Point P, float F)
+        public static Point operator /(Point P, double F)
         {
             return new Point(P.X / F, P.Y / F, P.Z / F);
         }
 
         // Utilities
 
-        public float AbsoluteValue()
+        public double AbsoluteValue()
         {
-            return (float)Math.Sqrt(X * X + Y * Y + Z * Z);
+            return Math.Sqrt(X * X + Y * Y + Z * Z);
         }
 
-        public float Distance(Point P)
+        public double Distance(Point P)
         {
             return (P - this).AbsoluteValue();
         }
 
-        public float Dot(Point P)
+        public double Dot(Point P)
         {
             return X * P.X + Y * P.Y + Z * P.Z;
         }
@@ -187,7 +195,7 @@ namespace Geometry
 
         public Point Normalized()
         {
-            float Abs = AbsoluteValue();
+            double Abs = AbsoluteValue();
             if (Abs == 0)
             {
                 return new Point(0, 1, 0);
@@ -198,12 +206,21 @@ namespace Geometry
             }
         }
 
-        public float Angle(Point P)
+        public Point RoundOff(int Prescision = 10)
         {
-            return (float)(Math.Acos(Dot(P) / (AbsoluteValue() * P.AbsoluteValue())));
+            return new Point(
+                Math.Round(X, Prescision),
+                Math.Round(Y, Prescision),
+                Math.Round(Z, Prescision)
+                );
         }
 
-        public Point Rotate(Line Seg, float Radians)
+        public double Angle(Point P)
+        {
+            return (Math.Acos(Dot(P) / (AbsoluteValue() * P.AbsoluteValue())));
+        }
+
+        public Point Rotate(Line Seg, double Radians)
         {
             Point Rotation = new Point(this);
             Line Line = new Line(Seg);
@@ -212,39 +229,39 @@ namespace Geometry
             Rotation -= Line.A;
             Line.A = new Point();
             //(2) Rotate space about the z axis so that the rotation axis lies in the xz plane.
-            float Placeholder = Line.B.Z;
+            double Placeholder = Line.B.Z;
             Line.B.Z = 0;
             Point XVector = new Point(1, 0, 0);
-            float RotAngle = Line.B.Angle(XVector);
+            double RotAngle = Line.B.Angle(XVector);
             Line.B.Z = Placeholder;
-            float Sin = (float)Math.Sin(RotAngle);
-            float Cos = (float)Math.Cos(RotAngle);
+            double Sin = Math.Sin(RotAngle);
+            double Cos = Math.Cos(RotAngle);
             Line.B.X = Line.B.X * Cos - Line.B.Y * Sin;
             Line.B.Y = Line.B.X * Sin + Line.B.Y * Cos;
             Rotation.X = Rotation.X * Cos - Rotation.Y * Sin;
             Rotation.Y = Rotation.X * Sin + Rotation.Y * Cos;
             //(3) Rotate space about the y axis so that the rotation axis lies along the z axis.
             Point ZVector = new Point(0, 0, 1);
-            float RotAngle2 = Line.B.Angle(ZVector);
-            float Sin2 = (float)Math.Sin(RotAngle2);
-            float Cos2 = (float)Math.Cos(RotAngle2);
+            double RotAngle2 = Line.B.Angle(ZVector);
+            double Sin2 = Math.Sin(RotAngle2);
+            double Cos2 = Math.Cos(RotAngle2);
             Line.B.X = Line.B.X * Cos2 - Line.B.Z * Sin2;
             Line.B.Z = Line.B.X * Sin2 + Line.B.Z * Cos2;
             Rotation.X = Rotation.X * Cos2 - Rotation.Z * Sin2;
             Rotation.Z = Rotation.X * Sin2 + Rotation.Z * Cos2;
             //(4) Perform the desired rotation by θ about the z axis.
-            float Sin3 = (float)Math.Sin(Radians);
-            float Cos3 = (float)Math.Cos(Radians);
+            double Sin3 = Math.Sin(Radians);
+            double Cos3 = Math.Cos(Radians);
             Rotation.X = Rotation.X * Cos3 - Rotation.Y * Sin3;
             Rotation.Y = Rotation.X * Sin3 + Rotation.Y * Cos3;
             //(5) Apply the inverse of step(3).
-            float NSin2 = (float)Math.Sin(-RotAngle2);
-            float NCos2 = (float)Math.Cos(-RotAngle2);
+            double NSin2 = Math.Sin(-RotAngle2);
+            double NCos2 = Math.Cos(-RotAngle2);
             Rotation.X = Rotation.X * NCos2 - Rotation.Z * NSin2;
             Rotation.Z = Rotation.X * NSin2 + Rotation.Z * NCos2;
             //(6) Apply the inverse of step(2).
-            float NSin = (float)Math.Sin(-RotAngle);
-            float NCos = (float)Math.Cos(-RotAngle);
+            double NSin = Math.Sin(-RotAngle);
+            double NCos = Math.Cos(-RotAngle);
             Rotation.X = Rotation.X * NCos - Rotation.Y * NSin;
             Rotation.Y = Rotation.X * NSin + Rotation.Y * NCos;
             //(7) Apply the inverse of step(1).
@@ -288,7 +305,7 @@ namespace Geometry
 
         public override string ToString()
         {
-            return String.Format("-{0}={1}-", A, B);
+            return string.Format("-{0}={1}-", A, B);
         }
 
         // Self Utilities
@@ -298,34 +315,34 @@ namespace Geometry
             return B - A;
         }
 
-        public float Length()
+        public double Length()
         {
             return Differernce().AbsoluteValue();
         }
 
-        public Line Rotate(Line Line, float Radians)
+        public Line Rotate(Line Line, double Radians)
         {
             return new Line(A.Rotate(Line, Radians), B.Rotate(Line, Radians));
         }
 
         // Scalar Utilities
 
-        public Point Extrapolate(float F)
+        public Point Extrapolate(double F)
         {
             return A + Differernce() * F;
         }
 
-        public virtual bool IsUnextrapolationInLine(float F)
+        public virtual bool IsUnextrapolationInLine(double F)
         {
             return true;
         }
 
         // Point Utilities
 
-        public float ClosestPointUnextrapolated(Point P)
+        public double ClosestPointUnextrapolated(Point P)
         {
             Point Diff = Differernce();
-            float Denominator = Diff.Dot(Diff);
+            double Denominator = Diff.Dot(Diff);
             if (Denominator == 0)
                 return 0;
             return -Diff.Dot(A - P) / Denominator;
@@ -338,40 +355,40 @@ namespace Geometry
 
         // Triangle Utilities
 
-        public Maybe<float> UnextrapolatedUncontainedIntersection(Triangle T)
+        public Maybe<double> UnextrapolatedUncontainedIntersection(Triangle T)
         {
             Point Normal = T.Normal();
-            float Denominator = Normal.Dot(Differernce());
+            double Denominator = Normal.Dot(Differernce());
             if (Denominator == 0)
-                return new Maybe<float>();
-            return new Maybe<float>(-Normal.Dot(A - T.A) / Denominator);
+                return new Maybe<double>();
+            return new Maybe<double>(-Normal.Dot(A - T.A) / Denominator);
         }
 
-        public bool IsUnextrapolationInTriangle(Maybe<float> F, Triangle Tri)
+        public bool IsUnextrapolationInTriangle(Maybe<double> F, Triangle Tri)
         {
             if (F.IsNull)
                 return false;
             return IsUnextrapolationInTriangle(F.Value(), Tri);
         }
-        public bool IsUnextrapolationInTriangle(float F, Triangle Tri)
+        public bool IsUnextrapolationInTriangle(double F, Triangle Tri)
         {
             Point U = Tri.B - Tri.A;
             Point V = Tri.C - Tri.A;
             Point W = Extrapolate(F) - Tri.A;
-            float UV = U.Dot(V);
-            float UU = U.Dot(U);
-            float WV = W.Dot(V);
-            float WU = W.Dot(U);
-            float VV = V.Dot(V);
-            float Denominator = UV * UV - UU * VV;
+            double UV = U.Dot(V);
+            double UU = U.Dot(U);
+            double WV = W.Dot(V);
+            double WU = W.Dot(U);
+            double VV = V.Dot(V);
+            double Denominator = UV * UV - UU * VV;
             if (Denominator == 0)
                 return false;
 
-            float S = (UV * WV - VV * WU) / Denominator;
+            double S = (UV * WV - VV * WU) / Denominator;
             if (S < 0 || S > 1)
                 return false;
 
-            float T = (UV * WU - UU * WV) / Denominator;
+            double T = (UV * WU - UU * WV) / Denominator;
             if (T < 0 || S + T > 1)
                 return false;
 
@@ -387,10 +404,10 @@ namespace Geometry
 
         public override string ToString()
         {
-            return String.Format("{0}>{1}", A, B);
+            return string.Format("{0}>{1}", A, B);
         }
 
-        public override bool IsUnextrapolationInLine(float F)
+        public override bool IsUnextrapolationInLine(double F)
         {
             return F >= 0;
         }
@@ -407,10 +424,10 @@ namespace Geometry
 
         public override string ToString()
         {
-            return String.Format("{0}={1}", A, B);
+            return string.Format("{0}={1}", A, B);
         }
 
-        public override bool IsUnextrapolationInLine(float F)
+        public override bool IsUnextrapolationInLine(double F)
         {
             return F >= 0 && F <= 1;
         }
@@ -440,7 +457,7 @@ namespace Geometry
 
         public override string ToString()
         {
-            return String.Format("{{0}:{1}:{2}}", A, B, C);
+            return string.Format("{{0}:{1}:{2}}", A, B, C);
         }
 
         // Utilities
@@ -452,12 +469,12 @@ namespace Geometry
             return W.Cross(V).Normalized();
         }
 
-        public float Distance(Point P)
+        public double Distance(Point P)
         {
             return Normal().Dot(P - A);
         }
 
-        public Triangle Rotate(Line Line, float Radians)
+        public Triangle Rotate(Line Line, double Radians)
         {
             return new Triangle(
                 A.Rotate(Line, Radians),
@@ -469,17 +486,17 @@ namespace Geometry
 
     public class Point2D
     {
-        public float X, Y;
+        public double X, Y;
 
         // Constructors
 
-        public Point2D(float X, float Y)
+        public Point2D(double X, double Y)
         {
             this.X = X;
             this.Y = Y;
         }
 
-        public Point2D(float F)
+        public Point2D(double F)
         {
             this.X = F;
             this.Y = F;
@@ -501,7 +518,7 @@ namespace Geometry
 
         public override string ToString()
         {
-            return String.Format("({0}, {1})", X, Y);
+            return string.Format("({0}, {1})", X, Y);
         }
 
         public static Point2D operator -(Point2D A, Point2D B)
@@ -509,7 +526,7 @@ namespace Geometry
             return new Point2D(A.X - B.X, A.Y - B.Y);
         }
 
-        public static Point2D operator -(Point2D P, float F)
+        public static Point2D operator -(Point2D P, double F)
         {
             return P - new Point2D(F);
         }
@@ -519,41 +536,51 @@ namespace Geometry
             return new Point2D(A.X + B.X, A.Y + B.Y);
         }
 
-        public static Point2D operator +(Point2D P, float F)
+        public static Point2D operator +(Point2D P, double F)
         {
             return P + new Point2D(F);
         }
 
-        public static Point2D operator *(Point2D P, float F)
+        public static Point2D operator *(Point2D P, double F)
         {
             return new Point2D(P.X * F, P.Y * F);
         }
 
-        public static Point2D operator /(Point2D P, float F)
+        public static Point2D operator /(Point2D P, double F)
         {
             return new Point2D(P.X / F, P.Y / F);
         }
 
         // Utilities
 
-        public float Cross(Point2D P)
+        public double Cross(Point2D P)
         {
             return (X * P.Y) - (Y * P.X);
         }
 
         public Pixel Pixel()
         {
-            return new Utility.Pixel((int)Math.Round(X), (int)Math.Round(Y));
+            return new Pixel((int)Math.Round(X), (int)Math.Round(Y));
         }
 
-        public Point2D Rotate(Point2D P, float Radians)
+        public Point2D RoundOff(int Prescision = 10)
         {
-            Point2D Rotation = new Point2D(this);
-            Rotation -= P;
-            float S = (float)Math.Sin(Radians);
-            float C = (float)Math.Cos(Radians);
-            Rotation.X = Rotation.X * C - Rotation.Y * S;
-            Rotation.Y = Rotation.X * S + Rotation.Y * C;
+            return new Point2D(
+                Math.Round(X, Prescision),
+                Math.Round(Y, Prescision)
+                );
+        }
+
+        public Point2D Rotate(Point2D P, double Radians)
+        {
+            Point2D Shifted = this - P;
+            double S = Math.Sin(Radians);
+            double C = Math.Cos(Radians);
+            Point2D Rotation = new Point2D(
+                Shifted.X * C - Shifted.Y * S,
+                Shifted.X * S + Shifted.Y * C
+                );
+            Rotation += P;
             return Rotation;
         }
     }
@@ -597,7 +624,7 @@ namespace Geometry
 
         public override string ToString()
         {
-            return String.Format("[{0}-{1}]", A, B);
+            return string.Format("[{0}-{1}]", A, B);
         }
 
         // Utilities
@@ -607,32 +634,32 @@ namespace Geometry
             return B - A;
         }
 
-        public float Side(Point2D P)
+        public double Side(Point2D P)
         {
             return (B.X - A.X) * (P.Y - A.Y) - (B.Y - A.Y) * (P.X - A.X);
         }
 
-        public bool IsUnextrapolationOnLine(float F)
+        public bool IsUnextrapolationOnLine(double F)
         {
             return F >= 0 && F <= 1;
         }
 
-        public Maybe<float> UnextrapolatedIntersection(Segment2D S)
+        public Maybe<double> UnextrapolatedIntersection(Segment2D S)
         {
             Point2D Numerator = S.A - A;
-            float Denominator = Difference().Cross(S.Difference());
+            double Denominator = Difference().Cross(S.Difference());
             if (Denominator == 0)
-                return new Maybe<float>();
-            float T = Numerator.Cross(S.Difference()) / Denominator;
+                return new Maybe<double>();
+            double T = Numerator.Cross(S.Difference()) / Denominator;
             if (!IsUnextrapolationOnLine(T))
-                return new Maybe<float>();
-            float U = Numerator.Cross(Difference()) / Denominator;
+                return new Maybe<double>();
+            double U = Numerator.Cross(Difference()) / Denominator;
             if (!S.IsUnextrapolationOnLine(U))
-                return new Maybe<float>();
-            return new Maybe<float>(T);
+                return new Maybe<double>();
+            return new Maybe<double>(T);
         }
 
-        public Point2D Extrapolate(float F)
+        public Point2D Extrapolate(double F)
         {
             return A + Difference() * F;
         }
@@ -689,7 +716,7 @@ namespace Geometry
 
         public override string ToString()
         {
-            return String.Format("{{0}.{1}.{2}}", A, B, C);
+            return string.Format("{{0}.{1}.{2}}", A, B, C);
         }
 
         // Utilities
@@ -771,14 +798,14 @@ public static class Utility
 
         public override string ToString()
         {
-            return String.Format("[{0}, {1}]", X, Y);
+            return string.Format("[{0}, {1}]", X, Y);
         }
 
         // Utilities
 
         public PointF PointF()
         {
-            return new PointF((float)X, (float)Y);
+            return new PointF(X, Y);
         }
     }
 
@@ -797,9 +824,9 @@ public static class Utility
                     List<Match> Matches = Regex.Matches(Line, @"\s+?\S+").Cast<Match>().ToList();
                     if (Matches.Count < 3)
                         continue;
-                    float X = float.Parse(Matches[0].ToString());
-                    float Y = float.Parse(Matches[1].ToString());
-                    float Z = float.Parse(Matches[2].ToString());
+                    double X = double.Parse(Matches[0].ToString());
+                    double Y = double.Parse(Matches[1].ToString());
+                    double Z = double.Parse(Matches[2].ToString());
                     Verticies.Add(new Geometry.Point(X, Y, Z));
                 }
                 else if (Line.StartsWith("f"))
@@ -832,13 +859,13 @@ namespace Render
         public Triangle Frame;
         public PictureBox Target;
 
-        internal float Width, Height;
-        internal float Ratio;
+        internal double Width, Height;
+        internal double Ratio;
         internal Geometry.Point UpperRightCorner, UpperLeftCorner, LowerRightCorner, LowerLeftCorner;
 
         internal BufferElement[,] ImageBuffer;
         internal GenericRenderThreadManager[] RenderThreadManagers;
-        public delegate Color PixelShader(float Depth, Ray Raycast, Triangle Tri);
+        public delegate Color PixelShader(double Depth, Ray Raycast, Triangle Tri);
 
         // Constructors
 
@@ -862,7 +889,7 @@ namespace Render
             Segment VerticalSegment = new Segment(Frame.A, Frame.C);
 
             this.Height = VerticalSegment.Length() * 2;
-            this.Ratio = (float)Target.Width / Target.Height;
+            this.Ratio = (double)Target.Width / Target.Height;
             this.Width = Height * Ratio;
 
             Geometry.Point RightSideMidpoint = Frame.A + Frame.Normal() * Width;
@@ -1000,11 +1027,11 @@ namespace Render
         {
             Segment LeftRail = new Segment(LowerLeftCorner, UpperLeftCorner);
             Segment RightRail = new Segment(LowerRightCorner, UpperRightCorner);
-            float PositionY = LowerBounds.Y / (float)Target.Height;
+            double PositionY = LowerBounds.Y / Target.Height;
             for (int PixelY = LowerBounds.Y; PixelY <= UpperBounds.Y; PixelY += 1, PositionY += 1f / Target.Height)
             {
                 Segment Step = new Segment(RightRail.Extrapolate(PositionY), LeftRail.Extrapolate(PositionY));
-                float PositionX = LowerBounds.X / (float)Target.Width;
+                double PositionX = LowerBounds.X / Target.Width;
                 for (int PixelX = LowerBounds.X; PixelX <= UpperBounds.X; PixelX += 1, PositionX += 1f / Target.Width)
                 {
                     yield return new PointPixelPair(Step.Extrapolate(PositionX), new Point2D(PositionX, PositionY), new Pixel(PixelX, PixelY));
@@ -1014,7 +1041,7 @@ namespace Render
 
         public void Render(Triangle Tri)
         {
-            Render(Tri, delegate (float D, Ray R, Triangle T)
+            Render(Tri, delegate (double D, Ray R, Triangle T)
             {
                 return Color.White;
             });
@@ -1022,7 +1049,7 @@ namespace Render
         
         public void AsyncMultipleRender(List<Triangle> Polygon)
         {
-            AsyncMultipleRender(Polygon, delegate (float D, Ray R, Triangle T)
+            AsyncMultipleRender(Polygon, delegate (double D, Ray R, Triangle T)
             {
                 return Color.White;
             });
@@ -1081,18 +1108,18 @@ namespace Render
 
             public override string ToString()
             {
-                return String.Format("{0}:{1} | {2}", Pixel, Point2D, Point);
+                return string.Format("{0}:{1} | {2}", Pixel, Point2D, Point);
             }
         }
 
         public class BufferElement
         {
             public Color VisualElement;
-            public float ZElement;
+            public double ZElement;
 
             // Constructors
 
-            public BufferElement(Color VisualElement, float ZElement)
+            public BufferElement(Color VisualElement, double ZElement)
             {
                 this.VisualElement = VisualElement;
                 this.ZElement = ZElement;
@@ -1151,7 +1178,7 @@ namespace Render
                     ImageBuffer[Pixel.X - LowerCorner.X, Pixel.Y - LowerCorner.Y] = Elem;
                     return;
                 }
-                float OldZElement = CurrentBufferElement.ZElement;
+                double OldZElement = CurrentBufferElement.ZElement;
                 if (Elem.ZElement < 0 || OldZElement < 0 || Elem.ZElement < OldZElement)
                     ImageBuffer[Pixel.X - LowerCorner.X, Pixel.Y - LowerCorner.Y] = Elem;
             }
@@ -1165,7 +1192,7 @@ namespace Render
 
             public void Render(Triangle Tri)
             {
-                Render(Tri, delegate (float D, Ray R, Triangle T)
+                Render(Tri, delegate (double D, Ray R, Triangle T)
                 {
                     return Color.White;
                 });
@@ -1179,7 +1206,7 @@ namespace Render
 
             public void AsyncMultipleRender(List<Triangle> Polygon)
             {
-                AsyncMultipleRender(Polygon, delegate (float D, Ray R, Triangle T)
+                AsyncMultipleRender(Polygon, delegate (double D, Ray R, Triangle T)
                 {
                     return Color.White;
                 });
@@ -1205,12 +1232,12 @@ namespace Render
         {
             this.RenderThreadManagers = new RaytracerRenderThreadManager[ThreadCount];
 
-            float Division = 0;
+            double Division = 0;
             for (int i = 0; i < ThreadCount; i++)
             {
-                float LeftBounds = (float)Math.Round(Division);
-                Division += Target.Width / (float)ThreadCount;
-                float RightBounds = (float)Math.Round(Division);
+                double LeftBounds = Math.Round(Division);
+                Division += Target.Width / (double)ThreadCount;
+                double RightBounds = Math.Round(Division);
                 RenderThreadManagers[i] = new RaytracerRenderThreadManager(this, new Pixel((int)LeftBounds, 0), new Pixel((int)RightBounds, Target.Height));
             }
         }
@@ -1224,10 +1251,10 @@ namespace Render
                 foreach (PointPixelPair Pair in Parent.GetPixels(LowerCorner, UpperCorner))
                 {
                     Ray R = new Ray(Pair.Point, Parent.Frame.B);
-                    Maybe<float> MaybeDepth = R.UnextrapolatedUncontainedIntersection(Tri);
+                    Maybe<double> MaybeDepth = R.UnextrapolatedUncontainedIntersection(Tri);
                     if (MaybeDepth.IsNull)
                         continue;
-                    float Depth = MaybeDepth.Value();
+                    double Depth = MaybeDepth.Value();
                     if (!R.IsUnextrapolationInLine(Depth))
                         continue;
                     if (!R.IsUnextrapolationInTriangle(Depth, Tri))
@@ -1251,7 +1278,7 @@ namespace Render
             while (GridHeight > 1 && ThreadCount % GridHeight != 0)
                 GridHeight--;
             int GridWidth = (int)ThreadCount / GridHeight;
-            Point2D BoxSize = new Point2D((float)Target.Width / GridWidth, (float)Target.Height / GridHeight);
+            Point2D BoxSize = new Point2D((double)Target.Width / GridWidth, (double)Target.Height / GridHeight);
             Point2D Division = new Point2D();
             int t = 0;
             for (int x = 0; x < GridWidth; x++)
@@ -1288,15 +1315,15 @@ namespace Render
                 Ray PointBRayCast = new Ray(Tri.B, Parent.Frame.B);
                 Ray PointCRayCast = new Ray(Tri.C, Parent.Frame.B);
 
-                Maybe<float> PossiblePointAIntersection = PointARayCast.UnextrapolatedUncontainedIntersection(ScreenTri);
+                Maybe<double> PossiblePointAIntersection = PointARayCast.UnextrapolatedUncontainedIntersection(ScreenTri);
                 if (PossiblePointAIntersection.IsNull) return;
                 Geometry.Point PointAScreenIntersection = PointARayCast.Extrapolate(PossiblePointAIntersection.Value());
 
-                Maybe<float> PossiblePointBIntersection = PointBRayCast.UnextrapolatedUncontainedIntersection(ScreenTri);
+                Maybe<double> PossiblePointBIntersection = PointBRayCast.UnextrapolatedUncontainedIntersection(ScreenTri);
                 if (PossiblePointBIntersection.IsNull) return;
                 Geometry.Point PointBScreenIntersection = PointBRayCast.Extrapolate(PossiblePointBIntersection.Value());
 
-                Maybe<float> PossiblePointCIntersection = PointCRayCast.UnextrapolatedUncontainedIntersection(ScreenTri);
+                Maybe<double> PossiblePointCIntersection = PointCRayCast.UnextrapolatedUncontainedIntersection(ScreenTri);
                 if (PossiblePointCIntersection.IsNull) return;
                 Geometry.Point PointCScreenIntersection = PointCRayCast.Extrapolate(PossiblePointCIntersection.Value());
 
@@ -1359,7 +1386,7 @@ namespace Render
                     if (ProjectedTriangle.Contains(Pair.Point2D))
                     {
                         Ray Raycast = new Ray(Pair.Point, Parent.Frame.B);
-                        Maybe<float> Depth = Raycast.UnextrapolatedUncontainedIntersection(Tri);
+                        Maybe<double> Depth = Raycast.UnextrapolatedUncontainedIntersection(Tri);
                         if (Depth.IsNull) continue;
                         Impress(Pair.Pixel, new BufferElement(Shader(Depth.Value(), Raycast, Tri), Depth.Value()));
                     }
