@@ -14,11 +14,33 @@ namespace SoftwareRenderer
     public partial class MainForm : Form
     {
         Camera.PixelShader DefaultShader;
+        Camera.PixelShader ShadowShader;
+        Geometry.Point UnitVertical = new Geometry.Point(0, -1, 0);
 
         List<Triangle> TestTriangles;
         List<Triangle> Bunny;
 
+        Triangle OverheadFrame = new Triangle(
+            new Geometry.Point(0, 3, 0),
+            new Geometry.Point(0, 2, 0),
+            new Geometry.Point(1, 3, 0)
+            );
+        Triangle IsometricFrame = new Triangle(
+            new Geometry.Point(3, 3, -3),
+            new Geometry.Point(2, 2, -2),
+            new Geometry.Point(2, 4, -2)
+            );
+        Triangle SideFrame = new Triangle(
+            new Geometry.Point(-3, 0, 0),
+            new Geometry.Point(-2, 0, 0),
+            new Geometry.Point(-3, 1, 0)
+            );
+
+        Triangle ActiveFrame;
+
         Thread RenderThread;
+
+        Line RotationalAxis = new Line(new Geometry.Point(), new Geometry.Point(0, 1, 0));
 
         public readonly double Pi = Math.PI;
 
@@ -26,75 +48,75 @@ namespace SoftwareRenderer
         {
             InitializeComponent();
 
-            Geometry.Point PT = new Geometry.Point(0, 0, 1);
-            Line RLine = new Line(new Geometry.Point(0, 0, 0), new Geometry.Point(1, 0, 0));
+            Bunny = Import("../bunny.obj");
 
-            Point2D P2 = new Point2D(0, 1);
-            Point2D OP = new Point2D(0, 0);
+            Geometry.Point Sub = new Geometry.Point(0, -1, 0);
 
-            P2 = P2.Rotate(OP, Pi / 4).RoundOff();
-            P2 = P2.Rotate(OP, Pi / 4).RoundOff();
-            P2 = P2.Rotate(OP, Pi / 4).RoundOff();
-            P2 = P2.Rotate(OP, Pi / 4).RoundOff();
+            for (int i=0;i<Bunny.Count; i++)
+            {
+                Bunny[i] = new Triangle(
+                    Bunny[i].A * 10 + Sub,
+                    Bunny[i].B * 10 + Sub,
+                    Bunny[i].C * 10 + Sub
+                    );
+            }
 
-            Bunny = Import("bunny.obj");
-            TestTriangles = Import("testtris.obj");
+            ActiveFrame = SideFrame;
+
+            TestTriangles = Import("../testtris.obj");
 
             DefaultShader = delegate (double Depth, Ray Raycast, Triangle Tri)
             {
-                int C = (int)(Depth * 32) % 256;
+                int C = (int)Math.Abs((Depth * 32) % 256);
+                return Color.FromArgb(C, C, C);
+            };
+
+            ShadowShader = delegate (double Depth, Ray Raycast, Triangle Tri)
+            {
+                int C = (int)(Tri.Normal().Angle(UnitVertical) * (127.0/Pi));
                 return Color.FromArgb(C, C, C);
             };
         }
 
         private void RenderTarget_Paint(object sender, PaintEventArgs e)
         {
-            Raytracer OverheadCamera = new Raytracer(new Triangle(
-                new Geometry.Point(0, 3, 0),
-                new Geometry.Point(0, 2, 0),
-                new Geometry.Point(1, 3, 0)
-                ), RenderTarget);
-
-            Raytracer IsometricCamera = new Raytracer(new Triangle(
-                new Geometry.Point(3, 3, -3),
-                new Geometry.Point(2, 2, -2),
-                new Geometry.Point(2, 4, -2)
-                ), RenderTarget);
-
-            Rasterizer RasterCam = new Rasterizer(new Triangle(
-                new Geometry.Point(0, 3, 0),
-                new Geometry.Point(0, 2, 0),
-                new Geometry.Point(1, 3, 0)
-                ), RenderTarget);
+            Rasterizer RenderCamera = new Rasterizer(ActiveFrame, RenderTarget);
 
             if (RenderThread != null && RenderThread.IsAlive)
             {
                 RenderThread.Abort();
-                OverheadCamera.Clean();
+                RenderCamera.Clean();
             }
 
             RenderThread = new Thread(delegate ()
             {
-                RasterCam.AsyncMultipleRender(TestTriangles, DefaultShader);
-                RasterCam.AsyncDraw();
+                RenderCamera.AsyncMultipleRender(Bunny, ShadowShader);
+                RenderCamera.AsyncDraw();
             });
             RenderThread.Start();
         }
 
         private void LeftButton_Click(object sender, EventArgs e)
         {
-
+            ActiveFrame = ActiveFrame.Rotate(RotationalAxis, Pi / 8);
+            RenderTarget.Refresh();
         }
 
         private void RightButton_Click(object sender, EventArgs e)
         {
-
+            ActiveFrame = ActiveFrame.Rotate(RotationalAxis, -Pi / 8);
+            RenderTarget.Refresh();
         }
     }
 }
 
 namespace Geometry
 {
+
+    public enum Axis
+    {
+        X, Y, Z
+    }
 
     public class Point
     {
@@ -220,6 +242,28 @@ namespace Geometry
             return (Math.Acos(Dot(P) / (AbsoluteValue() * P.AbsoluteValue())));
         }
 
+        public Point AxialRotate(Axis A, double Radians)
+        {
+            Point2D Analogue = new Point2D();
+            switch(A)
+            {
+                case Axis.X: Analogue = new Point2D(Y, Z);
+                    break;
+                case Axis.Y: Analogue = new Point2D(X, Z);
+                    break;
+                case Axis.Z: Analogue = new Point2D(X, Y);
+                    break;
+            }
+            Point2D Rotation2D = Analogue.Rotate(new Point2D(), Radians);
+            switch (A)
+            {
+                case Axis.X: return new Point(X, Rotation2D.X, Rotation2D.Y);
+                case Axis.Y: return new Point(Rotation2D.X, Y, Rotation2D.Y);
+                case Axis.Z: return new Point(Rotation2D.X, Rotation2D.Y, Z);
+            }
+            return new Point();
+        }
+
         public Point Rotate(Line Seg, double Radians)
         {
             Point Rotation = new Point(this);
@@ -231,39 +275,23 @@ namespace Geometry
             //(2) Rotate space about the z axis so that the rotation axis lies in the xz plane.
             double Placeholder = Line.B.Z;
             Line.B.Z = 0;
-            Point XVector = new Point(1, 0, 0);
-            double RotAngle = Line.B.Angle(XVector);
+            double RotAngle = Line.B.Angle(new Point(1, 0, 0));
             Line.B.Z = Placeholder;
-            double Sin = Math.Sin(RotAngle);
-            double Cos = Math.Cos(RotAngle);
-            Line.B.X = Line.B.X * Cos - Line.B.Y * Sin;
-            Line.B.Y = Line.B.X * Sin + Line.B.Y * Cos;
-            Rotation.X = Rotation.X * Cos - Rotation.Y * Sin;
-            Rotation.Y = Rotation.X * Sin + Rotation.Y * Cos;
+            Line.B = Line.B.AxialRotate(Axis.Z, RotAngle);
+            Rotation = Rotation.AxialRotate(Axis.Z, RotAngle);
             //(3) Rotate space about the y axis so that the rotation axis lies along the z axis.
-            Point ZVector = new Point(0, 0, 1);
-            double RotAngle2 = Line.B.Angle(ZVector);
-            double Sin2 = Math.Sin(RotAngle2);
-            double Cos2 = Math.Cos(RotAngle2);
-            Line.B.X = Line.B.X * Cos2 - Line.B.Z * Sin2;
-            Line.B.Z = Line.B.X * Sin2 + Line.B.Z * Cos2;
-            Rotation.X = Rotation.X * Cos2 - Rotation.Z * Sin2;
-            Rotation.Z = Rotation.X * Sin2 + Rotation.Z * Cos2;
+            double RotAngle2 = Line.B.Angle(new Point(0, 0, 1));
+            Line.B = Line.B.AxialRotate(Axis.Y, RotAngle2);
+            Rotation = Rotation.AxialRotate(Axis.Y, RotAngle2);
             //(4) Perform the desired rotation by θ about the z axis.
-            double Sin3 = Math.Sin(Radians);
-            double Cos3 = Math.Cos(Radians);
-            Rotation.X = Rotation.X * Cos3 - Rotation.Y * Sin3;
-            Rotation.Y = Rotation.X * Sin3 + Rotation.Y * Cos3;
+            Line.B = Line.B.AxialRotate(Axis.Z, Radians);
+            Rotation = Rotation.AxialRotate(Axis.Z, Radians);
             //(5) Apply the inverse of step(3).
-            double NSin2 = Math.Sin(-RotAngle2);
-            double NCos2 = Math.Cos(-RotAngle2);
-            Rotation.X = Rotation.X * NCos2 - Rotation.Z * NSin2;
-            Rotation.Z = Rotation.X * NSin2 + Rotation.Z * NCos2;
+            Line.B = Line.B.AxialRotate(Axis.Y, -RotAngle2);
+            Rotation = Rotation.AxialRotate(Axis.Y, -RotAngle2);
             //(6) Apply the inverse of step(2).
-            double NSin = Math.Sin(-RotAngle);
-            double NCos = Math.Cos(-RotAngle);
-            Rotation.X = Rotation.X * NCos - Rotation.Y * NSin;
-            Rotation.Y = Rotation.X * NSin + Rotation.Y * NCos;
+            Line.B = Line.B.AxialRotate(Axis.Z, -RotAngle);
+            Rotation = Rotation.AxialRotate(Axis.Z, -RotAngle);
             //(7) Apply the inverse of step(1).
             Rotation += Seg.A;
             return Rotation;
@@ -581,7 +609,7 @@ namespace Geometry
                 Shifted.X * S + Shifted.Y * C
                 );
             Rotation += P;
-            return Rotation;
+            return Rotation.RoundOff(14);
         }
     }
 
@@ -1027,11 +1055,11 @@ namespace Render
         {
             Segment LeftRail = new Segment(LowerLeftCorner, UpperLeftCorner);
             Segment RightRail = new Segment(LowerRightCorner, UpperRightCorner);
-            double PositionY = LowerBounds.Y / Target.Height;
+            double PositionY = (double)LowerBounds.Y / Target.Height;
             for (int PixelY = LowerBounds.Y; PixelY <= UpperBounds.Y; PixelY += 1, PositionY += 1f / Target.Height)
             {
                 Segment Step = new Segment(RightRail.Extrapolate(PositionY), LeftRail.Extrapolate(PositionY));
-                double PositionX = LowerBounds.X / Target.Width;
+                double PositionX = (double)LowerBounds.X / Target.Width;
                 for (int PixelX = LowerBounds.X; PixelX <= UpperBounds.X; PixelX += 1, PositionX += 1f / Target.Width)
                 {
                     yield return new PointPixelPair(Step.Extrapolate(PositionX), new Point2D(PositionX, PositionY), new Pixel(PixelX, PixelY));

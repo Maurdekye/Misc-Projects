@@ -7,3 +7,12 @@ C:\Users\ncolaprete\Desktop\scripts\Misc-Projects\C#\SoftwareRenderer\SoftwareRe
 C:\Users\ncolaprete\Desktop\scripts\Misc-Projects\C#\SoftwareRenderer\SoftwareRenderer\bin\Debug\SoftwareRenderer.pdb
 C:\Users\ncolaprete\Desktop\scripts\Misc-Projects\C#\SoftwareRenderer\SoftwareRenderer\obj\Debug\SoftwareRenderer.exe
 C:\Users\ncolaprete\Desktop\scripts\Misc-Projects\C#\SoftwareRenderer\SoftwareRenderer\obj\Debug\SoftwareRenderer.pdb
+C:\Repos\Misc-Projects\C#\SoftwareRenderer\SoftwareRenderer\bin\Debug\SoftwareRenderer.exe.config
+C:\Repos\Misc-Projects\C#\SoftwareRenderer\SoftwareRenderer\obj\Debug\SoftwareRenderer.exe
+C:\Repos\Misc-Projects\C#\SoftwareRenderer\SoftwareRenderer\obj\Debug\SoftwareRenderer.pdb
+C:\Repos\Misc-Projects\C#\SoftwareRenderer\SoftwareRenderer\bin\Debug\SoftwareRenderer.exe
+C:\Repos\Misc-Projects\C#\SoftwareRenderer\SoftwareRenderer\bin\Debug\SoftwareRenderer.pdb
+C:\Repos\Misc-Projects\C#\SoftwareRenderer\SoftwareRenderer\obj\Debug\SoftwareRenderer.csprojResolveAssemblyReference.cache
+C:\Repos\Misc-Projects\C#\SoftwareRenderer\SoftwareRenderer\obj\Debug\SoftwareRenderer.MainForm.resources
+C:\Repos\Misc-Projects\C#\SoftwareRenderer\SoftwareRenderer\obj\Debug\SoftwareRenderer.Properties.Resources.resources
+C:\Repos\Misc-Projects\C#\SoftwareRenderer\SoftwareRenderer\obj\Debug\SoftwareRenderer.csproj.GenerateResource.Cache

@@ -6,3 +6,11 @@ C:\Users\ncolaprete\Desktop\scripts\Misc-Projects\C#\SoftwareRenderer\SoftwareRe
 C:\Users\ncolaprete\Desktop\scripts\Misc-Projects\C#\SoftwareRenderer\SoftwareRenderer\obj\Release\SoftwareRenderer.csproj.GenerateResource.Cache
 C:\Users\ncolaprete\Desktop\scripts\Misc-Projects\C#\SoftwareRenderer\SoftwareRenderer\obj\Release\SoftwareRenderer.exe
 C:\Users\ncolaprete\Desktop\scripts\Misc-Projects\C#\SoftwareRenderer\SoftwareRenderer\obj\Release\SoftwareRenderer.pdb
+C:\Repos\Misc-Projects\C#\SoftwareRenderer\SoftwareRenderer\bin\Release\SoftwareRenderer.exe.config
+C:\Repos\Misc-Projects\C#\SoftwareRenderer\SoftwareRenderer\obj\Release\SoftwareRenderer.exe
+C:\Repos\Misc-Projects\C#\SoftwareRenderer\SoftwareRenderer\obj\Release\SoftwareRenderer.pdb
+C:\Repos\Misc-Projects\C#\SoftwareRenderer\SoftwareRenderer\bin\Release\SoftwareRenderer.exe
+C:\Repos\Misc-Projects\C#\SoftwareRenderer\SoftwareRenderer\bin\Release\SoftwareRenderer.pdb
+C:\Repos\Misc-Projects\C#\SoftwareRenderer\SoftwareRenderer\obj\Release\SoftwareRenderer.MainForm.resources
+C:\Repos\Misc-Projects\C#\SoftwareRenderer\SoftwareRenderer\obj\Release\SoftwareRenderer.Properties.Resources.resources
+C:\Repos\Misc-Projects\C#\SoftwareRenderer\SoftwareRenderer\obj\Release\SoftwareRenderer.csproj.GenerateResource.Cache

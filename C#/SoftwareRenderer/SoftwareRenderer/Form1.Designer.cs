@@ -38,8 +38,9 @@
             // 
             this.RenderTarget.Dock = System.Windows.Forms.DockStyle.Fill;
             this.RenderTarget.Location = new System.Drawing.Point(0, 0);
+            this.RenderTarget.Margin = new System.Windows.Forms.Padding(6);
             this.RenderTarget.Name = "RenderTarget";
-            this.RenderTarget.Size = new System.Drawing.Size(800, 800);
+            this.RenderTarget.Size = new System.Drawing.Size(1600, 1329);
             this.RenderTarget.TabIndex = 0;
             this.RenderTarget.TabStop = false;
             this.RenderTarget.UseWaitCursor = true;
@@ -50,34 +51,39 @@
             this.LeftButton.Dock = System.Windows.Forms.DockStyle.Left;
             this.LeftButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 48F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.LeftButton.Location = new System.Drawing.Point(0, 0);
+            this.LeftButton.Margin = new System.Windows.Forms.Padding(6);
             this.LeftButton.Name = "LeftButton";
-            this.LeftButton.Size = new System.Drawing.Size(75, 800);
+            this.LeftButton.Size = new System.Drawing.Size(150, 1329);
             this.LeftButton.TabIndex = 1;
             this.LeftButton.Text = "<";
             this.LeftButton.UseVisualStyleBackColor = true;
+            this.LeftButton.UseWaitCursor = true;
             this.LeftButton.Click += new System.EventHandler(this.LeftButton_Click);
             // 
             // RightButton
             // 
             this.RightButton.Dock = System.Windows.Forms.DockStyle.Right;
             this.RightButton.Font = new System.Drawing.Font("Microsoft Sans Serif", 48F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.RightButton.Location = new System.Drawing.Point(725, 0);
+            this.RightButton.Location = new System.Drawing.Point(1450, 0);
+            this.RightButton.Margin = new System.Windows.Forms.Padding(6);
             this.RightButton.Name = "RightButton";
             this.RightButton.RightToLeft = System.Windows.Forms.RightToLeft.No;
-            this.RightButton.Size = new System.Drawing.Size(75, 800);
+            this.RightButton.Size = new System.Drawing.Size(150, 1329);
             this.RightButton.TabIndex = 2;
             this.RightButton.Text = ">";
             this.RightButton.UseVisualStyleBackColor = true;
+            this.RightButton.UseWaitCursor = true;
             this.RightButton.Click += new System.EventHandler(this.RightButton_Click);
             // 
             // MainForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(12F, 25F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(800, 800);
+            this.ClientSize = new System.Drawing.Size(1600, 1329);
             this.Controls.Add(this.RightButton);
             this.Controls.Add(this.LeftButton);
             this.Controls.Add(this.RenderTarget);
+            this.Margin = new System.Windows.Forms.Padding(6);
             this.Name = "MainForm";
             this.Text = "Software Rendering Test";
             this.UseWaitCursor = true;
