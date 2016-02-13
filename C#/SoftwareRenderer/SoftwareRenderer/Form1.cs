@@ -13,7 +13,7 @@ namespace SoftwareRenderer
 {
     public partial class MainForm : Form
     {
-        Camera.PixelShader DefaultShader;
+        Camera.PixelShader DepthShader;
         Camera.PixelShader ShadowShader;
         Geometry.Point UnitVertical = new Geometry.Point(0, -1, 0);
 
@@ -48,24 +48,12 @@ namespace SoftwareRenderer
         {
             InitializeComponent();
 
-            Bunny = Import("../bunny.obj");
-
-            Geometry.Point Sub = new Geometry.Point(0, -1, 0);
-
-            for (int i=0;i<Bunny.Count; i++)
-            {
-                Bunny[i] = new Triangle(
-                    Bunny[i].A * 10 + Sub,
-                    Bunny[i].B * 10 + Sub,
-                    Bunny[i].C * 10 + Sub
-                    );
-            }
-
             ActiveFrame = SideFrame;
 
+            Bunny = Import("../bunny.obj");
             TestTriangles = Import("../testtris.obj");
 
-            DefaultShader = delegate (double Depth, Ray Raycast, Triangle Tri)
+            DepthShader = delegate (double Depth, Ray Raycast, Triangle Tri)
             {
                 int C = (int)Math.Abs((Depth * 32) % 256);
                 return Color.FromArgb(C, C, C);
@@ -323,10 +311,10 @@ namespace Geometry
             this.B = new Point();
         }
 
-        public Line(Line S)
+        public Line(Line L)
         {
-            this.A = S.A;
-            this.B = S.B;
+            this.A = L.A;
+            this.B = L.B;
         }
 
         // Overrides
@@ -334,6 +322,21 @@ namespace Geometry
         public override string ToString()
         {
             return string.Format("-{0}={1}-", A, B);
+        }
+
+        public static Line operator +(Line L, double N)
+        {
+            return new Line(L.A + N, L.B + N);
+        }
+
+        public static Line operator -(Line L, double N)
+        {
+            return new Line(L.A - N, L.B - N);
+        }
+
+        public static Line operator *(Line L, double N)
+        {
+            return new Line(L.A * N, L.B * N);
         }
 
         // Self Utilities
@@ -486,6 +489,21 @@ namespace Geometry
         public override string ToString()
         {
             return string.Format("{{0}:{1}:{2}}", A, B, C);
+        }
+
+        public static Triangle operator +(Triangle T, double N)
+        {
+            return new Triangle(T.A + N, T.B + N, T.C + N);
+        }
+
+        public static Triangle operator -(Triangle T, double N)
+        {
+            return new Triangle(T.A - N, T.B - N, T.C - N);
+        }
+
+        public static Triangle operator *(Triangle T, double N)
+        {
+            return new Triangle(T.A * N, T.B * N, T.C * N);
         }
 
         // Utilities
