@@ -14,3 +14,4 @@ C:\Repos\Misc-Projects\C#\SoftwareRenderer\SoftwareRenderer\bin\Release\Software
 C:\Repos\Misc-Projects\C#\SoftwareRenderer\SoftwareRenderer\obj\Release\SoftwareRenderer.MainForm.resources
 C:\Repos\Misc-Projects\C#\SoftwareRenderer\SoftwareRenderer\obj\Release\SoftwareRenderer.Properties.Resources.resources
 C:\Repos\Misc-Projects\C#\SoftwareRenderer\SoftwareRenderer\obj\Release\SoftwareRenderer.csproj.GenerateResource.Cache
+C:\Repos\Misc-Projects\C#\SoftwareRenderer\SoftwareRenderer\obj\Release\SoftwareRenderer.csprojResolveAssemblyReference.cache
