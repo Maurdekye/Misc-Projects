@@ -15,7 +15,10 @@ namespace SoftwareRenderer
     {
         static Geometry.Point UnitVertical = new Geometry.Point(0, -1, 0);
         public static readonly double Pi = Math.PI;
-        static Line RotationalAxis = new Line(new Geometry.Point(), new Geometry.Point(0, 1, 0));
+        static Line HorizontalRotationalAxis = new Line(new Geometry.Point(), new Geometry.Point(0, 1, 0));
+        static Line VerticalRotationalAxis = new Line(new Geometry.Point(), new Geometry.Point(0, 0, 1));
+
+        public static readonly bool DEBUG = false;
 
         Triangle OverheadFrame = new Triangle(
             new Geometry.Point(0, 3, 0),
@@ -39,15 +42,21 @@ namespace SoftwareRenderer
             );
         
         Camera.PixelShader DepthShader = delegate (double Depth, Ray Raycast, Triangle Tri)
-            {
-                int C = (int)Math.Abs((Depth * 32) % 256);
-                return Color.FromArgb(C, C, C);
-            };
+        {
+            if (Depth < -8)
+                return Color.Yellow;
+            if (Depth < 0)
+                return Color.Red;
+            if (Depth > 8)
+                return Color.Blue;
+            int C = (int)Math.Abs(Depth * 32);
+            return Color.FromArgb(C, C, C);
+        };
         Camera.PixelShader ShadowShader = delegate (double Depth, Ray Raycast, Triangle Tri)
-            {
-                int C = (int)(Tri.Normal().Angle(UnitVertical) * (127.0 / Pi));
-                return Color.FromArgb(C, C, C);
-            };
+        {
+            int C = (int)(Tri.Normal().Angle(UnitVertical) * (127.0 / Pi));
+            return Color.FromArgb(C, C, C);
+        };
 
         Triangle ActiveFrame;
         List<Triangle> ActiveModel;
@@ -73,7 +82,7 @@ namespace SoftwareRenderer
                 RenderCamera.Clean();
             }
 
-            /*RenderThread = new Thread(delegate ()
+            if (DEBUG)
             {
                 int a = 0;
                 int c = ActiveModel.Count;
@@ -83,26 +92,39 @@ namespace SoftwareRenderer
                     RenderCamera.DebugThreadlessRender(Tri, ActiveShader);
                 }
                 RenderCamera.Draw();
-            });
-            RenderThread.Start();*/
-
-            RenderThread = new Thread(delegate ()
+            }
+            else
             {
-                RenderCamera.AsyncMultipleRender(ActiveModel, ActiveShader);
-                RenderCamera.AsyncDraw();
-            });
-            RenderThread.Start();
+                RenderThread = new Thread(delegate ()
+                {
+                    RenderCamera.AsyncMultipleRender(ActiveModel, ActiveShader);
+                    RenderCamera.AsyncDraw();
+                });
+                RenderThread.Start();
+            }
         }
 
         private void LeftButton_Click(object sender, EventArgs e)
         {
-            ActiveFrame = ActiveFrame.Rotate(RotationalAxis, Pi / 8);
+            ActiveFrame = ActiveFrame.Rotate(HorizontalRotationalAxis, Pi / 8);
             RenderTarget.Refresh();
         }
 
         private void RightButton_Click(object sender, EventArgs e)
         {
-            ActiveFrame = ActiveFrame.Rotate(RotationalAxis, -Pi / 8);
+            ActiveFrame = ActiveFrame.Rotate(HorizontalRotationalAxis, -Pi / 8);
+            RenderTarget.Refresh();
+        }
+
+        private void UpButton_Click(object sender, EventArgs e)
+        {
+            ActiveFrame = ActiveFrame.Rotate(VerticalRotationalAxis, Pi / 8);
+            RenderTarget.Refresh();
+        }
+
+        private void DownButton_Click(object sender, EventArgs e)
+        {
+            ActiveFrame = ActiveFrame.Rotate(VerticalRotationalAxis, -Pi / 8);
             RenderTarget.Refresh();
         }
     }
@@ -1451,7 +1473,7 @@ namespace Render
                     {
                         Ray Raycast = new Ray(Pair.Point, Parent.Frame.B);
                         Maybe<double> Depth = Raycast.UnextrapolatedPlaneIntersection(Tri);
-                        if (Raycast.IsUnextrapolationInLine(Depth)) continue;
+                        if (!Raycast.IsUnextrapolationInLine(Depth)) continue;
                         Impress(Pair.Pixel, new BufferElement(Shader(Depth.Value(), Raycast, Tri), Depth.Value()));
                     }
                 }
