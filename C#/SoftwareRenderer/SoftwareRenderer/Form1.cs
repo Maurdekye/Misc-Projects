@@ -15,8 +15,6 @@ namespace SoftwareRenderer
     {
         static Geometry.Point UnitVertical = new Geometry.Point(0, -1, 0);
         public static readonly double Pi = Math.PI;
-        static Line HorizontalRotationalAxis = new Line(new Geometry.Point(), new Geometry.Point(0, 1, 0));
-        static Line VerticalRotationalAxis = new Line(new Geometry.Point(), new Geometry.Point(0, 0, 1));
 
         public static readonly bool DEBUG = false;
 
@@ -106,25 +104,33 @@ namespace SoftwareRenderer
 
         private void LeftButton_Click(object sender, EventArgs e)
         {
-            ActiveFrame = ActiveFrame.Rotate(HorizontalRotationalAxis, Pi / 8);
+            Line Axis = new Line();
+            Axis.B = ActiveFrame.A - ActiveFrame.C;
+            ActiveFrame = ActiveFrame.Rotate(Axis, Pi / 8);
             RenderTarget.Refresh();
         }
 
         private void RightButton_Click(object sender, EventArgs e)
         {
-            ActiveFrame = ActiveFrame.Rotate(HorizontalRotationalAxis, -Pi / 8);
+            Line Axis = new Line();
+            Axis.B = ActiveFrame.A - ActiveFrame.C;
+            ActiveFrame = ActiveFrame.Rotate(Axis, -Pi / 8);
             RenderTarget.Refresh();
         }
 
         private void UpButton_Click(object sender, EventArgs e)
         {
-            ActiveFrame = ActiveFrame.Rotate(VerticalRotationalAxis, Pi / 8);
+            Line Axis = new Line();
+            Axis.B = ActiveFrame.Normal();
+            ActiveFrame = ActiveFrame.Rotate(Axis, Pi / 8);
             RenderTarget.Refresh();
         }
 
         private void DownButton_Click(object sender, EventArgs e)
         {
-            ActiveFrame = ActiveFrame.Rotate(VerticalRotationalAxis, -Pi / 8);
+            Line Axis = new Line();
+            Axis.B = ActiveFrame.Normal();
+            ActiveFrame = ActiveFrame.Rotate(Axis, -Pi / 8);
             RenderTarget.Refresh();
         }
     }
@@ -211,6 +217,11 @@ namespace Geometry
 
         // Utilities
 
+        public bool IsNull()
+        {
+            return X == 0 && Y == 0 && Z == 0;
+        }
+
         public double AbsoluteValue()
         {
             return Math.Sqrt(X * X + Y * Y + Z * Z);
@@ -259,6 +270,8 @@ namespace Geometry
 
         public double Angle(Point P)
         {
+            if (P.IsNull() || IsNull())
+                return 0;
             return (Math.Acos(Dot(P) / (AbsoluteValue() * P.AbsoluteValue())));
         }
 
