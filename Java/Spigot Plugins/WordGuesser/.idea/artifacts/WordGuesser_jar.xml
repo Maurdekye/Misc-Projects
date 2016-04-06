@@ -1,0 +1,9 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="WordGuesser:jar">
+    <output-path>D:/Libraries/Desktop/Game Stuff/Minecraft/Spigot/Server/plugins</output-path>
+    <root id="archive" name="WordGuesser.jar">
+      <element id="module-output" name="WordGuesser" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/../spigot.jar" path-in-jar="/" />
+    </root>
+  </artifact>
+</component>

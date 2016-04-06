@@ -49,12 +49,12 @@ public class Gunslingers extends JavaPlugin{
 	public static boolean explosiveAerial = false;
 	public static boolean infiniteAmmo = false;
 	public static boolean noToolDamage = false;
-	public static HashMap<String, Double> ranges = new  HashMap<String, Double>();
+	public static HashMap<String, Double> ranges = new  HashMap<>();
 	public Plugin plug = this;
 	public static int clock = 0;
 
-	public static ArrayList<Material> swords = new ArrayList<Material>();
-	public static ArrayList<String> swordBinds = new ArrayList<String>();
+	public static ArrayList<Material> swords = new ArrayList<>();
+	public static ArrayList<String> swordBinds = new ArrayList<>();
 	public static String[] weapon_names = {
 		"shotgun",
 		"burst",
@@ -230,7 +230,7 @@ public class Gunslingers extends JavaPlugin{
 			item.setDurability((short) (item.getType().getMaxDurability()));
 			owner.getInventory().remove(item);
 			item.setType(Material.AIR);
-			owner.getWorld().playSound(owner.getEyeLocation(), Sound.ITEM_BREAK, 1, 1); 
+			owner.getWorld().playSound(owner.getEyeLocation(), Sound.ENTITY_ITEM_BREAK, 1, 1);
 			return true;
 		}
 		return false;
@@ -427,7 +427,7 @@ public class Gunslingers extends JavaPlugin{
 					if (creativeOnly && ply.getGameMode() != GameMode.CREATIVE) continue;
 					HashMap<String, Integer> timer = timers.get(ply.getName());
 					boolean dead =  false;
-					ItemStack hand = ply.getItemInHand();
+					ItemStack hand = ply.getInventory().getItemInMainHand();
 
 					// Minigun
 					if (hand.getType() == weapon_items.get("minigun")) {
@@ -439,7 +439,7 @@ public class Gunslingers extends JavaPlugin{
 						if (!takeOnlyIf(ply, weapon_ammos.get("minigun"), weapon_usage.get("minigun"))) {debug("\tno ammo"); continue;}
 						dead = damage(ply, hand, "minigun");
 						timer.put("minigun", weapon_delay.get("minigun"));
-						ply.getWorld().playSound(ply.getEyeLocation(), Sound.PISTON_RETRACT, 0.5F, 10);
+						ply.getWorld().playSound(ply.getEyeLocation(), Sound.BLOCK_PISTON_CONTRACT, 0.5F, 10);
 						ply.setVelocity(ply.getVelocity().subtract(ply.getLocation().getDirection().multiply(0.01)));
 						playerShootArrow(ply, 3, 6, "minigun", plug);
 					}
@@ -474,7 +474,7 @@ public class Gunslingers extends JavaPlugin{
 					// Burst Fire Gun
 					if (timer.get("burst")%2 == 1 && timer.get("burst") >= weapon_delay.get("burst")) {
 						if (takeOnlyIf(ply, weapon_ammos.get("burst"), weapon_usage.get("burst"))) {
-							ply.getWorld().playSound(ply.getLocation(), Sound.FIRE_IGNITE, (float) Math.random()*3+3, (float) Math.random()*3+3);
+							ply.getWorld().playSound(ply.getLocation(), Sound.ITEM_FLINTANDSTEEL_USE, (float) Math.random()*3+3, (float) Math.random()*3+3);
 							playerShootArrow(ply, 3.5F, 1.25F, "burst", plug);
 							debug("\tfire, " + timer.get("burst"));
 						} else {
@@ -489,7 +489,7 @@ public class Gunslingers extends JavaPlugin{
 					if (timer.get("mortar") > weapon_delay.get("mortar")) {
 						if (takeOnlyIf(ply, weapon_ammos.get("mortar"), weapon_usage.get("mortar"))) {
 							for (int e=1;e<=mortarDensity;e++) {
-								ply.getWorld().playSound(targets.get(ply.getName()).get("mortar"), Sound.GHAST_FIREBALL, (float) Math.random()+1, (float) Math.random()+1);
+								ply.getWorld().playSound(targets.get(ply.getName()).get("mortar"), Sound.ENTITY_GHAST_SHOOT, (float) Math.random()+1, (float) Math.random()+1);
 								Location loc = null;
 								Location orig = targets.get(ply.getName()).get("mortar").clone();
 								while (loc == null || loc.distance(orig) > c_mortarDensity) {
@@ -507,14 +507,14 @@ public class Gunslingers extends JavaPlugin{
 					} else if (ply.getGameMode() == GameMode.CREATIVE) {
 						timer.put("mortar", 1);
 					} else if (timer.get("mortar") == 1) {
- 						ply.getWorld().playSound(ply.getEyeLocation(), Sound.LEVEL_UP, 4, 4);
+ 						ply.getWorld().playSound(ply.getEyeLocation(), Sound.ENTITY_PLAYER_LEVELUP, 4, 4);
 					}
 
 					// Airstrike Designator
 					if (timer.get("airstrike") > weapon_delay.get("airstrike")) {
 						if (takeOnlyIf(ply, weapon_ammos.get("airstrike"), weapon_usage.get("airstrike"))) {
 							for (int e=1;e<=airstrikeDensity;e++) {
-								ply.getWorld().playSound(targets.get(ply.getName()).get("airstrike"), Sound.GHAST_FIREBALL, (float) Math.random()+1, (float) Math.random()+1);
+								ply.getWorld().playSound(targets.get(ply.getName()).get("airstrike"), Sound.ENTITY_GHAST_SHOOT, (float) Math.random()+1, (float) Math.random()+1);
 								Location loc = targets.get(ply.getName()).get("airstrike").clone();
 								loc.setX(loc.getX()+(Math.random()*2*c_airstrikeDensity - c_airstrikeDensity));
 								loc.setZ(loc.getZ()+(Math.random()*2*c_airstrikeDensity - c_airstrikeDensity));
@@ -532,22 +532,22 @@ public class Gunslingers extends JavaPlugin{
 					} else if (ply.getGameMode() == GameMode.CREATIVE) {
 						timer.put("airstrike", 1);
 					} else if (timer.get("airstrike") == 1) {
-						ply.getWorld().playSound(ply.getEyeLocation(), Sound.FIREWORK_TWINKLE, 2, 8);
+						ply.getWorld().playSound(ply.getEyeLocation(), Sound.ENTITY_FIREWORK_TWINKLE, 2, 8);
 					}
 
 					if (timer.get("shotgun") == 1) {
-						ply.playSound(ply.getEyeLocation(), Sound.DOOR_CLOSE, 2, 10F);
+						ply.playSound(ply.getEyeLocation(), Sound.BLOCK_WOODEN_DOOR_CLOSE, 2, 10F);
 					}
 
-					if (timer.get("launcher") == 3) ply.playSound(ply.getEyeLocation(), Sound.PISTON_EXTEND, 2, 1.5F);
-					if (timer.get("launcher") == 1) ply.playSound(ply.getEyeLocation(), Sound.PISTON_RETRACT, 2, 1.2F);
+					if (timer.get("launcher") == 3) ply.playSound(ply.getEyeLocation(), Sound.BLOCK_PISTON_EXTEND, 2, 1.5F);
+					if (timer.get("launcher") == 1) ply.playSound(ply.getEyeLocation(), Sound.BLOCK_PISTON_CONTRACT, 2, 1.2F);
 
 
 					for (String wep : timer.keySet()) {
 						timer.put(wep, Math.max(timer.get(wep) - 1, 0));
 					}
 
-					if (dead) ply.getWorld().playSound(ply.getEyeLocation(), Sound.ITEM_BREAK, 1, 1);
+					if (dead) ply.getWorld().playSound(ply.getEyeLocation(), Sound.ENTITY_ITEM_BREAK, 1, 1);
 					timers.put(ply_s, timer);
 				}
 			}
@@ -649,7 +649,7 @@ class listen implements Listener {
 	
 	@EventHandler
 	public void Hotbar(PlayerItemHeldEvent event) {
-		Material item = event.getPlayer().getItemInHand().getType();
+		Material item = event.getPlayer().getInventory().getItemInMainHand().getType();
 		if (item == Gunslingers.weapon_items.get("sniper") || item == Gunslingers.weapon_items.get("dart")) return;
 		if (!event.getPlayer().hasPotionEffect(PotionEffectType.SLOW)) return;
 		event.getPlayer().removePotionEffect(PotionEffectType.SLOW);
@@ -805,7 +805,7 @@ class listen implements Listener {
 					// Shotgun
 					if (wepname.equals("shotgun")) {
 						ply.setVelocity(ply.getVelocity().subtract(ply.getLocation().getDirection().multiply(0.3)));
-						ply.getWorld().playSound(ply.getLocation(), Sound.EXPLODE, ((float) 8), (float) Math.random() + 2);
+						ply.getWorld().playSound(ply.getLocation(), Sound.ENTITY_GENERIC_EXPLODE, ((float) 8), (float) Math.random() + 2);
 						for (int i=0; i<8; i++) {
 							Gunslingers.playerShootArrow(ply, 3, 15, "shotgun", plug);
 						}	
@@ -818,7 +818,7 @@ class listen implements Listener {
 					
 					// Sniper Rifle / Dart Gun
 					else if (wepname.equals("sniper") || wepname.equals("dart")) {
-						ply.getWorld().playSound(ply.getLocation(), new Sound[]{Sound.FIREWORK_BLAST, Sound.FIREWORK_BLAST2}[(int) (Math.random()*2)], (float) Math.random()*2, (float) Math.random()*2);
+						ply.getWorld().playSound(ply.getLocation(), new Sound[]{Sound.ENTITY_FIREWORK_BLAST, Sound.ENTITY_FIREWORK_LARGE_BLAST}[(int) (Math.random()*2)], (float) Math.random()*2, (float) Math.random()*2);
 						Vector addVec = new Vector(0, 0.02, 0);
 						if (ply.hasPotionEffect(PotionEffectType.SLOW)) addVec.setY(0.04);
 						Gunslingers.playerShootArrow(ply, ply.getLocation().getDirection().add(addVec), 4, 0.001F, wepname, plug);
@@ -827,7 +827,7 @@ class listen implements Listener {
 					// C4 Placer
 					else if (wepname.equals("cfour")) {
 						final Arrow arrow = Gunslingers.playerShootArrow(ply, ply.getLocation().getDirection().add(new Vector(0, 0.2F, 0)), 0.2F, 0F, "cfour", plug);
-						ply.getWorld().playSound(ply.getLocation(), Sound.LAVA_POP, 5, 2);
+						ply.getWorld().playSound(ply.getLocation(), Sound.BLOCK_LAVA_POP, 5, 2);
 						plug.getServer().getScheduler().scheduleSyncDelayedTask(plug, new Runnable() {
 							public void run() {
 								if (arrow.isValid()) {
@@ -842,7 +842,7 @@ class listen implements Listener {
 					
 					// Rocket Launcherws
 					else if (wepname.equals("launcher")) {
-						ply.getWorld().playSound(ply.getEyeLocation(), Sound.FIREWORK_LAUNCH, 1, 20);
+						ply.getWorld().playSound(ply.getEyeLocation(), Sound.ENTITY_FIREWORK_LAUNCH, 1, 20);
 						Gunslingers.rockets.add(Gunslingers.playerShootArrow(ply, ply.getLocation().getDirection().add(new Vector(0, 0.15, 0)), 1.5F, 0.1F, "launcher", plug));
 					}
 					
@@ -867,7 +867,7 @@ class listen implements Listener {
 					} else if (wepname.equals("cfour")) {
 						for (final Arrow cfour : Gunslingers.cfours) {
 							if (((Player) cfour.getShooter()).getName().equals(ply.getName()) && cfour.isValid()) {
-								cfour.getWorld().playSound(cfour.getLocation(), Sound.CLICK, 4, 10);
+								cfour.getWorld().playSound(cfour.getLocation(), Sound.BLOCK_LEVER_CLICK, 4, 10);
 								cfour.getWorld().playEffect(cfour.getLocation(), Effect.MOBSPAWNER_FLAMES, 3);
 								plug.getServer().getScheduler().scheduleSyncDelayedTask(plug, new Runnable() {
 									public void run() {
@@ -917,7 +917,7 @@ class listen implements Listener {
 				for (int i=0;i<Gunslingers.cfours.size();i++) {
 					final Arrow cfour = Gunslingers.cfours.get(i);
 					if (((Player) cfour.getShooter()).getName().equals(ply.getName())) {
-						cfour.getWorld().playSound(cfour.getLocation(), Sound.CLICK, 4, 10);
+						cfour.getWorld().playSound(cfour.getLocation(), Sound.BLOCK_LEVER_CLICK, 4, 10);
 						cfour.getWorld().playEffect(cfour.getLocation(), Effect.MOBSPAWNER_FLAMES, 3);
 						plug.getServer().getScheduler().scheduleSyncDelayedTask(plug, new Runnable() {
 							public void run() {
@@ -967,26 +967,20 @@ class Mine {
 	public void detonate() {
 		if (this.dead) return;
 		final Player ply = this.owner;
-		this.owner.getWorld().playSound(loc, Sound.ANVIL_BREAK, 10, 18);
+		this.owner.getWorld().playSound(loc, Sound.BLOCK_ANVIL_BREAK, 10, 18);
 		Gunslingers.mines.remove(this);
-		plug.getServer().getScheduler().scheduleSyncDelayedTask(plug, new Runnable() {
-			public void run() {
-				if (type.equals("prox_mine")) {
-					loc.getWorld().createExplosion(loc, power);
-				} else if (type.equals("fire_mine")) {
-					loc.getWorld().createExplosion(loc, 0);
-					for (int i=0;i<power*80;i++) {
-						final Arrow arrow = Gunslingers.playerShootArrow(ply, loc, randomVector(), 3, 1, type, plug);
-						arrow.setFireTicks(100);
-						plug.getServer().getScheduler().scheduleSyncDelayedTask(plug, new Runnable() {
-							public void run() {
-								arrow.remove();
-							}
-						}, plug.getConfig().getInt("fire_mine_explosive_power"));
-					}
-				}
-			}
-		}, 8);
+		plug.getServer().getScheduler().scheduleSyncDelayedTask(plug, () -> {
+            if (type.equals("prox_mine")) {
+                loc.getWorld().createExplosion(loc, power);
+            } else if (type.equals("fire_mine")) {
+                loc.getWorld().createExplosion(loc, 0);
+                for (int i=0;i<power*80;i++) {
+                    final Arrow arrow = Gunslingers.playerShootArrow(ply, loc, randomVector(), 3, 1, type, plug);
+                    arrow.setFireTicks(100);
+                    plug.getServer().getScheduler().scheduleSyncDelayedTask(plug, arrow::remove, plug.getConfig().getInt("fire_mine_explosive_power"));
+                }
+            }
+        }, 8);
 	}
 	
 	public boolean disable(Block b) {

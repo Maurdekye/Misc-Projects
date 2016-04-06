@@ -1,0 +1,42 @@
+#
+#               Gunslingers
+#             ---------------
+#
+#       - Default Configuration File -
+#
+
+cfour_explode_on_weapon_loss: true
+cfour_explosive_power: 3
+mortar_density: 5
+airstrike_density: 4
+launcher_explosive_power: 4
+flamethrower_ignite_blocks: true
+enable_debug_text: false
+creative_only: false
+explosive_aerial: false
+aerial_explosive_power: 2
+permissions_disabled: false
+infinite_ammo: false
+no_tool_damage: false
+airstrike_ticks: 128
+mortar_ticks: 128
+burst_ticks: 4
+prox_mine_explosive_power: 3
+prox_mine_ready_delay: 40
+prox_mine_range: 2.5
+fire_mine_explosive_power: 3
+fire_mine_ready_delay: 40
+fire_mine_range: 2.5
+
+enable_shotgun: true
+enable_burst: true
+enable_sniper: true
+enable_cfour: true
+enable_dart: true
+enable_mortar: true
+enable_minigun: true
+enable_launcher: true
+enable_airstrike: true
+enable_flamethrower: true
+enable_prox_mine: true
+enable_fire_mine: true

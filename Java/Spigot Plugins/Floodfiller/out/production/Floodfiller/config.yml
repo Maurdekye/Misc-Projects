@@ -1,0 +1,10 @@
+#
+#             FloodFiller
+#           ---------------
+#
+#    - Default Configuration File -
+#
+
+default_limit: 5000
+maximum_limit: 20000
+timeout_limit: 8

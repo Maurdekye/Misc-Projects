@@ -1,0 +1,21 @@
+name: MagicAxe
+version: 1.0
+author: Maurdekye
+main: com.ncolaprete.testplugin.Main
+
+commands:
+  givemagicaxe:
+    usage: /giveaxe
+    description: gives a magical axe
+    aliases: [magicaxe]
+  maxdurability:
+    usage: /maxdurability
+    description: gives your hand item huge amounts of durability
+
+permissions:
+  magicaxe.givemagicaxe:
+    description: allows the use of the command /givemagicaxe
+    default: op
+  magicaxe.maxdurability:
+    description: allows the use of the command /maxdurability
+    default: op

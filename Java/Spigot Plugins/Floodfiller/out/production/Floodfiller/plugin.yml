@@ -1,0 +1,17 @@
+name: FloodFiller
+main: ncolaprete.main.Main
+version: 1.2.2
+description: Gives several commands for flood filling blocks and such.
+commands:
+  flood:
+    description: Flood replaces the area looked at with the desired block
+  hollow:
+    description: Hollows out the structure looked at, or fills it with the desired block
+  floodout:
+    description: Floods the area from where you are standing
+  shell:
+    description: Creates a shell around the structure looked at
+  envelop:
+    description: Similar to shell, but ultimately different in some ways as well.
+  undofill:
+    description: Undoes the last flood fill command used.

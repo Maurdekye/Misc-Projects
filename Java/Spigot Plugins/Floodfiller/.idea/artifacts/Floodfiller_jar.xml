@@ -1,0 +1,9 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="Floodfiller:jar">
+    <output-path>D:/Libraries/Desktop/Game Stuff/Minecraft/Spigot/Server/plugins</output-path>
+    <root id="archive" name="Floodfiller.jar">
+      <element id="module-output" name="Floodfiller" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/../spigot.jar" path-in-jar="/" />
+    </root>
+  </artifact>
+</component>

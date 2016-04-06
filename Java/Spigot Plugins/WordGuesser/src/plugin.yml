@@ -1,0 +1,11 @@
+name: Word_Guesser
+version: 1.0
+author: Maurdekye
+main: Main
+commands:
+  startgame:
+    description: Start the guessing game
+    usage: /startgame
+  stopgame:
+    description: Stop the guessing game
+    usage: /stopgame

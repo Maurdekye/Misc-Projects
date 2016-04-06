@@ -2,6 +2,7 @@
 <module type="JAVA_MODULE" version="4">
   <component name="EclipseModuleManager">
     <libelement value="jar://$MODULE_DIR$/../bukkit_1.7.2.jar!/" />
+    <libelement value="file://H:/Programming/Bukkit Plugin Projects/bukkit_1.7.2.jar" />
     <src_description expected_position="0">
       <src_folder value="file://$MODULE_DIR$/src" expected_position="0" />
     </src_description>
@@ -14,6 +15,16 @@
     </content>
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="inheritedJdk" />
-    <orderEntry type="library" name="Bukkit Essentials" level="project" />
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/../../Spigot Plugins/spigot.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES>
+          <root url="jar://$MODULE_DIR$/../../Spigot Plugins/spigot.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
   </component>
 </module>
