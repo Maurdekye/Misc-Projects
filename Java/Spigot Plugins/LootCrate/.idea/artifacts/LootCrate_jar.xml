@@ -1,0 +1,10 @@
+<component name="ArtifactManager">
+  <artifact type="jar" build-on-make="true" name="LootCrate:jar">
+    <output-path>D:/Libraries/Desktop/Game Stuff/Minecraft/Spigot/Server/plugins</output-path>
+    <root id="archive" name="LootCrate.jar">
+      <element id="module-output" name="LootCrate" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/../Essentials.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/../spigot.jar" path-in-jar="/" />
+    </root>
+  </artifact>
+</component>

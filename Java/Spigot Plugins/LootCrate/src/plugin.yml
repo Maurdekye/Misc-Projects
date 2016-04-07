@@ -1,0 +1,33 @@
+name: LootCrate
+version: 1.0
+author: Maurdekye
+main: com.ncolaprete.lootcrate.LootCrate
+depend: [Essentials]
+
+commands:
+  givecrate:
+    description: gives you a crate of the designated type. Random type if none provided.
+    usage: /givecrate [type] [player]
+    permission: lootcrate.givecrate
+    permission-message: You do not have permission to give yourself crates.
+  spawncrate:
+    description: spawns a loot crate of the designated type at your cursor. Random type if none provided.
+    usage: /spawncrate [type]
+    permission: lootcrate.spawncrate
+    permission-message: You do not have permission to spawn crates.
+  givereward:
+    description: gives reward of the designated type and amount to yourself. Look at a chest to use.
+    usage: /givereward <type> [amount]
+    permission: lootcrate.givereward
+    permission-message: You do not have permission to spawn crate rewards.
+
+permissions:
+  lootcrate.givecrate:
+    default: op
+  lootcrate.spawncrate:
+    default: op
+  lootcrate.givereward:
+    default: op
+  lootcrate.opencrate:
+    description: Allows the user to view and unlock loot crates
+    default: true
