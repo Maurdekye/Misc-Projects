@@ -42,16 +42,15 @@ import java.util.*;
 
 public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
 
-    ArrayList<Crate> allCrates;
-    ArrayList<Location> toRemove;
-    ArrayList<CrateLayout> crateLayouts;
+    private ArrayList<Crate> allCrates;
+    private ArrayList<CrateLayout> crateLayouts;
     HashMap<UUID, Long> tempCreativeTimestamps;
 
-    CustomConfig cratePositionConfig;
-    CustomConfig crateLayoutConfig;
+    private CustomConfig cratePositionConfig;
+    private CustomConfig crateLayoutConfig;
     CustomConfig tempCreativeTrackerConfig;
 
-    ConsoleCommandSender csend;
+    private ConsoleCommandSender csend;
 
     // Overridden Methods
 
@@ -65,7 +64,6 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
 
         allCrates = new ArrayList<>();
         crateLayouts = new ArrayList<>();
-        toRemove = new ArrayList<>();
         tempCreativeTimestamps = new HashMap<>();
 
         // load up configs
@@ -163,7 +161,7 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
         tempCreativeTrackerConfig.saveConfig();
     }
 
-    public void checkForSpecialItems()
+    private void checkForSpecialItems()
     {
         for (Player ply : getServer().getOnlinePlayers())
         {
@@ -181,7 +179,7 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
             }
 
             // Knackerbreaker Chestplate
-            if (Utility.itemHasLoreLine(ply.getInventory().getChestplate(), ChatColor.BLACK + "knackerbreaker_chestplate"))
+            if (Utility.itemHasLoreLine(ply.getInventory().getChestplate(), ChatColor.BLACK + "knackerbreaker_chesterplate"))
             {
                 ply.addPotionEffect(new PotionEffect(PotionEffectType.ABSORPTION, 40, 0), true);
             }
@@ -222,7 +220,7 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
         }
     }
 
-    public void checkForCreativeTimeUp()
+    private void checkForCreativeTimeUp()
     {
         for (UUID plyId : tempCreativeTimestamps.keySet())
         {
@@ -299,7 +297,7 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
                 target = ply;
 
             // give crate
-            target.getInventory().addItem(Utility.setName(new ItemStack(Material.CHEST), layout.getPrintname(true)));
+            target.getInventory().addItem(getCrateItemstack(layout));
         }
 
         // spawncrate
@@ -482,7 +480,7 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
             if (allCrates.get(i).location.equals(ev.getBlock()))
             {
                 ev.setCancelled(true);
-                ItemStack crateDrop = Utility.setName(new ItemStack(Material.CHEST), allCrates.get(i).layout.getPrintname(true));
+                ItemStack crateDrop = getCrateItemstack(allCrates.get(i).layout);
                 ev.getBlock().setType(Material.AIR);
                 ev.getBlock().getWorld().dropItemNaturally(ev.getBlock().getLocation().add(0.5, 0.5, 0.5), crateDrop);
                 removeCrate(i);
@@ -494,12 +492,11 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
     @EventHandler
     public void blockPlace(BlockPlaceEvent ev)
     {
-        String itemName = Utility.getName(ev.getItemInHand());
         CrateLayout newCrate = null;
         BlockFace[] cardinalDirections = new BlockFace[] {BlockFace.NORTH, BlockFace.SOUTH, BlockFace.EAST, BlockFace.WEST};
         for (CrateLayout l : crateLayouts)
         {
-            if (l.getPrintname(true).equals(itemName))
+            if (Utility.itemHasLoreLine(ev.getItemInHand(), ChatColor.BLACK + l.type))
             {
                 newCrate = l;
                 break;
@@ -561,32 +558,39 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
         }
     }
 
-    public void removeCrate(Crate c)
+    private void removeCrate(Crate c)
     {
         cratePositionConfig.getConfig().set(Utility.serializeLocation(c.location.getLocation()), null);
         cratePositionConfig.saveConfig();
         allCrates.remove(c);
     }
 
-    public void removeCrate(int index)
+    private void removeCrate(int index)
     {
         cratePositionConfig.getConfig().set(Utility.serializeLocation(allCrates.get(index).location.getLocation()), null);
         cratePositionConfig.saveConfig();
         allCrates.remove(index);
     }
 
-    public void addCrate(Crate c)
+    private void addCrate(Crate c)
     {
         allCrates.add(c);
         cratePositionConfig.getConfig().set(Utility.serializeLocation(c.location.getLocation()), c.layout.type);
         cratePositionConfig.saveConfig();
     }
 
+    private ItemStack getCrateItemstack(CrateLayout l)
+    {
+        ItemStack crateDrop = Utility.setName(new ItemStack(Material.CHEST), l.getPrintname(true));
+        crateDrop = Utility.addLoreLine(crateDrop, ChatColor.BLACK + l.type);
+        return crateDrop;
+    }
+
 }
 
 class Utility
 {
-    public static boolean itemHasLoreLine(ItemStack item, String line)
+    static boolean itemHasLoreLine(ItemStack item, String line)
     {
         if (item == null)
             return false;
@@ -598,7 +602,7 @@ class Utility
             return false;
         return lore.contains(line);
     }
-    public static ItemStack addLoreLine(ItemStack item, String line)
+    static ItemStack addLoreLine(ItemStack item, String line)
     {
         ItemMeta meta = item.getItemMeta();
         if (meta == null)
@@ -617,7 +621,7 @@ class Utility
         return item;
     }
 
-    public static ItemStack setName(ItemStack item, String name)
+    static ItemStack setName(ItemStack item, String name)
     {
         ItemMeta meta = item.getItemMeta();
         meta.setDisplayName(name);
@@ -635,12 +639,12 @@ class Utility
         return meta.getDisplayName();
     }
 
-    public static int randomInt(int start, int end)
+    static int randomInt(int start, int end)
     {
         return (int)(Math.random() * (end - start)) + start;
     }
 
-    public static void setChestInventoryName(Block chestblock, String name)
+    static void setChestInventoryName(Block chestblock, String name)
     {
         CraftChest chest = (CraftChest) chestblock.getState();
         try
@@ -656,7 +660,7 @@ class Utility
         }
     }
 
-    public static String serializeLocation(Location loc)
+    static String serializeLocation(Location loc)
     {
         StringBuilder sb = new StringBuilder();
         sb.append(loc.getWorld().getName());
@@ -669,7 +673,7 @@ class Utility
         return sb.toString();
     }
 
-    public static Location deserializeLocation(Server server, String serial)
+    static Location deserializeLocation(Server server, String serial)
     {
         server.getConsoleSender().sendMessage("deserializing " + serial);
         String[] parts = serial.split("\\?");
@@ -714,15 +718,15 @@ class Crate
 
 class CrateLayout
 {
-    public static final String LockedTag = ChatColor.RED + " [Locked]";
-    public static final String UnlockedTag = ChatColor.YELLOW + " [Unlocked]";
+    private static final String LockedTag = ChatColor.RED + " [Locked]";
+    private static final String UnlockedTag = ChatColor.YELLOW + " [Unlocked]";
 
-    public String printname;
-    public String type;
-    public Prize keyRequired;
-    public ArrayList<Reward> contents;
+    String printname;
+    String type;
+    private Prize keyRequired;
+    private ArrayList<Reward> contents;
 
-    public CrateLayout(String printname, String type, Prize keyRequired, ArrayList<Reward> contents)
+    CrateLayout(String printname, String type, Prize keyRequired, ArrayList<Reward> contents)
     {
         this.printname = printname;
         this.type = type;
@@ -730,7 +734,7 @@ class CrateLayout
         this.contents = contents;
     }
 
-    public void givePrize(LootCrate plugin, Player rewardee, Block location)
+    void givePrize(LootCrate plugin, Player rewardee, Block location)
     {
         double sum = 0;
         for (Reward r : contents)
@@ -754,7 +758,7 @@ class CrateLayout
             rewardee.playSound(rewardee.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1, 1);
     }
 
-    public Inventory showContents(LootCrate plugin, Player ply, Block chestblock)
+    Inventory showContents(LootCrate plugin, Player ply, Block chestblock)
     {
         Inventory display = Bukkit.createInventory(null, contents.size(), getPrintname(true));
         for (Reward r : contents)
@@ -766,12 +770,12 @@ class CrateLayout
         return display;
     }
 
-    public boolean isKeyValid(ItemStack key)
+    boolean isKeyValid(ItemStack key)
     {
         return Utility.itemHasLoreLine(key, keyRequired.getLoreTag());
     }
 
-    public String getPrintname(boolean isLocked)
+    String getPrintname(boolean isLocked)
     {
         if (isLocked)
             return printname + LockedTag;
@@ -781,11 +785,11 @@ class CrateLayout
 
 class Reward
 {
-    public Prize item;
-    public int amount;
-    public double rewardChance;
+    Prize item;
+    int amount;
+    double rewardChance;
 
-    public Reward(Prize item, int amount, double rewardChance)
+    Reward(Prize item, int amount, double rewardChance)
     {
         this.item = item;
         this.amount = amount;
@@ -895,39 +899,6 @@ enum Prize
         return Utility.setName(item, ChatColor.UNDERLINE + "" + ChatColor.BOLD + "" + "The Ultimate Reward");
     }),
 
-    LUCKY_TROUSERS (params -> {
-        ItemStack item = new ItemStack(Material.DIAMOND_LEGGINGS);
-        item = Utility.setName(item, ChatColor.GREEN + "Lucky Trousers");
-        item = Utility.addLoreLine(item, ChatColor.RESET + "The trousers grant increased luck");
-        item = Utility.addLoreLine(item, ChatColor.BLACK + "lucky_trousers");
-        item.addEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 1);
-        item.addEnchantment(Enchantment.DURABILITY, 1);
-        params.rewardee.sendMessage(ChatColor.GREEN + "You got the Lucky Trousers!");
-        return Collections.singletonList(item);
-    }, params -> {
-        ItemStack item = new ItemStack(Material.DIAMOND_LEGGINGS);
-        return Utility.setName(item, ChatColor.GREEN + "Lucky Trousers");
-    }),
-
-    KNACKERBREAKER_CHESTPLATE (params -> {
-        ItemStack item = new ItemStack(Material.DIAMOND_CHESTPLATE);
-        item = Utility.setName(item, ChatColor.GOLD + "Knackerbreaker Chestplate");
-        item = Utility.addLoreLine(item, ChatColor.RESET + "The chestplate grants increased health absorption");
-        item = Utility.addLoreLine(item, ChatColor.BLACK + "knackerbreaker_chestplate");
-        item.addEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 2);
-        item.addEnchantment(Enchantment.PROTECTION_EXPLOSIONS, 1);
-        item.addEnchantment(Enchantment.PROTECTION_FIRE, 1);
-        item.addEnchantment(Enchantment.PROTECTION_PROJECTILE, 1);
-        item.addEnchantment(Enchantment.THORNS, 3);
-        item.addEnchantment(Enchantment.DURABILITY, 1);
-        item.addEnchantment(Enchantment.MENDING, 1);
-        params.rewardee.sendMessage(ChatColor.YELLOW + "You got the Knackerbreaker Chestplate!");
-        return Collections.singletonList(item);
-    }, params -> {
-        ItemStack item = new ItemStack(Material.DIAMOND_CHESTPLATE);
-        return Utility.setName(item, ChatColor.GOLD + "Knackerbreaker Chestplate");
-    }),
-
     FROSTSPARK_CLEATS (params -> {
         ItemStack item = new ItemStack(Material.DIAMOND_BOOTS);
         item = Utility.setName(item, ChatColor.YELLOW + "Frostspark Cleats");
@@ -944,17 +915,50 @@ enum Prize
         return Utility.setName(item, ChatColor.YELLOW + "Frostspark Cleats");
     }),
 
-    WATERSTRIDE_BOOTS (params -> {
+    WATERGLIDE_BOOTS (params -> {
         ItemStack item = new ItemStack(Material.DIAMOND_BOOTS);
-        item = Utility.setName(item, ChatColor.AQUA + "Waterstride Boots");
+        item = Utility.setName(item, ChatColor.AQUA + "Waterglide Boots");
         item.addEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 1);
         item.addEnchantment(Enchantment.DURABILITY, 2);
         item.addEnchantment(Enchantment.DEPTH_STRIDER, 3);
-        params.rewardee.sendMessage(ChatColor.AQUA + "You got the Waterstride Boots!");
+        params.rewardee.sendMessage(ChatColor.AQUA + "You got the Waterglide Boots!");
         return Collections.singletonList(item);
     }, params -> {
         ItemStack item = new ItemStack(Material.DIAMOND_BOOTS);
-        return Utility.setName(item, ChatColor.AQUA + "Waterstride Boots");
+        return Utility.setName(item, ChatColor.AQUA + "Waterglide Boots");
+    }),
+
+    LUCKY_TROUSERS (params -> {
+        ItemStack item = new ItemStack(Material.DIAMOND_LEGGINGS);
+        item = Utility.setName(item, ChatColor.GREEN + "Lucky Trousers");
+        item = Utility.addLoreLine(item, ChatColor.RESET + "The trousers grant increased luck");
+        item = Utility.addLoreLine(item, ChatColor.BLACK + "lucky_trousers");
+        item.addEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 1);
+        item.addEnchantment(Enchantment.DURABILITY, 1);
+        params.rewardee.sendMessage(ChatColor.GREEN + "You got the Lucky Trousers!");
+        return Collections.singletonList(item);
+    }, params -> {
+        ItemStack item = new ItemStack(Material.DIAMOND_LEGGINGS);
+        return Utility.setName(item, ChatColor.GREEN + "Lucky Trousers");
+    }),
+
+    KNACKERBREAKER_CHESTERPLATE (params -> {
+        ItemStack item = new ItemStack(Material.DIAMOND_CHESTPLATE);
+        item = Utility.setName(item, ChatColor.GOLD + "Knackerbreaker Chestplate");
+        item = Utility.addLoreLine(item, ChatColor.RESET + "The chestplate grants increased health absorption");
+        item = Utility.addLoreLine(item, ChatColor.BLACK + "knackerbreaker_chesterplate");
+        item.addEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 2);
+        item.addEnchantment(Enchantment.PROTECTION_EXPLOSIONS, 1);
+        item.addEnchantment(Enchantment.PROTECTION_FIRE, 1);
+        item.addEnchantment(Enchantment.PROTECTION_PROJECTILE, 1);
+        item.addEnchantment(Enchantment.THORNS, 3);
+        item.addEnchantment(Enchantment.DURABILITY, 1);
+        item.addEnchantment(Enchantment.MENDING, 1);
+        params.rewardee.sendMessage(ChatColor.YELLOW + "You got the Knackerbreaker Chestplate!");
+        return Collections.singletonList(item);
+    }, params -> {
+        ItemStack item = new ItemStack(Material.DIAMOND_CHESTPLATE);
+        return Utility.setName(item, ChatColor.GOLD + "Knackerbreaker Chestplate");
     }),
 
     HYDRODYNE_HELMET (params -> {

@@ -25,10 +25,12 @@
       <file leaf-file-name="LootCrate.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/com/ncolaprete/lootcrate/LootCrate.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1189">
-              <caret line="236" column="82" selection-start-line="236" selection-start-column="82" selection-end-line="236" selection-end-column="82" />
+            <state relative-caret-position="586">
+              <caret line="945" column="45" selection-start-line="945" selection-start-column="45" selection-end-line="945" selection-end-column="45" />
               <folding>
-                <element signature="method#checkForSpecialItems#0;class#LootCrate#0" expanded="false" />
+                <element signature="method#onEnable#0;class#LootCrate#0" expanded="false" />
+                <element signature="method#onDisable#0;class#LootCrate#0" expanded="false" />
+                <element signature="method#checkForCreativeTimeUp#0;class#LootCrate#0" expanded="false" />
                 <element signature="method#onCommand#0;class#LootCrate#0" expanded="false" />
                 <element signature="method#playerInteract#0;class#LootCrate#0" expanded="false" />
                 <element signature="method#blockBreak#0;class#LootCrate#0" expanded="false" />
@@ -37,6 +39,8 @@
                 <element signature="method#projectileLaunch#0;class#LootCrate#0" expanded="false" />
                 <element signature="method#removeCrate#0;class#LootCrate#0" expanded="false" />
                 <element signature="method#removeCrate#1;class#LootCrate#0" expanded="false" />
+                <element signature="method#addCrate#0;class#LootCrate#0" expanded="false" />
+                <element signature="method#getCrateItemstack#0;class#LootCrate#0" expanded="false" />
                 <element signature="class#Utility#0" expanded="false" />
                 <element signature="method#itemHasLoreLine#0;class#Utility#0" expanded="false" />
                 <element signature="method#addLoreLine#0;class#Utility#0" expanded="false" />
@@ -52,6 +56,7 @@
                 <element signature="method#CrateLayout#0;class#CrateLayout#0" expanded="false" />
                 <element signature="method#givePrize#0;class#CrateLayout#0" expanded="false" />
                 <element signature="method#showContents#0;class#CrateLayout#0" expanded="false" />
+                <element signature="method#getPrintname#0;class#CrateLayout#0" expanded="false" />
                 <element signature="class#Reward#0" expanded="false" />
                 <element signature="method#Reward#0;class#Reward#0" expanded="false" />
                 <element signature="method#Prize#0;class#Prize#0" expanded="false" />
@@ -539,7 +544,9 @@
         <state relative-caret-position="0">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
-            <element signature="method#checkForSpecialItems#0;class#LootCrate#0" expanded="false" />
+            <element signature="method#onEnable#0;class#LootCrate#0" expanded="false" />
+            <element signature="method#onDisable#0;class#LootCrate#0" expanded="false" />
+            <element signature="method#checkForCreativeTimeUp#0;class#LootCrate#0" expanded="false" />
             <element signature="method#onCommand#0;class#LootCrate#0" expanded="false" />
             <element signature="method#playerInteract#0;class#LootCrate#0" expanded="false" />
             <element signature="method#blockBreak#0;class#LootCrate#0" expanded="false" />
@@ -548,6 +555,8 @@
             <element signature="method#projectileLaunch#0;class#LootCrate#0" expanded="false" />
             <element signature="method#removeCrate#0;class#LootCrate#0" expanded="false" />
             <element signature="method#removeCrate#1;class#LootCrate#0" expanded="false" />
+            <element signature="method#addCrate#0;class#LootCrate#0" expanded="false" />
+            <element signature="method#getCrateItemstack#0;class#LootCrate#0" expanded="false" />
             <element signature="class#Utility#0" expanded="false" />
             <element signature="method#itemHasLoreLine#0;class#Utility#0" expanded="false" />
             <element signature="method#addLoreLine#0;class#Utility#0" expanded="false" />
@@ -563,6 +572,7 @@
             <element signature="method#CrateLayout#0;class#CrateLayout#0" expanded="false" />
             <element signature="method#givePrize#0;class#CrateLayout#0" expanded="false" />
             <element signature="method#showContents#0;class#CrateLayout#0" expanded="false" />
+            <element signature="method#getPrintname#0;class#CrateLayout#0" expanded="false" />
             <element signature="class#Reward#0" expanded="false" />
             <element signature="method#Reward#0;class#Reward#0" expanded="false" />
             <element signature="method#Prize#0;class#Prize#0" expanded="false" />
@@ -605,7 +615,9 @@
         <state relative-caret-position="0">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
-            <element signature="method#checkForSpecialItems#0;class#LootCrate#0" expanded="false" />
+            <element signature="method#onEnable#0;class#LootCrate#0" expanded="false" />
+            <element signature="method#onDisable#0;class#LootCrate#0" expanded="false" />
+            <element signature="method#checkForCreativeTimeUp#0;class#LootCrate#0" expanded="false" />
             <element signature="method#onCommand#0;class#LootCrate#0" expanded="false" />
             <element signature="method#playerInteract#0;class#LootCrate#0" expanded="false" />
             <element signature="method#blockBreak#0;class#LootCrate#0" expanded="false" />
@@ -614,6 +626,8 @@
             <element signature="method#projectileLaunch#0;class#LootCrate#0" expanded="false" />
             <element signature="method#removeCrate#0;class#LootCrate#0" expanded="false" />
             <element signature="method#removeCrate#1;class#LootCrate#0" expanded="false" />
+            <element signature="method#addCrate#0;class#LootCrate#0" expanded="false" />
+            <element signature="method#getCrateItemstack#0;class#LootCrate#0" expanded="false" />
             <element signature="class#Utility#0" expanded="false" />
             <element signature="method#itemHasLoreLine#0;class#Utility#0" expanded="false" />
             <element signature="method#addLoreLine#0;class#Utility#0" expanded="false" />
@@ -629,6 +643,7 @@
             <element signature="method#CrateLayout#0;class#CrateLayout#0" expanded="false" />
             <element signature="method#givePrize#0;class#CrateLayout#0" expanded="false" />
             <element signature="method#showContents#0;class#CrateLayout#0" expanded="false" />
+            <element signature="method#getPrintname#0;class#CrateLayout#0" expanded="false" />
             <element signature="class#Reward#0" expanded="false" />
             <element signature="method#Reward#0;class#Reward#0" expanded="false" />
             <element signature="method#Prize#0;class#Prize#0" expanded="false" />
@@ -671,7 +686,9 @@
         <state relative-caret-position="0">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
-            <element signature="method#checkForSpecialItems#0;class#LootCrate#0" expanded="false" />
+            <element signature="method#onEnable#0;class#LootCrate#0" expanded="false" />
+            <element signature="method#onDisable#0;class#LootCrate#0" expanded="false" />
+            <element signature="method#checkForCreativeTimeUp#0;class#LootCrate#0" expanded="false" />
             <element signature="method#onCommand#0;class#LootCrate#0" expanded="false" />
             <element signature="method#playerInteract#0;class#LootCrate#0" expanded="false" />
             <element signature="method#blockBreak#0;class#LootCrate#0" expanded="false" />
@@ -680,6 +697,8 @@
             <element signature="method#projectileLaunch#0;class#LootCrate#0" expanded="false" />
             <element signature="method#removeCrate#0;class#LootCrate#0" expanded="false" />
             <element signature="method#removeCrate#1;class#LootCrate#0" expanded="false" />
+            <element signature="method#addCrate#0;class#LootCrate#0" expanded="false" />
+            <element signature="method#getCrateItemstack#0;class#LootCrate#0" expanded="false" />
             <element signature="class#Utility#0" expanded="false" />
             <element signature="method#itemHasLoreLine#0;class#Utility#0" expanded="false" />
             <element signature="method#addLoreLine#0;class#Utility#0" expanded="false" />
@@ -695,6 +714,7 @@
             <element signature="method#CrateLayout#0;class#CrateLayout#0" expanded="false" />
             <element signature="method#givePrize#0;class#CrateLayout#0" expanded="false" />
             <element signature="method#showContents#0;class#CrateLayout#0" expanded="false" />
+            <element signature="method#getPrintname#0;class#CrateLayout#0" expanded="false" />
             <element signature="class#Reward#0" expanded="false" />
             <element signature="method#Reward#0;class#Reward#0" expanded="false" />
             <element signature="method#Prize#0;class#Prize#0" expanded="false" />
@@ -737,7 +757,9 @@
         <state relative-caret-position="0">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
-            <element signature="method#checkForSpecialItems#0;class#LootCrate#0" expanded="false" />
+            <element signature="method#onEnable#0;class#LootCrate#0" expanded="false" />
+            <element signature="method#onDisable#0;class#LootCrate#0" expanded="false" />
+            <element signature="method#checkForCreativeTimeUp#0;class#LootCrate#0" expanded="false" />
             <element signature="method#onCommand#0;class#LootCrate#0" expanded="false" />
             <element signature="method#playerInteract#0;class#LootCrate#0" expanded="false" />
             <element signature="method#blockBreak#0;class#LootCrate#0" expanded="false" />
@@ -746,6 +768,8 @@
             <element signature="method#projectileLaunch#0;class#LootCrate#0" expanded="false" />
             <element signature="method#removeCrate#0;class#LootCrate#0" expanded="false" />
             <element signature="method#removeCrate#1;class#LootCrate#0" expanded="false" />
+            <element signature="method#addCrate#0;class#LootCrate#0" expanded="false" />
+            <element signature="method#getCrateItemstack#0;class#LootCrate#0" expanded="false" />
             <element signature="class#Utility#0" expanded="false" />
             <element signature="method#itemHasLoreLine#0;class#Utility#0" expanded="false" />
             <element signature="method#addLoreLine#0;class#Utility#0" expanded="false" />
@@ -761,6 +785,7 @@
             <element signature="method#CrateLayout#0;class#CrateLayout#0" expanded="false" />
             <element signature="method#givePrize#0;class#CrateLayout#0" expanded="false" />
             <element signature="method#showContents#0;class#CrateLayout#0" expanded="false" />
+            <element signature="method#getPrintname#0;class#CrateLayout#0" expanded="false" />
             <element signature="class#Reward#0" expanded="false" />
             <element signature="method#Reward#0;class#Reward#0" expanded="false" />
             <element signature="method#Prize#0;class#Prize#0" expanded="false" />
@@ -803,7 +828,9 @@
         <state relative-caret-position="2277">
           <caret line="69" column="72" selection-start-line="69" selection-start-column="72" selection-end-line="69" selection-end-column="72" />
           <folding>
-            <element signature="method#checkForSpecialItems#0;class#LootCrate#0" expanded="false" />
+            <element signature="method#onEnable#0;class#LootCrate#0" expanded="false" />
+            <element signature="method#onDisable#0;class#LootCrate#0" expanded="false" />
+            <element signature="method#checkForCreativeTimeUp#0;class#LootCrate#0" expanded="false" />
             <element signature="method#onCommand#0;class#LootCrate#0" expanded="false" />
             <element signature="method#playerInteract#0;class#LootCrate#0" expanded="false" />
             <element signature="method#blockBreak#0;class#LootCrate#0" expanded="false" />
@@ -812,6 +839,8 @@
             <element signature="method#projectileLaunch#0;class#LootCrate#0" expanded="false" />
             <element signature="method#removeCrate#0;class#LootCrate#0" expanded="false" />
             <element signature="method#removeCrate#1;class#LootCrate#0" expanded="false" />
+            <element signature="method#addCrate#0;class#LootCrate#0" expanded="false" />
+            <element signature="method#getCrateItemstack#0;class#LootCrate#0" expanded="false" />
             <element signature="class#Utility#0" expanded="false" />
             <element signature="method#itemHasLoreLine#0;class#Utility#0" expanded="false" />
             <element signature="method#addLoreLine#0;class#Utility#0" expanded="false" />
@@ -827,6 +856,7 @@
             <element signature="method#CrateLayout#0;class#CrateLayout#0" expanded="false" />
             <element signature="method#givePrize#0;class#CrateLayout#0" expanded="false" />
             <element signature="method#showContents#0;class#CrateLayout#0" expanded="false" />
+            <element signature="method#getPrintname#0;class#CrateLayout#0" expanded="false" />
             <element signature="class#Reward#0" expanded="false" />
             <element signature="method#Reward#0;class#Reward#0" expanded="false" />
             <element signature="method#Prize#0;class#Prize#0" expanded="false" />
@@ -869,7 +899,9 @@
         <state relative-caret-position="0">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
-            <element signature="method#checkForSpecialItems#0;class#LootCrate#0" expanded="false" />
+            <element signature="method#onEnable#0;class#LootCrate#0" expanded="false" />
+            <element signature="method#onDisable#0;class#LootCrate#0" expanded="false" />
+            <element signature="method#checkForCreativeTimeUp#0;class#LootCrate#0" expanded="false" />
             <element signature="method#onCommand#0;class#LootCrate#0" expanded="false" />
             <element signature="method#playerInteract#0;class#LootCrate#0" expanded="false" />
             <element signature="method#blockBreak#0;class#LootCrate#0" expanded="false" />
@@ -878,6 +910,8 @@
             <element signature="method#projectileLaunch#0;class#LootCrate#0" expanded="false" />
             <element signature="method#removeCrate#0;class#LootCrate#0" expanded="false" />
             <element signature="method#removeCrate#1;class#LootCrate#0" expanded="false" />
+            <element signature="method#addCrate#0;class#LootCrate#0" expanded="false" />
+            <element signature="method#getCrateItemstack#0;class#LootCrate#0" expanded="false" />
             <element signature="class#Utility#0" expanded="false" />
             <element signature="method#itemHasLoreLine#0;class#Utility#0" expanded="false" />
             <element signature="method#addLoreLine#0;class#Utility#0" expanded="false" />
@@ -893,6 +927,7 @@
             <element signature="method#CrateLayout#0;class#CrateLayout#0" expanded="false" />
             <element signature="method#givePrize#0;class#CrateLayout#0" expanded="false" />
             <element signature="method#showContents#0;class#CrateLayout#0" expanded="false" />
+            <element signature="method#getPrintname#0;class#CrateLayout#0" expanded="false" />
             <element signature="class#Reward#0" expanded="false" />
             <element signature="method#Reward#0;class#Reward#0" expanded="false" />
             <element signature="method#Prize#0;class#Prize#0" expanded="false" />
@@ -954,10 +989,12 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/com/ncolaprete/lootcrate/LootCrate.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1189">
-          <caret line="236" column="82" selection-start-line="236" selection-start-column="82" selection-end-line="236" selection-end-column="82" />
+        <state relative-caret-position="586">
+          <caret line="945" column="45" selection-start-line="945" selection-start-column="45" selection-end-line="945" selection-end-column="45" />
           <folding>
-            <element signature="method#checkForSpecialItems#0;class#LootCrate#0" expanded="false" />
+            <element signature="method#onEnable#0;class#LootCrate#0" expanded="false" />
+            <element signature="method#onDisable#0;class#LootCrate#0" expanded="false" />
+            <element signature="method#checkForCreativeTimeUp#0;class#LootCrate#0" expanded="false" />
             <element signature="method#onCommand#0;class#LootCrate#0" expanded="false" />
             <element signature="method#playerInteract#0;class#LootCrate#0" expanded="false" />
             <element signature="method#blockBreak#0;class#LootCrate#0" expanded="false" />
@@ -966,6 +1003,8 @@
             <element signature="method#projectileLaunch#0;class#LootCrate#0" expanded="false" />
             <element signature="method#removeCrate#0;class#LootCrate#0" expanded="false" />
             <element signature="method#removeCrate#1;class#LootCrate#0" expanded="false" />
+            <element signature="method#addCrate#0;class#LootCrate#0" expanded="false" />
+            <element signature="method#getCrateItemstack#0;class#LootCrate#0" expanded="false" />
             <element signature="class#Utility#0" expanded="false" />
             <element signature="method#itemHasLoreLine#0;class#Utility#0" expanded="false" />
             <element signature="method#addLoreLine#0;class#Utility#0" expanded="false" />
@@ -981,6 +1020,7 @@
             <element signature="method#CrateLayout#0;class#CrateLayout#0" expanded="false" />
             <element signature="method#givePrize#0;class#CrateLayout#0" expanded="false" />
             <element signature="method#showContents#0;class#CrateLayout#0" expanded="false" />
+            <element signature="method#getPrintname#0;class#CrateLayout#0" expanded="false" />
             <element signature="class#Reward#0" expanded="false" />
             <element signature="method#Reward#0;class#Reward#0" expanded="false" />
             <element signature="method#Prize#0;class#Prize#0" expanded="false" />
