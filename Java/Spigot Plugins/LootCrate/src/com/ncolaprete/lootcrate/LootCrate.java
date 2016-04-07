@@ -1,6 +1,8 @@
 package com.ncolaprete.lootcrate;
 
 import com.mysql.jdbc.Util;
+import net.minecraft.server.v1_9_R1.ChatComponentScore;
+import net.minecraft.server.v1_9_R1.SystemUtils;
 import net.minecraft.server.v1_9_R1.TileEntityChest;
 import org.bukkit.*;
 import org.bukkit.block.Block;
@@ -43,12 +45,11 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
     ArrayList<Crate> allCrates;
     ArrayList<Location> toRemove;
     ArrayList<CrateLayout> crateLayouts;
+    HashMap<UUID, Long> tempCreativeTimestamps;
 
     CustomConfig cratePositionConfig;
     CustomConfig crateLayoutConfig;
-
-    public static final String LockedTag = ChatColor.RED + " [Locked]";
-    public static final String UnlockedTag = ChatColor.YELLOW + " [Unlocked]";
+    CustomConfig tempCreativeTrackerConfig;
 
     ConsoleCommandSender csend;
 
@@ -58,24 +59,22 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
     {
         getServer().getPluginManager().registerEvents(this, this);
         getServer().getScheduler().scheduleSyncRepeatingTask(this, this::checkForSpecialItems, 0, 20);
+        getServer().getScheduler().scheduleSyncRepeatingTask(this, this::checkForCreativeTimeUp, 0, 1200);
 
         csend = getServer().getConsoleSender();
-
-        String s = "Available prizes: ";
-        for (Prize p : Prize.values())
-            s += p.toString().toLowerCase() + ", ";
-        csend.sendMessage(s.substring(0, s.length()-2));
 
         allCrates = new ArrayList<>();
         crateLayouts = new ArrayList<>();
         toRemove = new ArrayList<>();
 
-        // loadup configs
+        // load up configs
         cratePositionConfig = new CustomConfig(this, "crate_positions.yml");
         crateLayoutConfig = new CustomConfig(this, "crate_layouts.yml");
+        tempCreativeTrackerConfig = new CustomConfig(this, "temp_ops.yml");
         crateLayoutConfig.getConfig().options().copyDefaults(true);
         cratePositionConfig.saveConfig();
         crateLayoutConfig.saveConfig();
+        tempCreativeTrackerConfig.saveConfig();
 
         // load in crate layouts
         for (String key : crateLayoutConfig.getConfig().getKeys(false))
@@ -149,6 +148,12 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
                 continue;
             allCrates.add(new Crate(pos.getBlock(), layout));
         }
+
+        // load in temporary creatives
+        for (String key : tempCreativeTrackerConfig.getConfig().getKeys(false))
+        {
+            tempCreativeTimestamps.put(UUID.fromString(key), tempCreativeTrackerConfig.getConfig().getLong(key));
+        }
     }
 
     public void onDisable()
@@ -163,6 +168,7 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
             cratePositionConfig.getConfig().set(Utility.serializeLocation(c.location.getLocation()), c.layout.type);
         }
         cratePositionConfig.saveConfig();
+        tempCreativeTrackerConfig.saveConfig();
     }
 
     public void checkForSpecialItems()
@@ -202,10 +208,42 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
             }
 
             // Unyielding Battersea
-            if (Utility.itemHasLoreLine(ply.getInventory().getItemInOffHand(), ChatColor.BLACK + "unyielding_battersea"))
+            if ((Utility.itemHasLoreLine(ply.getInventory().getItemInOffHand(), ChatColor.BLACK + "unyielding_battersea") ||
+                    Utility.itemHasLoreLine(ply.getInventory().getItemInMainHand(), ChatColor.BLACK + "unyielding_battersea")) &&
+                    ply.isBlocking())
             {
                 ply.addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 40, 0), true);
                 ply.addPotionEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE, 40, 0), true);
+            }
+
+            // Veilstrike Bow
+            if (Utility.itemHasLoreLine(ply.getInventory().getItemInMainHand(), ChatColor.BLACK + "veilstrike_bow"))
+            {
+                ply.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, 40, 0), true);
+            }
+
+            // Heaven's Blade
+            if (Utility.itemHasLoreLine(ply.getInventory().getItemInMainHand(), ChatColor.BLACK + "heavens_blade"))
+            {
+                ply.addPotionEffect(new PotionEffect(PotionEffectType.INCREASE_DAMAGE, 40, 4), true);
+            }
+        }
+    }
+
+    public void checkForCreativeTimeUp()
+    {
+        for (UUID plyId : tempCreativeTimestamps.keySet())
+        {
+            Player ply = getServer().getPlayer(plyId);
+            if (ply == null)
+                continue;
+            if (System.currentTimeMillis() > tempCreativeTimestamps.get(plyId))
+            {
+                ply.setGameMode(GameMode.SURVIVAL);
+                ply.sendMessage(ChatColor.DARK_AQUA + "Your creative time is up.");
+                tempCreativeTimestamps.remove(ply.getUniqueId());
+                tempCreativeTrackerConfig.getConfig().set(plyId.toString(), null);
+                tempCreativeTrackerConfig.saveConfig();
             }
         }
     }
@@ -396,7 +434,7 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
             }
 
             // give prize
-            type.giveReward(ply, amount, chestBlock);
+            type.giveReward(this, ply, amount, chestBlock);
         }
         return true;
     }
@@ -433,13 +471,13 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
                     handItem.setAmount(handItem.getAmount() - 1);
                 else
                     ev.getPlayer().getInventory().remove(handItem);
-                crateToOpen.unlockAndGivePrize(ev.getPlayer());
+                crateToOpen.unlockAndGivePrize(this, ev.getPlayer());
                 removeCrate(crateToOpen);
             }
             else
             {
                 ev.setCancelled(true);
-                ev.getPlayer().openInventory(crateToOpen.showContents(ev.getPlayer()));
+                ev.getPlayer().openInventory(crateToOpen.showContents(this, ev.getPlayer()));
             }
         }
     }
@@ -524,7 +562,7 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
         if (ev.getEntity() instanceof Arrow && ev.getEntity().getShooter() instanceof Player)
         {
             Player ply = (Player) ev.getEntity().getShooter();
-            if (Utility.itemHasLoreLine(ply.getInventory().getItemInMainHand(), ChatColor.BLACK + "velstrike_bow"))
+            if (Utility.itemHasLoreLine(ply.getInventory().getItemInMainHand(), ChatColor.BLACK + "veilstrike_bow"))
             {
                 ev.getEntity().setVelocity(ev.getEntity().getVelocity().multiply(4));
             }
@@ -656,15 +694,15 @@ class Crate
             this.location.setType(Material.CHEST);
     }
 
-    public void unlockAndGivePrize(Player rewardee)
+    public void unlockAndGivePrize(LootCrate plugin, Player rewardee)
     {
-        layout.givePrize(rewardee, location);
+        layout.givePrize(plugin, rewardee, location);
         Utility.setChestInventoryName(location, layout.getPrintname(false));
     }
 
-    public Inventory showContents(Player ply)
+    public Inventory showContents(LootCrate plugin, Player ply)
     {
-        return layout.showContents(ply, location);
+        return layout.showContents(plugin, ply, location);
     }
 
     public boolean isKeyValid(ItemStack key)
@@ -675,6 +713,9 @@ class Crate
 
 class CrateLayout
 {
+    public static final String LockedTag = ChatColor.RED + " [Locked]";
+    public static final String UnlockedTag = ChatColor.YELLOW + " [Unlocked]";
+
     public String printname;
     public String type;
     public Prize keyRequired;
@@ -688,7 +729,7 @@ class CrateLayout
         this.contents = contents;
     }
 
-    public void givePrize(Player rewardee, Block location)
+    public void givePrize(LootCrate plugin, Player rewardee, Block location)
     {
         double sum = 0;
         for (Reward r : contents)
@@ -705,19 +746,19 @@ class CrateLayout
             rand -= contents.get(i).rewardChance;
         }
         Reward chosen = contents.get(prizeIndex);
-        chosen.item.giveReward(rewardee, chosen.amount, location);
+        chosen.item.giveReward(plugin, rewardee, chosen.amount, location);
         if (chosen.item == Prize.NOTHING)
             rewardee.playSound(rewardee.getLocation(), Sound.BLOCK_NOTE_SNARE, 1, 1);
         else
             rewardee.playSound(rewardee.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1, 1);
     }
 
-    public Inventory showContents(Player ply, Block chestblock)
+    public Inventory showContents(LootCrate plugin, Player ply, Block chestblock)
     {
         Inventory display = Bukkit.createInventory(null, contents.size(), getPrintname(true));
         for (Reward r : contents)
         {
-            ItemStack displayItem =  r.item.getVisualisation(ply, r.amount, chestblock);
+            ItemStack displayItem =  r.item.getVisualisation(plugin, ply, r.amount, chestblock);
             displayItem = Utility.addLoreLine(displayItem, ChatColor.WHITE + "%" + r.rewardChance + " chance");
             display.addItem(displayItem);
         }
@@ -732,8 +773,8 @@ class CrateLayout
     public String getPrintname(boolean isLocked)
     {
         if (isLocked)
-            return printname + LootCrate.LockedTag;
-        return printname + LootCrate.UnlockedTag;
+            return printname + LockedTag;
+        return printname + UnlockedTag;
     }
 }
 
@@ -837,6 +878,21 @@ enum Prize
     }),
 
     // reward items
+
+    ULTIMATE_REWARD (params -> {
+        params.rewardee.setGameMode(GameMode.CREATIVE);
+        params.plugin.tempCreativeTrackerConfig.getConfig().set(params.rewardee.getUniqueId().toString(), System.currentTimeMillis() + params.amountToGive * 3600000);
+        params.plugin.tempCreativeTimestamps.put(params.rewardee.getUniqueId(), System.currentTimeMillis() + params.amountToGive * 3600000);
+        params.plugin.tempCreativeTrackerConfig.saveConfig();
+        if (params.amountToGive == 1)
+            params.rewardee.sendMessage("You have received the ultimate reward: you may be in creative for 1 hour.");
+        else
+            params.rewardee.sendMessage("You have received the ultimate reward: you may be in creative for " + params.amountToGive + " hours.");
+        return null;
+    }, params -> {
+        ItemStack item = new ItemStack(Material.COMMAND);
+        return Utility.setName(item, ChatColor.UNDERLINE + "" + ChatColor.BOLD + "" + "The Ultimate Reward");
+    }),
 
     LUCKY_TROUSERS (params -> {
         ItemStack item = new ItemStack(Material.DIAMOND_LEGGINGS);
@@ -945,27 +1001,28 @@ enum Prize
         return Utility.setName(item, ChatColor.YELLOW + "Unyielding Battersea");
     }),
 
-    VELSTRIKE_BOW (params -> {
+    VEILSTRIKE_BOW (params -> {
         ItemStack item = new ItemStack(Material.BOW);
-        item = Utility.setName(item, ChatColor.YELLOW + "" + ChatColor.ITALIC + "Velstrike Bow");
-        item = Utility.addLoreLine(item, "An ancient, powerful bow used by an immensely skilled marksman");
-        item = Utility.addLoreLine(item, ChatColor.RESET + "The bow grants immense arrow speed");
-        item = Utility.addLoreLine(item, ChatColor.BLACK + "velstrike_bow");
+        item = Utility.setName(item, ChatColor.YELLOW + "" + ChatColor.ITALIC + "Veilstrike Bow");
+        item = Utility.addLoreLine(item, "An ancient, powerful bow used by an extremely skilled marksman");
+        item = Utility.addLoreLine(item, ChatColor.RESET + "The bow grants invisibility and immense arrow speed");
+        item = Utility.addLoreLine(item, ChatColor.BLACK + "veilstrike_bow");
         item.addEnchantment(Enchantment.ARROW_DAMAGE, 5);
         item.addEnchantment(Enchantment.ARROW_KNOCKBACK, 2);
         item.addEnchantment(Enchantment.DURABILITY, 2);
         item.addEnchantment(Enchantment.MENDING, 1);
-        params.rewardee.sendMessage(ChatColor.YELLOW + "" + ChatColor.ITALIC + "You got the Velstrike Bow!");
+        params.rewardee.sendMessage(ChatColor.YELLOW + "" + ChatColor.ITALIC + "You got the Veilstrike Bow!");
         return Collections.singletonList(item);
     }, params -> {
         ItemStack item = new ItemStack(Material.BOW);
-        return Utility.setName(item, ChatColor.YELLOW + "" + ChatColor.ITALIC + "Velstrike Bow");
+        return Utility.setName(item, ChatColor.YELLOW + "" + ChatColor.ITALIC + "Veilstrike Bow");
     }),
 
     HEAVENS_BLADE (params -> {
         ItemStack item = new ItemStack(Material.DIAMOND_SWORD);
         item = Utility.setName(item, ChatColor.YELLOW + "" + ChatColor.BOLD + "Heaven's Blade");
-        item = Utility.addLoreLine(item, "A godly blade of incredible desctructive power");
+        item = Utility.addLoreLine(item, "A godly blade that weilds incredible desctructive power");
+        item = Utility.addLoreLine(item, ChatColor.BLACK + "heavens_blade");
         item.addEnchantment(Enchantment.DAMAGE_ALL, 5);
         item.addEnchantment(Enchantment.KNOCKBACK, 2);
         item.addEnchantment(Enchantment.FIRE_ASPECT, 2);
@@ -1231,11 +1288,11 @@ enum Prize
         this.visualisation = visualisation;
     }
 
-    public void giveReward(Player rewardee, int amount, Block chestBlock)
+    public void giveReward(LootCrate plugin, Player rewardee, int amount, Block chestBlock)
     {
         if (chestBlock.getType() != Material.CHEST)
             return;
-        List<ItemStack> rewardItemsRaw = action.enactReward(new RewardActionParameter(rewardee, amount, chestBlock));
+        List<ItemStack> rewardItemsRaw = action.enactReward(new RewardActionParameter(plugin, rewardee, amount, chestBlock));
         if (rewardItemsRaw == null)
             rewardItemsRaw = new ArrayList<>();
         ArrayList<ItemStack> rewardItems = new ArrayList<>();
@@ -1260,9 +1317,9 @@ enum Prize
         }
     }
 
-    public ItemStack getVisualisation(Player rewardee, int amount, Block chestBlock)
+    public ItemStack getVisualisation(LootCrate plugin, Player rewardee, int amount, Block chestBlock)
     {
-        return visualisation.getVisualisation(new RewardActionParameter(rewardee, amount, chestBlock));
+        return visualisation.getVisualisation(new RewardActionParameter(plugin, rewardee, amount, chestBlock));
     }
 
     public String getLoreTag()
@@ -1272,12 +1329,14 @@ enum Prize
 
     public class RewardActionParameter
     {
+        public LootCrate plugin;
         public Player rewardee;
         public int amountToGive;
         public Block chestBlock;
 
-        public RewardActionParameter(Player rewardee, int amountToGive, Block chestBlock)
+        public RewardActionParameter(LootCrate plugin, Player rewardee, int amountToGive, Block chestBlock)
         {
+            this.plugin = plugin;
             this.rewardee = rewardee;
             this.amountToGive = amountToGive;
             this.chestBlock = chestBlock;
