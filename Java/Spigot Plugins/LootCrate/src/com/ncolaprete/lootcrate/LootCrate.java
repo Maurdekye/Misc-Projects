@@ -71,7 +71,7 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
         // load up configs
         cratePositionConfig = new CustomConfig(this, "crate_positions.yml");
         crateLayoutConfig = new CustomConfig(this, "crate_layouts.yml");
-        tempCreativeTrackerConfig = new CustomConfig(this, "temp_ops.yml");
+        tempCreativeTrackerConfig = new CustomConfig(this, "temp_creatives.yml");
         crateLayoutConfig.getConfig().options().copyDefaults(true);
         cratePositionConfig.saveConfig();
         crateLayoutConfig.saveConfig();
@@ -147,7 +147,7 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
             }
             if (layout == null)
                 continue;
-            allCrates.add(new Crate(pos.getBlock(), layout));
+            addCrate(new Crate(pos.getBlock(), layout));
         }
 
         // load in temporary creatives
@@ -159,15 +159,6 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
 
     public void onDisable()
     {
-        // researialize and save crate positions
-        for (Location l : toRemove)
-        {
-            cratePositionConfig.getConfig().set(Utility.serializeLocation(l), null);
-        }
-        for (Crate c : allCrates)
-        {
-            cratePositionConfig.getConfig().set(Utility.serializeLocation(c.location.getLocation()), c.layout.type);
-        }
         cratePositionConfig.saveConfig();
         tempCreativeTrackerConfig.saveConfig();
     }
@@ -363,7 +354,7 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
             }
 
             // Place crate
-            allCrates.add(new Crate(location, layout));
+            addCrate(new Crate(location, layout));
             sender.sendMessage(layout.printname + ChatColor.AQUA + " Placed");
         }
 
@@ -541,7 +532,7 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
         }
         if (newCrate == null)
             return;
-        allCrates.add(new Crate(ev.getBlock(), newCrate));
+        addCrate(new Crate(ev.getBlock(), newCrate));
     }
 
     @EventHandler
@@ -572,14 +563,23 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
 
     public void removeCrate(Crate c)
     {
+        cratePositionConfig.getConfig().set(Utility.serializeLocation(c.location.getLocation()), null);
+        cratePositionConfig.saveConfig();
         allCrates.remove(c);
-        toRemove.add(c.location.getLocation());
     }
 
     public void removeCrate(int index)
     {
-        toRemove.add(allCrates.get(index).location.getLocation());
+        cratePositionConfig.getConfig().set(Utility.serializeLocation(allCrates.get(index).location.getLocation()), null);
+        cratePositionConfig.saveConfig();
         allCrates.remove(index);
+    }
+
+    public void addCrate(Crate c)
+    {
+        allCrates.add(c);
+        cratePositionConfig.getConfig().set(Utility.serializeLocation(c.location.getLocation()), c.layout.type);
+        cratePositionConfig.saveConfig();
     }
 
 }
