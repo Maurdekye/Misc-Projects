@@ -178,7 +178,7 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
                 ply.addPotionEffect(new PotionEffect(PotionEffectType.LUCK, 40, 2), true);
             }
 
-            // Knackerbreaker Chestplate
+            // Knackerbreaker Chesterplate
             if (Utility.itemHasLoreLine(ply.getInventory().getChestplate(), ChatColor.BLACK + "knackerbreaker_chesterplate"))
             {
                 ply.addPotionEffect(new PotionEffect(PotionEffectType.ABSORPTION, 40, 0), true);
@@ -944,7 +944,7 @@ enum Prize
 
     KNACKERBREAKER_CHESTERPLATE (params -> {
         ItemStack item = new ItemStack(Material.DIAMOND_CHESTPLATE);
-        item = Utility.setName(item, ChatColor.GOLD + "Knackerbreaker Chestplate");
+        item = Utility.setName(item, ChatColor.GOLD + "Knackerbreaker Chesterplate");
         item = Utility.addLoreLine(item, ChatColor.RESET + "The chestplate grants increased health absorption");
         item = Utility.addLoreLine(item, ChatColor.BLACK + "knackerbreaker_chesterplate");
         item.addEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 2);
@@ -954,11 +954,11 @@ enum Prize
         item.addEnchantment(Enchantment.THORNS, 3);
         item.addEnchantment(Enchantment.DURABILITY, 1);
         item.addEnchantment(Enchantment.MENDING, 1);
-        params.rewardee.sendMessage(ChatColor.YELLOW + "You got the Knackerbreaker Chestplate!");
+        params.rewardee.sendMessage(ChatColor.YELLOW + "You got the Knackerbreaker Chesterplate!");
         return Collections.singletonList(item);
     }, params -> {
         ItemStack item = new ItemStack(Material.DIAMOND_CHESTPLATE);
-        return Utility.setName(item, ChatColor.GOLD + "Knackerbreaker Chestplate");
+        return Utility.setName(item, ChatColor.GOLD + "Knackerbreaker Chesterplate");
     }),
 
     HYDRODYNE_HELMET (params -> {

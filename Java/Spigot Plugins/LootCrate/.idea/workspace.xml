@@ -25,40 +25,19 @@
       <file leaf-file-name="LootCrate.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/com/ncolaprete/lootcrate/LootCrate.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="586">
-              <caret line="945" column="45" selection-start-line="945" selection-start-column="45" selection-end-line="945" selection-end-column="45" />
+            <state relative-caret-position="463">
+              <caret line="426" column="59" selection-start-line="426" selection-start-column="59" selection-end-line="426" selection-end-column="59" />
               <folding>
                 <element signature="method#onEnable#0;class#LootCrate#0" expanded="false" />
                 <element signature="method#onDisable#0;class#LootCrate#0" expanded="false" />
-                <element signature="method#checkForCreativeTimeUp#0;class#LootCrate#0" expanded="false" />
-                <element signature="method#onCommand#0;class#LootCrate#0" expanded="false" />
-                <element signature="method#playerInteract#0;class#LootCrate#0" expanded="false" />
-                <element signature="method#blockBreak#0;class#LootCrate#0" expanded="false" />
-                <element signature="method#blockPlace#0;class#LootCrate#0" expanded="false" />
-                <element signature="method#inventoryClick#0;class#LootCrate#0" expanded="false" />
-                <element signature="method#projectileLaunch#0;class#LootCrate#0" expanded="false" />
-                <element signature="method#removeCrate#0;class#LootCrate#0" expanded="false" />
-                <element signature="method#removeCrate#1;class#LootCrate#0" expanded="false" />
-                <element signature="method#addCrate#0;class#LootCrate#0" expanded="false" />
-                <element signature="method#getCrateItemstack#0;class#LootCrate#0" expanded="false" />
-                <element signature="class#Utility#0" expanded="false" />
-                <element signature="method#itemHasLoreLine#0;class#Utility#0" expanded="false" />
-                <element signature="method#addLoreLine#0;class#Utility#0" expanded="false" />
-                <element signature="method#setName#0;class#Utility#0" expanded="false" />
-                <element signature="method#getName#0;class#Utility#0" expanded="false" />
-                <element signature="method#setChestInventoryName#0;class#Utility#0" expanded="false" />
-                <element signature="method#serializeLocation#0;class#Utility#0" expanded="false" />
-                <element signature="method#deserializeLocation#0;class#Utility#0" expanded="false" />
-                <element signature="class#Crate#0" expanded="false" />
-                <element signature="method#Crate#0;class#Crate#0" expanded="false" />
-                <element signature="method#unlockAndGivePrize#0;class#Crate#0" expanded="false" />
-                <element signature="class#CrateLayout#0" expanded="false" />
-                <element signature="method#CrateLayout#0;class#CrateLayout#0" expanded="false" />
-                <element signature="method#givePrize#0;class#CrateLayout#0" expanded="false" />
-                <element signature="method#showContents#0;class#CrateLayout#0" expanded="false" />
-                <element signature="method#getPrintname#0;class#CrateLayout#0" expanded="false" />
-                <element signature="class#Reward#0" expanded="false" />
-                <element signature="method#Reward#0;class#Reward#0" expanded="false" />
+                <element signature="e#22844#22845#0" expanded="true" />
+                <element signature="e#22911#22912#0" expanded="true" />
+                <element signature="e#24811#24812#0" expanded="true" />
+                <element signature="e#24876#24877#0" expanded="true" />
+                <element signature="e#24928#24929#0" expanded="true" />
+                <element signature="e#24973#24974#0" expanded="true" />
+                <element signature="e#26932#26933#0" expanded="true" />
+                <element signature="e#27009#27010#0" expanded="true" />
                 <element signature="method#Prize#0;class#Prize#0" expanded="false" />
                 <element signature="method#giveReward#0;class#Prize#0" expanded="false" />
                 <element signature="method#getVisualisation#0;class#Prize#0" expanded="false" />
@@ -493,7 +472,7 @@
     <layout>
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
-      <window_info id="Messages" active="false" anchor="left" auto_hide="false" internal_type="SLIDING" type="SLIDING" visible="false" show_stripe_button="true" weight="0.09322917" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" x="-10" y="671" width="3860" height="692" />
+      <window_info id="Messages" active="true" anchor="left" auto_hide="false" internal_type="SLIDING" type="SLIDING" visible="true" show_stripe_button="true" weight="0.09322917" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" x="-10" y="671" width="3860" height="692" />
       <window_info id="Palette&#9;" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Capture Analysis" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3298264" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
@@ -546,35 +525,14 @@
           <folding>
             <element signature="method#onEnable#0;class#LootCrate#0" expanded="false" />
             <element signature="method#onDisable#0;class#LootCrate#0" expanded="false" />
-            <element signature="method#checkForCreativeTimeUp#0;class#LootCrate#0" expanded="false" />
-            <element signature="method#onCommand#0;class#LootCrate#0" expanded="false" />
-            <element signature="method#playerInteract#0;class#LootCrate#0" expanded="false" />
-            <element signature="method#blockBreak#0;class#LootCrate#0" expanded="false" />
-            <element signature="method#blockPlace#0;class#LootCrate#0" expanded="false" />
-            <element signature="method#inventoryClick#0;class#LootCrate#0" expanded="false" />
-            <element signature="method#projectileLaunch#0;class#LootCrate#0" expanded="false" />
-            <element signature="method#removeCrate#0;class#LootCrate#0" expanded="false" />
-            <element signature="method#removeCrate#1;class#LootCrate#0" expanded="false" />
-            <element signature="method#addCrate#0;class#LootCrate#0" expanded="false" />
-            <element signature="method#getCrateItemstack#0;class#LootCrate#0" expanded="false" />
-            <element signature="class#Utility#0" expanded="false" />
-            <element signature="method#itemHasLoreLine#0;class#Utility#0" expanded="false" />
-            <element signature="method#addLoreLine#0;class#Utility#0" expanded="false" />
-            <element signature="method#setName#0;class#Utility#0" expanded="false" />
-            <element signature="method#getName#0;class#Utility#0" expanded="false" />
-            <element signature="method#setChestInventoryName#0;class#Utility#0" expanded="false" />
-            <element signature="method#serializeLocation#0;class#Utility#0" expanded="false" />
-            <element signature="method#deserializeLocation#0;class#Utility#0" expanded="false" />
-            <element signature="class#Crate#0" expanded="false" />
-            <element signature="method#Crate#0;class#Crate#0" expanded="false" />
-            <element signature="method#unlockAndGivePrize#0;class#Crate#0" expanded="false" />
-            <element signature="class#CrateLayout#0" expanded="false" />
-            <element signature="method#CrateLayout#0;class#CrateLayout#0" expanded="false" />
-            <element signature="method#givePrize#0;class#CrateLayout#0" expanded="false" />
-            <element signature="method#showContents#0;class#CrateLayout#0" expanded="false" />
-            <element signature="method#getPrintname#0;class#CrateLayout#0" expanded="false" />
-            <element signature="class#Reward#0" expanded="false" />
-            <element signature="method#Reward#0;class#Reward#0" expanded="false" />
+            <element signature="e#22844#22845#0" expanded="true" />
+            <element signature="e#22911#22912#0" expanded="true" />
+            <element signature="e#24811#24812#0" expanded="true" />
+            <element signature="e#24876#24877#0" expanded="true" />
+            <element signature="e#24928#24929#0" expanded="true" />
+            <element signature="e#24973#24974#0" expanded="true" />
+            <element signature="e#26932#26933#0" expanded="true" />
+            <element signature="e#27009#27010#0" expanded="true" />
             <element signature="method#Prize#0;class#Prize#0" expanded="false" />
             <element signature="method#giveReward#0;class#Prize#0" expanded="false" />
             <element signature="method#getVisualisation#0;class#Prize#0" expanded="false" />
@@ -617,35 +575,14 @@
           <folding>
             <element signature="method#onEnable#0;class#LootCrate#0" expanded="false" />
             <element signature="method#onDisable#0;class#LootCrate#0" expanded="false" />
-            <element signature="method#checkForCreativeTimeUp#0;class#LootCrate#0" expanded="false" />
-            <element signature="method#onCommand#0;class#LootCrate#0" expanded="false" />
-            <element signature="method#playerInteract#0;class#LootCrate#0" expanded="false" />
-            <element signature="method#blockBreak#0;class#LootCrate#0" expanded="false" />
-            <element signature="method#blockPlace#0;class#LootCrate#0" expanded="false" />
-            <element signature="method#inventoryClick#0;class#LootCrate#0" expanded="false" />
-            <element signature="method#projectileLaunch#0;class#LootCrate#0" expanded="false" />
-            <element signature="method#removeCrate#0;class#LootCrate#0" expanded="false" />
-            <element signature="method#removeCrate#1;class#LootCrate#0" expanded="false" />
-            <element signature="method#addCrate#0;class#LootCrate#0" expanded="false" />
-            <element signature="method#getCrateItemstack#0;class#LootCrate#0" expanded="false" />
-            <element signature="class#Utility#0" expanded="false" />
-            <element signature="method#itemHasLoreLine#0;class#Utility#0" expanded="false" />
-            <element signature="method#addLoreLine#0;class#Utility#0" expanded="false" />
-            <element signature="method#setName#0;class#Utility#0" expanded="false" />
-            <element signature="method#getName#0;class#Utility#0" expanded="false" />
-            <element signature="method#setChestInventoryName#0;class#Utility#0" expanded="false" />
-            <element signature="method#serializeLocation#0;class#Utility#0" expanded="false" />
-            <element signature="method#deserializeLocation#0;class#Utility#0" expanded="false" />
-            <element signature="class#Crate#0" expanded="false" />
-            <element signature="method#Crate#0;class#Crate#0" expanded="false" />
-            <element signature="method#unlockAndGivePrize#0;class#Crate#0" expanded="false" />
-            <element signature="class#CrateLayout#0" expanded="false" />
-            <element signature="method#CrateLayout#0;class#CrateLayout#0" expanded="false" />
-            <element signature="method#givePrize#0;class#CrateLayout#0" expanded="false" />
-            <element signature="method#showContents#0;class#CrateLayout#0" expanded="false" />
-            <element signature="method#getPrintname#0;class#CrateLayout#0" expanded="false" />
-            <element signature="class#Reward#0" expanded="false" />
-            <element signature="method#Reward#0;class#Reward#0" expanded="false" />
+            <element signature="e#22844#22845#0" expanded="true" />
+            <element signature="e#22911#22912#0" expanded="true" />
+            <element signature="e#24811#24812#0" expanded="true" />
+            <element signature="e#24876#24877#0" expanded="true" />
+            <element signature="e#24928#24929#0" expanded="true" />
+            <element signature="e#24973#24974#0" expanded="true" />
+            <element signature="e#26932#26933#0" expanded="true" />
+            <element signature="e#27009#27010#0" expanded="true" />
             <element signature="method#Prize#0;class#Prize#0" expanded="false" />
             <element signature="method#giveReward#0;class#Prize#0" expanded="false" />
             <element signature="method#getVisualisation#0;class#Prize#0" expanded="false" />
@@ -688,35 +625,14 @@
           <folding>
             <element signature="method#onEnable#0;class#LootCrate#0" expanded="false" />
             <element signature="method#onDisable#0;class#LootCrate#0" expanded="false" />
-            <element signature="method#checkForCreativeTimeUp#0;class#LootCrate#0" expanded="false" />
-            <element signature="method#onCommand#0;class#LootCrate#0" expanded="false" />
-            <element signature="method#playerInteract#0;class#LootCrate#0" expanded="false" />
-            <element signature="method#blockBreak#0;class#LootCrate#0" expanded="false" />
-            <element signature="method#blockPlace#0;class#LootCrate#0" expanded="false" />
-            <element signature="method#inventoryClick#0;class#LootCrate#0" expanded="false" />
-            <element signature="method#projectileLaunch#0;class#LootCrate#0" expanded="false" />
-            <element signature="method#removeCrate#0;class#LootCrate#0" expanded="false" />
-            <element signature="method#removeCrate#1;class#LootCrate#0" expanded="false" />
-            <element signature="method#addCrate#0;class#LootCrate#0" expanded="false" />
-            <element signature="method#getCrateItemstack#0;class#LootCrate#0" expanded="false" />
-            <element signature="class#Utility#0" expanded="false" />
-            <element signature="method#itemHasLoreLine#0;class#Utility#0" expanded="false" />
-            <element signature="method#addLoreLine#0;class#Utility#0" expanded="false" />
-            <element signature="method#setName#0;class#Utility#0" expanded="false" />
-            <element signature="method#getName#0;class#Utility#0" expanded="false" />
-            <element signature="method#setChestInventoryName#0;class#Utility#0" expanded="false" />
-            <element signature="method#serializeLocation#0;class#Utility#0" expanded="false" />
-            <element signature="method#deserializeLocation#0;class#Utility#0" expanded="false" />
-            <element signature="class#Crate#0" expanded="false" />
-            <element signature="method#Crate#0;class#Crate#0" expanded="false" />
-            <element signature="method#unlockAndGivePrize#0;class#Crate#0" expanded="false" />
-            <element signature="class#CrateLayout#0" expanded="false" />
-            <element signature="method#CrateLayout#0;class#CrateLayout#0" expanded="false" />
-            <element signature="method#givePrize#0;class#CrateLayout#0" expanded="false" />
-            <element signature="method#showContents#0;class#CrateLayout#0" expanded="false" />
-            <element signature="method#getPrintname#0;class#CrateLayout#0" expanded="false" />
-            <element signature="class#Reward#0" expanded="false" />
-            <element signature="method#Reward#0;class#Reward#0" expanded="false" />
+            <element signature="e#22844#22845#0" expanded="true" />
+            <element signature="e#22911#22912#0" expanded="true" />
+            <element signature="e#24811#24812#0" expanded="true" />
+            <element signature="e#24876#24877#0" expanded="true" />
+            <element signature="e#24928#24929#0" expanded="true" />
+            <element signature="e#24973#24974#0" expanded="true" />
+            <element signature="e#26932#26933#0" expanded="true" />
+            <element signature="e#27009#27010#0" expanded="true" />
             <element signature="method#Prize#0;class#Prize#0" expanded="false" />
             <element signature="method#giveReward#0;class#Prize#0" expanded="false" />
             <element signature="method#getVisualisation#0;class#Prize#0" expanded="false" />
@@ -759,35 +675,14 @@
           <folding>
             <element signature="method#onEnable#0;class#LootCrate#0" expanded="false" />
             <element signature="method#onDisable#0;class#LootCrate#0" expanded="false" />
-            <element signature="method#checkForCreativeTimeUp#0;class#LootCrate#0" expanded="false" />
-            <element signature="method#onCommand#0;class#LootCrate#0" expanded="false" />
-            <element signature="method#playerInteract#0;class#LootCrate#0" expanded="false" />
-            <element signature="method#blockBreak#0;class#LootCrate#0" expanded="false" />
-            <element signature="method#blockPlace#0;class#LootCrate#0" expanded="false" />
-            <element signature="method#inventoryClick#0;class#LootCrate#0" expanded="false" />
-            <element signature="method#projectileLaunch#0;class#LootCrate#0" expanded="false" />
-            <element signature="method#removeCrate#0;class#LootCrate#0" expanded="false" />
-            <element signature="method#removeCrate#1;class#LootCrate#0" expanded="false" />
-            <element signature="method#addCrate#0;class#LootCrate#0" expanded="false" />
-            <element signature="method#getCrateItemstack#0;class#LootCrate#0" expanded="false" />
-            <element signature="class#Utility#0" expanded="false" />
-            <element signature="method#itemHasLoreLine#0;class#Utility#0" expanded="false" />
-            <element signature="method#addLoreLine#0;class#Utility#0" expanded="false" />
-            <element signature="method#setName#0;class#Utility#0" expanded="false" />
-            <element signature="method#getName#0;class#Utility#0" expanded="false" />
-            <element signature="method#setChestInventoryName#0;class#Utility#0" expanded="false" />
-            <element signature="method#serializeLocation#0;class#Utility#0" expanded="false" />
-            <element signature="method#deserializeLocation#0;class#Utility#0" expanded="false" />
-            <element signature="class#Crate#0" expanded="false" />
-            <element signature="method#Crate#0;class#Crate#0" expanded="false" />
-            <element signature="method#unlockAndGivePrize#0;class#Crate#0" expanded="false" />
-            <element signature="class#CrateLayout#0" expanded="false" />
-            <element signature="method#CrateLayout#0;class#CrateLayout#0" expanded="false" />
-            <element signature="method#givePrize#0;class#CrateLayout#0" expanded="false" />
-            <element signature="method#showContents#0;class#CrateLayout#0" expanded="false" />
-            <element signature="method#getPrintname#0;class#CrateLayout#0" expanded="false" />
-            <element signature="class#Reward#0" expanded="false" />
-            <element signature="method#Reward#0;class#Reward#0" expanded="false" />
+            <element signature="e#22844#22845#0" expanded="true" />
+            <element signature="e#22911#22912#0" expanded="true" />
+            <element signature="e#24811#24812#0" expanded="true" />
+            <element signature="e#24876#24877#0" expanded="true" />
+            <element signature="e#24928#24929#0" expanded="true" />
+            <element signature="e#24973#24974#0" expanded="true" />
+            <element signature="e#26932#26933#0" expanded="true" />
+            <element signature="e#27009#27010#0" expanded="true" />
             <element signature="method#Prize#0;class#Prize#0" expanded="false" />
             <element signature="method#giveReward#0;class#Prize#0" expanded="false" />
             <element signature="method#getVisualisation#0;class#Prize#0" expanded="false" />
@@ -830,35 +725,14 @@
           <folding>
             <element signature="method#onEnable#0;class#LootCrate#0" expanded="false" />
             <element signature="method#onDisable#0;class#LootCrate#0" expanded="false" />
-            <element signature="method#checkForCreativeTimeUp#0;class#LootCrate#0" expanded="false" />
-            <element signature="method#onCommand#0;class#LootCrate#0" expanded="false" />
-            <element signature="method#playerInteract#0;class#LootCrate#0" expanded="false" />
-            <element signature="method#blockBreak#0;class#LootCrate#0" expanded="false" />
-            <element signature="method#blockPlace#0;class#LootCrate#0" expanded="false" />
-            <element signature="method#inventoryClick#0;class#LootCrate#0" expanded="false" />
-            <element signature="method#projectileLaunch#0;class#LootCrate#0" expanded="false" />
-            <element signature="method#removeCrate#0;class#LootCrate#0" expanded="false" />
-            <element signature="method#removeCrate#1;class#LootCrate#0" expanded="false" />
-            <element signature="method#addCrate#0;class#LootCrate#0" expanded="false" />
-            <element signature="method#getCrateItemstack#0;class#LootCrate#0" expanded="false" />
-            <element signature="class#Utility#0" expanded="false" />
-            <element signature="method#itemHasLoreLine#0;class#Utility#0" expanded="false" />
-            <element signature="method#addLoreLine#0;class#Utility#0" expanded="false" />
-            <element signature="method#setName#0;class#Utility#0" expanded="false" />
-            <element signature="method#getName#0;class#Utility#0" expanded="false" />
-            <element signature="method#setChestInventoryName#0;class#Utility#0" expanded="false" />
-            <element signature="method#serializeLocation#0;class#Utility#0" expanded="false" />
-            <element signature="method#deserializeLocation#0;class#Utility#0" expanded="false" />
-            <element signature="class#Crate#0" expanded="false" />
-            <element signature="method#Crate#0;class#Crate#0" expanded="false" />
-            <element signature="method#unlockAndGivePrize#0;class#Crate#0" expanded="false" />
-            <element signature="class#CrateLayout#0" expanded="false" />
-            <element signature="method#CrateLayout#0;class#CrateLayout#0" expanded="false" />
-            <element signature="method#givePrize#0;class#CrateLayout#0" expanded="false" />
-            <element signature="method#showContents#0;class#CrateLayout#0" expanded="false" />
-            <element signature="method#getPrintname#0;class#CrateLayout#0" expanded="false" />
-            <element signature="class#Reward#0" expanded="false" />
-            <element signature="method#Reward#0;class#Reward#0" expanded="false" />
+            <element signature="e#22844#22845#0" expanded="true" />
+            <element signature="e#22911#22912#0" expanded="true" />
+            <element signature="e#24811#24812#0" expanded="true" />
+            <element signature="e#24876#24877#0" expanded="true" />
+            <element signature="e#24928#24929#0" expanded="true" />
+            <element signature="e#24973#24974#0" expanded="true" />
+            <element signature="e#26932#26933#0" expanded="true" />
+            <element signature="e#27009#27010#0" expanded="true" />
             <element signature="method#Prize#0;class#Prize#0" expanded="false" />
             <element signature="method#giveReward#0;class#Prize#0" expanded="false" />
             <element signature="method#getVisualisation#0;class#Prize#0" expanded="false" />
@@ -901,35 +775,14 @@
           <folding>
             <element signature="method#onEnable#0;class#LootCrate#0" expanded="false" />
             <element signature="method#onDisable#0;class#LootCrate#0" expanded="false" />
-            <element signature="method#checkForCreativeTimeUp#0;class#LootCrate#0" expanded="false" />
-            <element signature="method#onCommand#0;class#LootCrate#0" expanded="false" />
-            <element signature="method#playerInteract#0;class#LootCrate#0" expanded="false" />
-            <element signature="method#blockBreak#0;class#LootCrate#0" expanded="false" />
-            <element signature="method#blockPlace#0;class#LootCrate#0" expanded="false" />
-            <element signature="method#inventoryClick#0;class#LootCrate#0" expanded="false" />
-            <element signature="method#projectileLaunch#0;class#LootCrate#0" expanded="false" />
-            <element signature="method#removeCrate#0;class#LootCrate#0" expanded="false" />
-            <element signature="method#removeCrate#1;class#LootCrate#0" expanded="false" />
-            <element signature="method#addCrate#0;class#LootCrate#0" expanded="false" />
-            <element signature="method#getCrateItemstack#0;class#LootCrate#0" expanded="false" />
-            <element signature="class#Utility#0" expanded="false" />
-            <element signature="method#itemHasLoreLine#0;class#Utility#0" expanded="false" />
-            <element signature="method#addLoreLine#0;class#Utility#0" expanded="false" />
-            <element signature="method#setName#0;class#Utility#0" expanded="false" />
-            <element signature="method#getName#0;class#Utility#0" expanded="false" />
-            <element signature="method#setChestInventoryName#0;class#Utility#0" expanded="false" />
-            <element signature="method#serializeLocation#0;class#Utility#0" expanded="false" />
-            <element signature="method#deserializeLocation#0;class#Utility#0" expanded="false" />
-            <element signature="class#Crate#0" expanded="false" />
-            <element signature="method#Crate#0;class#Crate#0" expanded="false" />
-            <element signature="method#unlockAndGivePrize#0;class#Crate#0" expanded="false" />
-            <element signature="class#CrateLayout#0" expanded="false" />
-            <element signature="method#CrateLayout#0;class#CrateLayout#0" expanded="false" />
-            <element signature="method#givePrize#0;class#CrateLayout#0" expanded="false" />
-            <element signature="method#showContents#0;class#CrateLayout#0" expanded="false" />
-            <element signature="method#getPrintname#0;class#CrateLayout#0" expanded="false" />
-            <element signature="class#Reward#0" expanded="false" />
-            <element signature="method#Reward#0;class#Reward#0" expanded="false" />
+            <element signature="e#22844#22845#0" expanded="true" />
+            <element signature="e#22911#22912#0" expanded="true" />
+            <element signature="e#24811#24812#0" expanded="true" />
+            <element signature="e#24876#24877#0" expanded="true" />
+            <element signature="e#24928#24929#0" expanded="true" />
+            <element signature="e#24973#24974#0" expanded="true" />
+            <element signature="e#26932#26933#0" expanded="true" />
+            <element signature="e#27009#27010#0" expanded="true" />
             <element signature="method#Prize#0;class#Prize#0" expanded="false" />
             <element signature="method#giveReward#0;class#Prize#0" expanded="false" />
             <element signature="method#getVisualisation#0;class#Prize#0" expanded="false" />
@@ -989,40 +842,19 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/com/ncolaprete/lootcrate/LootCrate.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="586">
-          <caret line="945" column="45" selection-start-line="945" selection-start-column="45" selection-end-line="945" selection-end-column="45" />
+        <state relative-caret-position="463">
+          <caret line="426" column="59" selection-start-line="426" selection-start-column="59" selection-end-line="426" selection-end-column="59" />
           <folding>
             <element signature="method#onEnable#0;class#LootCrate#0" expanded="false" />
             <element signature="method#onDisable#0;class#LootCrate#0" expanded="false" />
-            <element signature="method#checkForCreativeTimeUp#0;class#LootCrate#0" expanded="false" />
-            <element signature="method#onCommand#0;class#LootCrate#0" expanded="false" />
-            <element signature="method#playerInteract#0;class#LootCrate#0" expanded="false" />
-            <element signature="method#blockBreak#0;class#LootCrate#0" expanded="false" />
-            <element signature="method#blockPlace#0;class#LootCrate#0" expanded="false" />
-            <element signature="method#inventoryClick#0;class#LootCrate#0" expanded="false" />
-            <element signature="method#projectileLaunch#0;class#LootCrate#0" expanded="false" />
-            <element signature="method#removeCrate#0;class#LootCrate#0" expanded="false" />
-            <element signature="method#removeCrate#1;class#LootCrate#0" expanded="false" />
-            <element signature="method#addCrate#0;class#LootCrate#0" expanded="false" />
-            <element signature="method#getCrateItemstack#0;class#LootCrate#0" expanded="false" />
-            <element signature="class#Utility#0" expanded="false" />
-            <element signature="method#itemHasLoreLine#0;class#Utility#0" expanded="false" />
-            <element signature="method#addLoreLine#0;class#Utility#0" expanded="false" />
-            <element signature="method#setName#0;class#Utility#0" expanded="false" />
-            <element signature="method#getName#0;class#Utility#0" expanded="false" />
-            <element signature="method#setChestInventoryName#0;class#Utility#0" expanded="false" />
-            <element signature="method#serializeLocation#0;class#Utility#0" expanded="false" />
-            <element signature="method#deserializeLocation#0;class#Utility#0" expanded="false" />
-            <element signature="class#Crate#0" expanded="false" />
-            <element signature="method#Crate#0;class#Crate#0" expanded="false" />
-            <element signature="method#unlockAndGivePrize#0;class#Crate#0" expanded="false" />
-            <element signature="class#CrateLayout#0" expanded="false" />
-            <element signature="method#CrateLayout#0;class#CrateLayout#0" expanded="false" />
-            <element signature="method#givePrize#0;class#CrateLayout#0" expanded="false" />
-            <element signature="method#showContents#0;class#CrateLayout#0" expanded="false" />
-            <element signature="method#getPrintname#0;class#CrateLayout#0" expanded="false" />
-            <element signature="class#Reward#0" expanded="false" />
-            <element signature="method#Reward#0;class#Reward#0" expanded="false" />
+            <element signature="e#22844#22845#0" expanded="true" />
+            <element signature="e#22911#22912#0" expanded="true" />
+            <element signature="e#24811#24812#0" expanded="true" />
+            <element signature="e#24876#24877#0" expanded="true" />
+            <element signature="e#24928#24929#0" expanded="true" />
+            <element signature="e#24973#24974#0" expanded="true" />
+            <element signature="e#26932#26933#0" expanded="true" />
+            <element signature="e#27009#27010#0" expanded="true" />
             <element signature="method#Prize#0;class#Prize#0" expanded="false" />
             <element signature="method#giveReward#0;class#Prize#0" expanded="false" />
             <element signature="method#getVisualisation#0;class#Prize#0" expanded="false" />
