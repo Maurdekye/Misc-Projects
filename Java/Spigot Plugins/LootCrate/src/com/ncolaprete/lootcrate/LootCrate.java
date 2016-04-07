@@ -890,9 +890,9 @@ enum Prize
         params.plugin.tempCreativeTimestamps.put(params.rewardee.getUniqueId(), System.currentTimeMillis() + params.amountToGive * 3600000);
         params.plugin.tempCreativeTrackerConfig.saveConfig();
         if (params.amountToGive == 1)
-            params.rewardee.sendMessage("You have received the ultimate reward: you may be in creative for 1 hour.");
+            params.rewardee.sendMessage("You have received the ultimate reward: " + ChatColor.BOLD + "you may be in creative for 1 hour.");
         else
-            params.rewardee.sendMessage("You have received the ultimate reward: you may be in creative for " + params.amountToGive + " hours.");
+            params.rewardee.sendMessage("You have received the ultimate reward: " + ChatColor.BOLD + "you may be in creative for " + params.amountToGive + " hours.");
         return null;
     }, params -> {
         ItemStack item = new ItemStack(Material.COMMAND);
@@ -1115,6 +1115,55 @@ enum Prize
         else
             item = Utility.setName(item, ChatColor.DARK_AQUA + "1 Gold Ingot");
         return item;
+    }),
+
+    RAW_ORE_BLOCKS (params -> {
+        ArrayList<ItemStack> rewards = new ArrayList<>();
+        HashMap<Material, Integer> multipliers = new HashMap<>();
+        multipliers.put(Material.COAL_ORE, 6);
+        multipliers.put(Material.IRON_ORE, 4);
+        multipliers.put(Material.GOLD_ORE, 3);
+        multipliers.put(Material.REDSTONE_ORE, 5);
+        multipliers.put(Material.LAPIS_ORE, 5);
+        multipliers.put(Material.DIAMOND_ORE, 1);
+        multipliers.put(Material.EMERALD_ORE, 1);
+        for (Material key : multipliers.keySet())
+        {
+            int basecount = params.amountToGive * multipliers.get(key);
+            ItemStack item = new ItemStack(key, Utility.randomInt(basecount, basecount*2));
+            rewards.add(item);
+        }
+        params.rewardee.sendMessage(ChatColor.AQUA + "You got various raw ore blocks!");
+        return rewards;
+    }, params -> {
+        ItemStack item = new ItemStack(Material.REDSTONE_ORE);
+        return Utility.setName(item, ChatColor.AQUA + "Assorted Raw Ore Blocks");
+    }),
+
+    ASSORTED_ORES (params -> {
+        ArrayList<ItemStack> rewards = new ArrayList<>();
+        HashMap<Material, Integer> multipliers = new HashMap<>();
+        multipliers.put(Material.COBBLESTONE, 24);
+        multipliers.put(Material.COAL, 12);
+        multipliers.put(Material.IRON_INGOT, 8);
+        multipliers.put(Material.GOLD_INGOT, 6);
+        multipliers.put(Material.REDSTONE, 18);
+        multipliers.put(Material.INK_SACK, 15);
+        multipliers.put(Material.DIAMOND, 2);
+        multipliers.put(Material.EMERALD, 3);
+        for (Material key : multipliers.keySet())
+        {
+            int basecount = params.amountToGive * multipliers.get(key);
+            ItemStack item = new ItemStack(key, Utility.randomInt(basecount, basecount*2));
+            if (key == Material.INK_SACK)
+                item.setDurability((short)4);
+            rewards.add(item);
+        }
+        params.rewardee.sendMessage(ChatColor.AQUA + "You got an assortment of ores!");
+        return rewards;
+    }, params -> {
+        ItemStack item = new ItemStack(Material.COAL);
+        return Utility.setName(item, ChatColor.AQUA + "Assorted Ores");
     }),
 
     ASSORTMENT (params -> {
