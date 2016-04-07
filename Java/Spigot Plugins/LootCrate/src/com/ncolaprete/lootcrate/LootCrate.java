@@ -66,6 +66,7 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
         allCrates = new ArrayList<>();
         crateLayouts = new ArrayList<>();
         toRemove = new ArrayList<>();
+        tempCreativeTimestamps = new HashMap<>();
 
         // load up configs
         cratePositionConfig = new CustomConfig(this, "crate_positions.yml");
