@@ -1,88 +1,213 @@
 package com.ncolaprete.lootcrate;
 
+import com.mysql.jdbc.Util;
 import net.minecraft.server.v1_9_R1.TileEntityChest;
 import org.bukkit.*;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.block.Chest;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.ConsoleCommandSender;
+import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.craftbukkit.v1_9_R1.block.CraftChest;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Firework;
-import org.bukkit.entity.Ocelot;
-import org.bukkit.entity.Player;
+import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.BlockIterator;
 import org.bukkit.util.Vector;
 
+import javax.lang.model.type.ArrayType;
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
 
     ArrayList<Crate> allCrates;
+    ArrayList<Location> toRemove;
     ArrayList<CrateLayout> crateLayouts;
+
+    CustomConfig cratePositionConfig;
+    CustomConfig crateLayoutConfig;
 
     public static final String LockedTag = ChatColor.RED + " [Locked]";
     public static final String UnlockedTag = ChatColor.YELLOW + " [Unlocked]";
+
+    ConsoleCommandSender csend;
 
     // Overridden Methods
 
     public void onEnable()
     {
         getServer().getPluginManager().registerEvents(this, this);
+        getServer().getScheduler().scheduleSyncRepeatingTask(this, this::checkForSpecialItems, 0, 20);
+
+        csend = getServer().getConsoleSender();
+
+        String s = "Available prizes: ";
+        for (Prize p : Prize.values())
+            s += p.toString().toLowerCase() + ", ";
+        csend.sendMessage(s.substring(0, s.length()-2));
 
         allCrates = new ArrayList<>();
         crateLayouts = new ArrayList<>();
-        ArrayList<Reward> mysticCrateRewardList = new ArrayList<>();
-        mysticCrateRewardList.add(new Reward(Prize.INVINCIBILITY, 600, 30));
-        mysticCrateRewardList.add(new Reward(Prize.MONEY, 1000, 30));
-        mysticCrateRewardList.add(new Reward(Prize.IRON_BARS, 64, 15));
-        mysticCrateRewardList.add(new Reward(Prize.MONEY, 500, 10));
-        mysticCrateRewardList.add(new Reward(Prize.MONEY, 2000, 5));
-        mysticCrateRewardList.add(new Reward(Prize.DIAMONDS, 16, 4));
-        mysticCrateRewardList.add(new Reward(Prize.DIAMONDS, 64, 3));
-        mysticCrateRewardList.add(new Reward(Prize.CRATE_KEY, 1, 2));
-        mysticCrateRewardList.add(new Reward(Prize.MYSTIC_KEY, 1, 1));
-        crateLayouts.add(new CrateLayout(
-                ChatColor.LIGHT_PURPLE + "Mystic Crate",
-                "mystic_crate",
-                Prize.MYSTIC_KEY,
-                mysticCrateRewardList
-        ));
-        ArrayList<Reward> commonCrateRewardList = new ArrayList<>();
-        commonCrateRewardList.add(new Reward(Prize.IRON_BARS, 16, 30));
-        commonCrateRewardList.add(new Reward(Prize.INDIVIDUAL_NUGGETS, 8, 30));
-        commonCrateRewardList.add(new Reward(Prize.MONEY, 100, 15));
-        commonCrateRewardList.add(new Reward(Prize.MONEY, 500, 10));
-        commonCrateRewardList.add(new Reward(Prize.MONEY, 2000, 5));
-        commonCrateRewardList.add(new Reward(Prize.DIAMONDS, 1, 4));
-        commonCrateRewardList.add(new Reward(Prize.DIAMONDS, 8, 3));
-        commonCrateRewardList.add(new Reward(Prize.CRATE_KEY, 1, 2));
-        commonCrateRewardList.add(new Reward(Prize.MYSTIC_KEY, 1, 1));
-        crateLayouts.add(new CrateLayout(
-                ChatColor.GREEN + "Common Crate",
-                "common_crate",
-                Prize.CRATE_KEY,
-                commonCrateRewardList
-        ));
+        toRemove = new ArrayList<>();
+
+        // loadup configs
+        cratePositionConfig = new CustomConfig(this, "crate_positions.yml");
+        crateLayoutConfig = new CustomConfig(this, "crate_layouts.yml");
+        crateLayoutConfig.getConfig().options().copyDefaults(true);
+        cratePositionConfig.saveConfig();
+        crateLayoutConfig.saveConfig();
+
+        // load in crate layouts
+        for (String key : crateLayoutConfig.getConfig().getKeys(false))
+        {
+            String type = key;
+            String printname = crateLayoutConfig.getConfig().getString(key + ".name");
+            printname = ChatColor.translateAlternateColorCodes('?', printname);
+            String reqKeyName = crateLayoutConfig.getConfig().getString(key + ".required_key");
+            Prize reqKey;
+            try
+            {
+                reqKey = Prize.valueOf(reqKeyName.toUpperCase());
+            } catch (Exception e)
+            {
+                csend.sendMessage(ChatColor.RED + "Error! Unknown prize: " + reqKeyName);
+                continue;
+            }
+            ArrayList<Reward> rewardList = new ArrayList<>();
+            ConfigurationSection rewardsSection = crateLayoutConfig.getConfig().getConfigurationSection(key + ".rewards");
+            for (String rewardKey : rewardsSection.getKeys(false))
+            {
+                String prizeName = rewardsSection.getString(rewardKey + ".prize");
+                Prize prize;
+                double rewardChance;
+                int amount;
+                try {
+                    prize = Prize.valueOf(prizeName.toUpperCase());
+                } catch (Exception e) {
+                    csend.sendMessage(ChatColor.RED + "Error! Unknown prize: " + prizeName);
+                    continue;
+                }
+                try {
+                    rewardChance = Double.parseDouble(rewardsSection.getString(rewardKey + ".chance"));
+                } catch (Exception e) {
+                    csend.sendMessage(ChatColor.RED + "Error! '" + rewardsSection.getString(rewardKey + ".chance") + "' is not a number!");
+                    continue;
+                }
+                try {
+                    amount = Integer.parseInt(rewardsSection.getString(rewardKey + ".amount"));
+                } catch (Exception e) {
+                    csend.sendMessage(ChatColor.RED + "Error! '" + rewardsSection.getString(rewardKey + ".amount") + "' is not an integer!");
+                    continue;
+                }
+
+                rewardList.add(new Reward(prize, amount, rewardChance));
+            }
+            crateLayouts.add(new CrateLayout(printname, type, reqKey, rewardList));
+        }
+
+        if (crateLayouts.size() == 0)
+        {
+            csend.sendMessage(ChatColor.RED + "Critical Error; No crate layouts detected! Disabling plugin.");
+            getPluginLoader().disablePlugin(this);
+        }
+
+        // load in crate locations
+        for (String key : cratePositionConfig.getConfig().getKeys(false))
+        {
+            Location pos = Utility.deserializeLocation(getServer(), key);
+            String layoutname = cratePositionConfig.getConfig().getString(key);
+            CrateLayout layout = null;
+            for (CrateLayout l : crateLayouts)
+            {
+                if (l.type.equalsIgnoreCase(layoutname))
+                {
+                    layout = l;
+                    break;
+                }
+            }
+            if (layout == null)
+                continue;
+            allCrates.add(new Crate(pos.getBlock(), layout));
+        }
+    }
+
+    public void onDisable()
+    {
+        // researialize and save crate positions
+        for (Location l : toRemove)
+        {
+            cratePositionConfig.getConfig().set(Utility.serializeLocation(l), null);
+        }
+        for (Crate c : allCrates)
+        {
+            cratePositionConfig.getConfig().set(Utility.serializeLocation(c.location.getLocation()), c.layout.type);
+        }
+        cratePositionConfig.saveConfig();
+    }
+
+    public void checkForSpecialItems()
+    {
+        for (Player ply : getServer().getOnlinePlayers())
+        {
+            // Frostspark Cleats
+            if (Utility.itemHasLoreLine(ply.getInventory().getBoots(), ChatColor.BLACK + "frostspark_cleats"))
+            {
+                ply.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 40, 2), true);
+                ply.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 40, 1), true);
+            }
+
+            // Lucky Trousers
+            if (Utility.itemHasLoreLine(ply.getInventory().getLeggings(), ChatColor.BLACK + "lucky_trousers"))
+            {
+                ply.addPotionEffect(new PotionEffect(PotionEffectType.LUCK, 40, 2), true);
+            }
+
+            // Knackerbreaker Chestplate
+            if (Utility.itemHasLoreLine(ply.getInventory().getChestplate(), ChatColor.BLACK + "knackerbreaker_chestplate"))
+            {
+                ply.addPotionEffect(new PotionEffect(PotionEffectType.ABSORPTION, 40, 0), true);
+            }
+
+            // Hydrodyne Helmet
+            if (Utility.itemHasLoreLine(ply.getInventory().getHelmet(), ChatColor.BLACK + "hydrodyne_helmet"))
+            {
+                ply.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION, 250, 0), true);
+                ply.addPotionEffect(new PotionEffect(PotionEffectType.WATER_BREATHING, 40, 0), true);
+            }
+
+            // Giga Drill Breaker
+            if (Utility.itemHasLoreLine(ply.getInventory().getItemInMainHand(), ChatColor.BLACK + "giga_drill_breaker"))
+            {
+                ply.addPotionEffect(new PotionEffect(PotionEffectType.FAST_DIGGING, 25, 3), true);
+            }
+
+            // Unyielding Battersea
+            if (Utility.itemHasLoreLine(ply.getInventory().getItemInOffHand(), ChatColor.BLACK + "unyielding_battersea"))
+            {
+                ply.addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 40, 0), true);
+                ply.addPotionEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE, 40, 0), true);
+            }
+        }
     }
 
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args)
@@ -92,12 +217,6 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
         // givecrate
         if (command.getName().equalsIgnoreCase("givecrate"))
         {
-            // Check if sender is player
-            if (ply == null)
-            {
-                sender.sendMessage(ChatColor.RED + "You must be a player to use this command");
-                return true;
-            }
 
             // Find chest layout to use
             CrateLayout layout = null;
@@ -139,6 +258,15 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
                 }
                 target = newtarget;
             }
+
+            // Check if sender is player
+            if (target == null)
+            {
+                sender.sendMessage(ChatColor.RED + "You must be a player to use this command on yourself");
+                return true;
+            }
+            else
+                target = ply;
 
             // give crate
             target.getInventory().addItem(Utility.setName(new ItemStack(Material.CHEST), layout.getPrintname(true)));
@@ -278,7 +406,7 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
     @EventHandler
     public void playerInteract(PlayerInteractEvent ev)
     {
-        if (ev.getAction() == Action.RIGHT_CLICK_BLOCK)
+        if (ev.getAction() == Action.RIGHT_CLICK_BLOCK && !ev.getPlayer().isSneaking())
         {
             Block block = ev.getClickedBlock();
             Crate crateToOpen = null;
@@ -306,7 +434,7 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
                 else
                     ev.getPlayer().getInventory().remove(handItem);
                 crateToOpen.unlockAndGivePrize(ev.getPlayer());
-                allCrates.remove(crateToOpen);
+                removeCrate(crateToOpen);
             }
             else
             {
@@ -327,7 +455,7 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
                 ItemStack crateDrop = Utility.setName(new ItemStack(Material.CHEST), allCrates.get(i).layout.getPrintname(true));
                 ev.getBlock().setType(Material.AIR);
                 ev.getBlock().getWorld().dropItemNaturally(ev.getBlock().getLocation().add(0.5, 0.5, 0.5), crateDrop);
-                allCrates.remove(i);
+                removeCrate(i);
                 break;
             }
         }
@@ -337,14 +465,44 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
     public void blockPlace(BlockPlaceEvent ev)
     {
         String itemName = Utility.getName(ev.getItemInHand());
+        CrateLayout newCrate = null;
+        BlockFace[] cardinalDirections = new BlockFace[] {BlockFace.NORTH, BlockFace.SOUTH, BlockFace.EAST, BlockFace.WEST};
         for (CrateLayout l : crateLayouts)
         {
             if (l.getPrintname(true).equals(itemName))
             {
-                allCrates.add(new Crate(ev.getBlock(), l));
+                newCrate = l;
                 break;
             }
         }
+        if (newCrate != null)
+        {
+            for (BlockFace f : cardinalDirections)
+            {
+                if (ev.getBlock().getRelative(f).getType() == Material.CHEST)
+                {
+                    ev.setCancelled(true);
+                    return;
+                }
+            }
+        }
+        else if (ev.getItemInHand().getType() == Material.CHEST)
+        {
+            for (BlockFace f : cardinalDirections)
+            {
+                for (Crate c : allCrates)
+                {
+                    if (ev.getBlock().getRelative(f).equals(c.location))
+                    {
+                        ev.setCancelled(true);
+                        return;
+                    }
+                }
+            }
+        }
+        if (newCrate == null)
+            return;
+        allCrates.add(new Crate(ev.getBlock(), newCrate));
     }
 
     @EventHandler
@@ -358,6 +516,31 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
                 break;
             }
         }
+    }
+
+    @EventHandler
+    public void projectileLaunch(ProjectileLaunchEvent ev)
+    {
+        if (ev.getEntity() instanceof Arrow && ev.getEntity().getShooter() instanceof Player)
+        {
+            Player ply = (Player) ev.getEntity().getShooter();
+            if (Utility.itemHasLoreLine(ply.getInventory().getItemInMainHand(), ChatColor.BLACK + "velstrike_bow"))
+            {
+                ev.getEntity().setVelocity(ev.getEntity().getVelocity().multiply(4));
+            }
+        }
+    }
+
+    public void removeCrate(Crate c)
+    {
+        allCrates.remove(c);
+        toRemove.add(c.location.getLocation());
+    }
+
+    public void removeCrate(int index)
+    {
+        toRemove.add(allCrates.get(index).location.getLocation());
+        allCrates.remove(index);
     }
 
 }
@@ -433,6 +616,30 @@ class Utility
             e.printStackTrace();
         }
     }
+
+    public static String serializeLocation(Location loc)
+    {
+        StringBuilder sb = new StringBuilder();
+        sb.append(loc.getWorld().getName());
+        sb.append("?");
+        sb.append(loc.getBlockX());
+        sb.append("?");
+        sb.append(loc.getBlockY());
+        sb.append("?");
+        sb.append(loc.getBlockZ());
+        return sb.toString();
+    }
+
+    public static Location deserializeLocation(Server server, String serial)
+    {
+        server.getConsoleSender().sendMessage("deserializing " + serial);
+        String[] parts = serial.split("\\?");
+        World world = server.getWorld(parts[0]);
+        int x = Integer.parseInt(parts[1]);
+        int y = Integer.parseInt(parts[2]);
+        int z = Integer.parseInt(parts[3]);
+        return world.getBlockAt(x, y, z).getLocation();
+    }
 }
 
 class Crate
@@ -499,7 +706,10 @@ class CrateLayout
         }
         Reward chosen = contents.get(prizeIndex);
         chosen.item.giveReward(rewardee, chosen.amount, location);
-        rewardee.playSound(rewardee.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1, 1);
+        if (chosen.item == Prize.NOTHING)
+            rewardee.playSound(rewardee.getLocation(), Sound.BLOCK_NOTE_SNARE, 1, 1);
+        else
+            rewardee.playSound(rewardee.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1, 1);
     }
 
     public Inventory showContents(Player ply, Block chestblock)
@@ -543,44 +753,261 @@ class Reward
 
 enum Prize
 {
-    MYSTIC_KEY (params -> {
+
+    // keys
+
+    ANCIENT_KEY (params -> {
         ItemStack key = new ItemStack(Material.TRIPWIRE_HOOK, params.amountToGive);
         ItemMeta keyMeta = key.getItemMeta();
-        keyMeta.setDisplayName(ChatColor.LIGHT_PURPLE + "Mystic Key");
-        keyMeta.setLore(Arrays.asList("A mystical key of unknown origin. Surely very rare.", ChatColor.BLACK + "mystic_key"));
+        keyMeta.setDisplayName(ChatColor.DARK_GRAY + "Ancient Key");
+        keyMeta.setLore(Arrays.asList("An old key from long ago. History has long forgotten what it unlocks.", ChatColor.BLACK + "ancient_key"));
         key.setItemMeta(keyMeta);
         if (params.amountToGive > 1)
-            params.rewardee.sendMessage("You got " + params.amountToGive + " Mystic Keys!");
+            params.rewardee.sendMessage("You got " + params.amountToGive + " Ancient Keys!");
         else
-            params.rewardee.sendMessage("You got a Mystic Key!");
+            params.rewardee.sendMessage("You got an Ancient Key!");
         return Collections.singletonList(key);
     }, params -> {
         ItemStack key = new ItemStack(Material.TRIPWIRE_HOOK, params.amountToGive);
         ItemMeta keyMeta = key.getItemMeta();
-        keyMeta.setDisplayName(ChatColor.LIGHT_PURPLE + "Mystic Key");
-        keyMeta.setLore(Collections.singletonList("A mystical key of unknown origin. Surely very rare."));
+        keyMeta.setDisplayName(ChatColor.DARK_GRAY + "Ancient Key");
+        keyMeta.setLore(Collections.singletonList("An old key from long ago. History has long forgotten what it unlocks."));
         key.setItemMeta(keyMeta);
         return key;
     }),
 
-    CRATE_KEY (params -> {
+    LEGENDARY_KEY (params -> {
         ItemStack key = new ItemStack(Material.TRIPWIRE_HOOK, params.amountToGive);
         ItemMeta keyMeta = key.getItemMeta();
-        keyMeta.setDisplayName(ChatColor.AQUA + "Crate Key");
-        keyMeta.setLore(Arrays.asList("A normal crate key.", ChatColor.BLACK + "crate_key"));
+        keyMeta.setDisplayName(ChatColor.YELLOW + "" + ChatColor.BOLD + "Legendary Key");
+        keyMeta.setLore(Arrays.asList("An incredibly rare key of legends. It unlocks untold riches.", ChatColor.BLACK + "legendary_key"));
         key.setItemMeta(keyMeta);
         if (params.amountToGive > 1)
-            params.rewardee.sendMessage("You got " + params.amountToGive + " Crate Keys!");
+            params.rewardee.sendMessage("You got " + params.amountToGive + " Legendary Keys!");
         else
-            params.rewardee.sendMessage("You got a Crate Key!");
+            params.rewardee.sendMessage("You got a Legendary Key!");
         return Collections.singletonList(key);
     }, params -> {
         ItemStack key = new ItemStack(Material.TRIPWIRE_HOOK, params.amountToGive);
         ItemMeta keyMeta = key.getItemMeta();
-        keyMeta.setDisplayName(ChatColor.AQUA + "Crate Key");
+        keyMeta.setDisplayName(ChatColor.LIGHT_PURPLE + "Legendary Key");
+        keyMeta.setLore(Collections.singletonList("An incredibly rare key of legends. It unlocks untold riches."));
+        key.setItemMeta(keyMeta);
+        return key;
+    }),
+
+    MYSTICAL_KEY (params -> {
+        ItemStack key = new ItemStack(Material.TRIPWIRE_HOOK, params.amountToGive);
+        ItemMeta keyMeta = key.getItemMeta();
+        keyMeta.setDisplayName(ChatColor.LIGHT_PURPLE + "" + ChatColor.ITALIC + "Mystical Key");
+        keyMeta.setLore(Arrays.asList("A Mysticalal key of unknown origin. Surely very rare.", ChatColor.BLACK + "Mystical_key"));
+        key.setItemMeta(keyMeta);
+        if (params.amountToGive > 1)
+            params.rewardee.sendMessage("You got " + params.amountToGive + " Mystical Keys!");
+        else
+            params.rewardee.sendMessage("You got a Mystical Key!");
+        return Collections.singletonList(key);
+    }, params -> {
+        ItemStack key = new ItemStack(Material.TRIPWIRE_HOOK, params.amountToGive);
+        ItemMeta keyMeta = key.getItemMeta();
+        keyMeta.setDisplayName(ChatColor.LIGHT_PURPLE + "" + ChatColor.ITALIC + "Mystical Key");
+        keyMeta.setLore(Collections.singletonList("A Mysticalal key of unknown origin. Surely very rare."));
+        key.setItemMeta(keyMeta);
+        return key;
+    }),
+
+    COMMON_KEY (params -> {
+        ItemStack key = new ItemStack(Material.TRIPWIRE_HOOK, params.amountToGive);
+        ItemMeta keyMeta = key.getItemMeta();
+        keyMeta.setDisplayName(ChatColor.GREEN + "Common Key");
+        keyMeta.setLore(Arrays.asList("A normal crate key.", ChatColor.BLACK + "common_key"));
+        key.setItemMeta(keyMeta);
+        if (params.amountToGive > 1)
+            params.rewardee.sendMessage("You got " + params.amountToGive + " Common Keys!");
+        else
+            params.rewardee.sendMessage("You got a Common Key!");
+        return Collections.singletonList(key);
+    }, params -> {
+        ItemStack key = new ItemStack(Material.TRIPWIRE_HOOK, params.amountToGive);
+        ItemMeta keyMeta = key.getItemMeta();
+        keyMeta.setDisplayName(ChatColor.GREEN + "Common Key");
         keyMeta.setLore(Collections.singletonList("A normal crate key."));
         key.setItemMeta(keyMeta);
         return key;
+    }),
+
+    // reward items
+
+    LUCKY_TROUSERS (params -> {
+        ItemStack item = new ItemStack(Material.DIAMOND_LEGGINGS);
+        item = Utility.setName(item, ChatColor.GREEN + "Lucky Trousers");
+        item = Utility.addLoreLine(item, ChatColor.RESET + "The trousers grant increased luck");
+        item = Utility.addLoreLine(item, ChatColor.BLACK + "lucky_trousers");
+        item.addEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 1);
+        item.addEnchantment(Enchantment.DURABILITY, 1);
+        params.rewardee.sendMessage(ChatColor.GREEN + "You got the Lucky Trousers!");
+        return Collections.singletonList(item);
+    }, params -> {
+        ItemStack item = new ItemStack(Material.DIAMOND_LEGGINGS);
+        return Utility.setName(item, ChatColor.GREEN + "Lucky Trousers");
+    }),
+
+    KNACKERBREAKER_CHESTPLATE (params -> {
+        ItemStack item = new ItemStack(Material.DIAMOND_CHESTPLATE);
+        item = Utility.setName(item, ChatColor.GOLD + "Knackerbreaker Chestplate");
+        item = Utility.addLoreLine(item, ChatColor.RESET + "The chestplate grants increased health absorption");
+        item = Utility.addLoreLine(item, ChatColor.BLACK + "knackerbreaker_chestplate");
+        item.addEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 2);
+        item.addEnchantment(Enchantment.PROTECTION_EXPLOSIONS, 1);
+        item.addEnchantment(Enchantment.PROTECTION_FIRE, 1);
+        item.addEnchantment(Enchantment.PROTECTION_PROJECTILE, 1);
+        item.addEnchantment(Enchantment.THORNS, 3);
+        item.addEnchantment(Enchantment.DURABILITY, 1);
+        item.addEnchantment(Enchantment.MENDING, 1);
+        params.rewardee.sendMessage(ChatColor.YELLOW + "You got the Knackerbreaker Chestplate!");
+        return Collections.singletonList(item);
+    }, params -> {
+        ItemStack item = new ItemStack(Material.DIAMOND_CHESTPLATE);
+        return Utility.setName(item, ChatColor.GOLD + "Knackerbreaker Chestplate");
+    }),
+
+    FROSTSPARK_CLEATS (params -> {
+        ItemStack item = new ItemStack(Material.DIAMOND_BOOTS);
+        item = Utility.setName(item, ChatColor.YELLOW + "Frostspark Cleats");
+        item = Utility.addLoreLine(item, ChatColor.RESET + "The cleats grant improved mobility");
+        item = Utility.addLoreLine(item, ChatColor.BLACK + "frostspark_cleats");
+        item.addEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 1);
+        item.addEnchantment(Enchantment.DURABILITY, 2);
+        item.addEnchantment(Enchantment.FROST_WALKER, 2);
+        item.addEnchantment(Enchantment.PROTECTION_FALL, 4);
+        params.rewardee.sendMessage(ChatColor.YELLOW + "You got the Frostspark Cleats!");
+        return Collections.singletonList(item);
+    }, params -> {
+        ItemStack item = new ItemStack(Material.DIAMOND_BOOTS);
+        return Utility.setName(item, ChatColor.YELLOW + "Frostspark Cleats");
+    }),
+
+    WATERSTRIDE_BOOTS (params -> {
+        ItemStack item = new ItemStack(Material.DIAMOND_BOOTS);
+        item = Utility.setName(item, ChatColor.AQUA + "Waterstride Boots");
+        item.addEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 1);
+        item.addEnchantment(Enchantment.DURABILITY, 2);
+        item.addEnchantment(Enchantment.DEPTH_STRIDER, 3);
+        params.rewardee.sendMessage(ChatColor.AQUA + "You got the Waterstride Boots!");
+        return Collections.singletonList(item);
+    }, params -> {
+        ItemStack item = new ItemStack(Material.DIAMOND_BOOTS);
+        return Utility.setName(item, ChatColor.AQUA + "Waterstride Boots");
+    }),
+
+    HYDRODYNE_HELMET (params -> {
+        ItemStack item = new ItemStack(Material.DIAMOND_HELMET);
+        item = Utility.setName(item, ChatColor.BLUE + "Hydrodyne Helmet");
+        item = Utility.addLoreLine(item, ChatColor.RESET + "The helmet grants improved underwater and visual acuity");
+        item = Utility.addLoreLine(item, ChatColor.BLACK + "hydrodyne_helmet");
+        item.addEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 1);
+        item.addEnchantment(Enchantment.DURABILITY, 2);
+        item.addEnchantment(Enchantment.OXYGEN, 3);
+        item.addEnchantment(Enchantment.WATER_WORKER, 1);
+        params.rewardee.sendMessage(ChatColor.BLUE + "You got the Hydrodyne Helmet!");
+        return Collections.singletonList(item);
+    }, params -> {
+        ItemStack item = new ItemStack(Material.DIAMOND_HELMET);
+        return Utility.setName(item, ChatColor.BLUE + "Hydrodyne Helmet");
+    }),
+
+    GIGA_DRILL_BREAKER (params -> {
+        ItemStack item = new ItemStack(Material.DIAMOND_PICKAXE);
+        item = Utility.setName(item, ChatColor.AQUA + "" + ChatColor.BOLD + "Giga Drill Breaker");
+        item = Utility.addLoreLine(item, ChatColor.AQUA + "Bust through the heavens with your Drill!");
+        item = Utility.addLoreLine(item, ChatColor.BLACK + "giga_drill_breaker");
+        item.addEnchantment(Enchantment.DIG_SPEED, 5);
+        item.addEnchantment(Enchantment.DURABILITY, 3);
+        params.rewardee.sendMessage(ChatColor.AQUA + "You got the Giga Drill Breaker; thrust through the heavens with your spirit!");
+        return Collections.singletonList(item);
+    }, params -> {
+        ItemStack item = new ItemStack(Material.DIAMOND_PICKAXE);
+        return Utility.setName(item, ChatColor.AQUA + "" + ChatColor.BOLD + "Giga Drill Breaker");
+    }),
+
+    UNYIELDING_BATTERSEA (params -> {
+        ItemStack item = new ItemStack(Material.SHIELD);
+        item = Utility.setName(item, ChatColor.YELLOW + "Unyielding Battersea");
+        item = Utility.addLoreLine(item, "An olden shield used by unending legions");
+        item = Utility.addLoreLine(item, ChatColor.RESET + "The battersea grants increase resistances while equipped");
+        item = Utility.addLoreLine(item, ChatColor.BLACK + "unyielding_battersea");
+        item.addEnchantment(Enchantment.DURABILITY, 3);
+        item.addEnchantment(Enchantment.MENDING, 1);
+        params.rewardee.sendMessage(ChatColor.YELLOW + "You got the Unyielding Battersea!");
+        return Collections.singletonList(item);
+    }, params -> {
+        ItemStack item = new ItemStack(Material.SHIELD);
+        return Utility.setName(item, ChatColor.YELLOW + "Unyielding Battersea");
+    }),
+
+    VELSTRIKE_BOW (params -> {
+        ItemStack item = new ItemStack(Material.BOW);
+        item = Utility.setName(item, ChatColor.YELLOW + "" + ChatColor.ITALIC + "Velstrike Bow");
+        item = Utility.addLoreLine(item, "An ancient, powerful bow used by an immensely skilled marksman");
+        item = Utility.addLoreLine(item, ChatColor.RESET + "The bow grants immense arrow speed");
+        item = Utility.addLoreLine(item, ChatColor.BLACK + "velstrike_bow");
+        item.addEnchantment(Enchantment.ARROW_DAMAGE, 5);
+        item.addEnchantment(Enchantment.ARROW_KNOCKBACK, 2);
+        item.addEnchantment(Enchantment.DURABILITY, 2);
+        item.addEnchantment(Enchantment.MENDING, 1);
+        params.rewardee.sendMessage(ChatColor.YELLOW + "" + ChatColor.ITALIC + "You got the Velstrike Bow!");
+        return Collections.singletonList(item);
+    }, params -> {
+        ItemStack item = new ItemStack(Material.BOW);
+        return Utility.setName(item, ChatColor.YELLOW + "" + ChatColor.ITALIC + "Velstrike Bow");
+    }),
+
+    HEAVENS_BLADE (params -> {
+        ItemStack item = new ItemStack(Material.DIAMOND_SWORD);
+        item = Utility.setName(item, ChatColor.YELLOW + "" + ChatColor.BOLD + "Heaven's Blade");
+        item = Utility.addLoreLine(item, "A godly blade of incredible desctructive power");
+        item.addEnchantment(Enchantment.DAMAGE_ALL, 5);
+        item.addEnchantment(Enchantment.KNOCKBACK, 2);
+        item.addEnchantment(Enchantment.FIRE_ASPECT, 2);
+        item.addEnchantment(Enchantment.DURABILITY, 3);
+        item.addEnchantment(Enchantment.MENDING, 1);
+        params.rewardee.sendMessage(ChatColor.YELLOW + "" + ChatColor.BOLD + "You got Heaven's Blade!");
+        return Collections.singletonList(item);
+    }, params -> {
+        ItemStack item = new ItemStack(Material.DIAMOND_SWORD);
+        return Utility.setName(item, ChatColor.YELLOW + "" + ChatColor.BOLD + "Heaven's Blade");
+    }),
+
+    IRON_COMBAT_SET (params -> {
+        ArrayList<ItemStack> rewards = new ArrayList<>();
+        rewards.add(new ItemStack(Material.IRON_SWORD));
+        rewards.add(new ItemStack(Material.IRON_AXE));
+        rewards.add(new ItemStack(Material.SHIELD));
+        rewards.add(new ItemStack(Material.BOW));
+        rewards.add(new ItemStack(Material.ARROW, params.amountToGive));
+        rewards.add(new ItemStack(Material.IRON_HELMET));
+        rewards.add(new ItemStack(Material.IRON_CHESTPLATE));
+        rewards.add(new ItemStack(Material.IRON_LEGGINGS));
+        rewards.add(new ItemStack(Material.IRON_BOOTS));
+        params.rewardee.sendMessage("You got full iron combat gear!");
+        return rewards;
+    }, params -> {
+        ItemStack item = new ItemStack(Material.IRON_CHESTPLATE);
+        return Utility.setName(item, ChatColor.AQUA + "Full Iron Combat Gear");
+    }),
+
+    IRON_TOOLSET (params -> {
+        ArrayList<ItemStack> rewards = new ArrayList<>();
+        rewards.add(new ItemStack(Material.IRON_PICKAXE));
+        rewards.add(new ItemStack(Material.IRON_AXE));
+        rewards.add(new ItemStack(Material.IRON_SWORD));
+        rewards.add(new ItemStack(Material.IRON_SPADE));
+        rewards.add(new ItemStack(Material.IRON_HOE));
+        params.rewardee.sendMessage("You got a full iron toolset!");
+        return rewards;
+    }, params -> {
+        ItemStack item = new ItemStack(Material.IRON_PICKAXE);
+        return Utility.setName(item, ChatColor.AQUA + "Full Iron Toolset");
     }),
 
     DIAMONDS (params -> {
@@ -591,12 +1018,10 @@ enum Prize
         return Collections.singletonList(new ItemStack(Material.DIAMOND, params.amountToGive));
     }, params -> {
         ItemStack item = new ItemStack(Material.DIAMOND, 1);
-        ItemMeta meta = item.getItemMeta();
         if (params.amountToGive > 1)
-            meta.setDisplayName(ChatColor.DARK_AQUA + "" + params.amountToGive + " Diamonds");
+            item = Utility.setName(item, ChatColor.DARK_AQUA + "" + params.amountToGive + " Diamonds");
         else
-            meta.setDisplayName(ChatColor.DARK_AQUA + "1 Diamond");
-        item.setItemMeta(meta);
+            item = Utility.setName(item, ChatColor.DARK_AQUA + "1 Diamond");
         return item;
     }),
 
@@ -608,12 +1033,78 @@ enum Prize
         return Collections.singletonList(new ItemStack(Material.IRON_INGOT, params.amountToGive));
     }, params -> {
         ItemStack item = new ItemStack(Material.IRON_INGOT, 1);
-        ItemMeta meta = item.getItemMeta();
         if (params.amountToGive > 1)
-            meta.setDisplayName(ChatColor.DARK_AQUA + "" + params.amountToGive + " Iron Ingots");
+            item = Utility.setName(item, ChatColor.DARK_AQUA + "" + params.amountToGive + " Iron Ingots");
         else
-            meta.setDisplayName(ChatColor.DARK_AQUA + "1 Iron Ingot");
-        item.setItemMeta(meta);
+            item = Utility.setName(item, ChatColor.DARK_AQUA + "1 Iron Ingot");
+        return item;
+    }),
+
+    GOLD_BARS (params -> {
+        if (params.amountToGive > 1)
+            params.rewardee.sendMessage("You got " + params.amountToGive + " gold ingots!");
+        else
+            params.rewardee.sendMessage("You got a gold ingot!");
+        return Collections.singletonList(new ItemStack(Material.GOLD_INGOT, params.amountToGive));
+    }, params -> {
+        ItemStack item = new ItemStack(Material.IRON_INGOT, 1);
+        if (params.amountToGive > 1)
+            item = Utility.setName(item, ChatColor.DARK_AQUA + "" + params.amountToGive + " Gold Ingots");
+        else
+            item = Utility.setName(item, ChatColor.DARK_AQUA + "1 Gold Ingot");
+        return item;
+    }),
+
+    ASSORTMENT (params -> {
+        ArrayList<ItemStack> rewards = new ArrayList<>();
+        HashMap<Material, Integer> multipliers = new HashMap<>();
+        multipliers.put(Material.GOLD_NUGGET, 6);
+        multipliers.put(Material.REDSTONE, 16);
+        multipliers.put(Material.INK_SACK, 9);
+        multipliers.put(Material.ARROW, 12);
+        multipliers.put(Material.SULPHUR, 8);
+        multipliers.put(Material.BLAZE_POWDER, 6);
+        multipliers.put(Material.APPLE, 3);
+        multipliers.put(Material.LOG, 5);
+        for (Material key : multipliers.keySet())
+        {
+            int basecount = params.amountToGive * multipliers.get(key);
+            ItemStack item = new ItemStack(key, Utility.randomInt(basecount, basecount*2));
+            if (key == Material.INK_SACK)
+                item.setDurability((short)4);
+            rewards.add(item);
+        }
+        params.rewardee.sendMessage(ChatColor.GREEN + "You got a random assortment of items.");
+        return rewards;
+    }, params -> {
+        ItemStack item = new ItemStack(Material.CHEST);
+        item = Utility.setName(item, ChatColor.GREEN + "An Assortment of Items");
+        return item;
+    }),
+
+    PLANTS (params -> {
+        ArrayList<ItemStack> rewards = new ArrayList<>();
+        HashMap<Material, Integer> multipliers = new HashMap<>();
+        multipliers.put(Material.LOG, 16);
+        multipliers.put(Material.SAPLING, 6);
+        multipliers.put(Material.APPLE, 12);
+        multipliers.put(Material.YELLOW_FLOWER, 4);
+        multipliers.put(Material.SEEDS, 24);
+        multipliers.put(Material.MELON_SEEDS, 4);
+        multipliers.put(Material.PUMPKIN_SEEDS, 3);
+        multipliers.put(Material.POTATO, 7);
+        multipliers.put(Material.CARROT, 4);
+        for (Material key : multipliers.keySet())
+        {
+            int basecount = params.amountToGive * multipliers.get(key);
+            ItemStack item = new ItemStack(key, Utility.randomInt(basecount, basecount*2));
+            rewards.add(item);
+        }
+        params.rewardee.sendMessage(ChatColor.GREEN + "You got an assorted planter set.");
+        return rewards;
+    }, params -> {
+        ItemStack item = new ItemStack(Material.SAPLING);
+        item = Utility.setName(item, ChatColor.DARK_GREEN + "An Assorted Planter Set");
         return item;
     }),
 
@@ -623,9 +1114,7 @@ enum Prize
         return null;
     }, params -> {
         ItemStack item = new ItemStack(Material.GOLD_INGOT, 1);
-        ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName(ChatColor.DARK_AQUA + "$" + params.amountToGive);
-        item.setItemMeta(meta);
+        item = Utility.setName(item, ChatColor.DARK_AQUA + "$" + params.amountToGive);
         return item;
     }),
 
@@ -639,6 +1128,49 @@ enum Prize
         ItemStack item = new ItemStack(Material.POTION, 1);
         ItemMeta meta = item.getItemMeta();
         meta.setDisplayName(ChatColor.GOLD + "" + params.amountToGive + " Seconds of Invincibility");
+        PotionMeta pmeta = (PotionMeta) meta;
+        pmeta.addCustomEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE, 1, 1), true);
+        item.setItemMeta(meta);
+        return item;
+    }),
+
+    MASSIVE_DAMAGE (params -> {
+        params.rewardee.addPotionEffect(new PotionEffect(PotionEffectType.INCREASE_DAMAGE, params.amountToGive*1200, 6));
+        if (params.amountToGive == 1)
+            params.rewardee.sendMessage(ChatColor.DARK_RED + "You got 1 Minute of Massive Damage!");
+        else
+            params.rewardee.sendMessage(ChatColor.DARK_RED + "You got " + params.amountToGive + " Minutes of Massive Damage!");
+        return null;
+    }, params -> {
+        ItemStack item = new ItemStack(Material.POTION, 1);
+        ItemMeta meta = item.getItemMeta();
+        if (params.amountToGive == 1)
+            meta.setDisplayName(ChatColor.DARK_RED + "1 Minute of Massive Damage");
+        else
+            meta.setDisplayName(ChatColor.DARK_RED + "" + params.amountToGive + " Minutes of Massive Damage");
+        PotionMeta pmeta = (PotionMeta) meta;
+        pmeta.addCustomEffect(new PotionEffect(PotionEffectType.INCREASE_DAMAGE, 1, 1), true);
+        item.setItemMeta(meta);
+        return item;
+    }),
+
+    MASSIVE_HEALTH (params -> {
+        params.rewardee.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 160, 8));
+        params.rewardee.addPotionEffect(new PotionEffect(PotionEffectType.HEALTH_BOOST, params.amountToGive*72000, 19));
+        if (params.amountToGive == 1)
+            params.rewardee.sendMessage(ChatColor.RED + "You got 1 Hour of Massive Health!");
+        else
+            params.rewardee.sendMessage(ChatColor.RED + "You got " + params.amountToGive + " Hours of Massive Health!");
+        return null;
+    }, params -> {
+        ItemStack item = new ItemStack(Material.POTION, 1);
+        ItemMeta meta = item.getItemMeta();
+        if (params.amountToGive == 1)
+            params.rewardee.sendMessage(ChatColor.RED + "1 Hour of Massive Health");
+        else
+            meta.setDisplayName(ChatColor.RED + "" + params.amountToGive + " Hours of Massive Health");
+        PotionMeta pmeta = (PotionMeta) meta;
+        pmeta.addCustomEffect(new PotionEffect(PotionEffectType.REGENERATION, 1, 1), true);
         item.setItemMeta(meta);
         return item;
     }),
@@ -647,16 +1179,14 @@ enum Prize
         ArrayList<ItemStack> nuggets = new ArrayList<>();
         for (int i=0;i<params.amountToGive;i++)
             nuggets.add(new ItemStack(Material.GOLD_NUGGET, 1));
-        params.rewardee.sendMessage("You got " + params.amountToGive + " individually placed gold nuggets!");
+        params.rewardee.sendMessage(ChatColor.DARK_AQUA + "You got " + params.amountToGive + " individually placed gold nuggets!");
         return nuggets;
     }, params -> {
         ItemStack item = new ItemStack(Material.GOLD_NUGGET);
-        ItemMeta meta = item.getItemMeta();
         if (params.amountToGive > 1)
-            meta.setDisplayName(ChatColor.DARK_AQUA + "" + params.amountToGive + " Individually Placed Gold Nuggets");
+            item = Utility.setName(item, ChatColor.DARK_AQUA + "" + params.amountToGive + " Individually Placed Gold Nuggets");
         else
-            meta.setDisplayName(ChatColor.DARK_AQUA + "1 Gold Nugget");
-        item.setItemMeta(meta);
+            item = Utility.setName(item, ChatColor.DARK_AQUA + "1 Gold Nugget");
         return item;
     }),
 
@@ -676,13 +1206,20 @@ enum Prize
             meta.addEffect(effect);
             firework.setFireworkMeta(meta);
         }
-        params.rewardee.sendMessage(ChatColor.AQUA + "You got a fireworks show! Yaayyy!!");
+        params.rewardee.sendMessage(ChatColor.GOLD + "You got a fireworks show! Yaayyy!!");
         return null;
     }, params -> {
         ItemStack item = new ItemStack(Material.FIREWORK);
-        ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName(ChatColor.GOLD + "A Fireworks Show");
-        item.setItemMeta(meta);
+        item = Utility.setName(item, ChatColor.GOLD + "A Fireworks Show");
+        return item;
+    }),
+
+    NOTHING (params -> {
+        params.rewardee.sendMessage(ChatColor.DARK_GRAY + "You got nothing.");
+        return null;
+    }, params -> {
+        ItemStack item = new ItemStack(Material.THIN_GLASS);
+        item = Utility.setName(item, ChatColor.DARK_GRAY + "Nothing");
         return item;
     });
 

@@ -7,7 +7,7 @@ depend: [Essentials]
 commands:
   givecrate:
     description: gives you a crate of the designated type. Random type if none provided.
-    usage: /givecrate [type]
+    usage: /givecrate [type] [player]
     permission: lootcrate.givecrate
     permission-message: You do not have permission to give yourself crates.
   spawncrate:
@@ -29,5 +29,5 @@ permissions:
   lootcrate.givereward:
     default: op
   lootcrate.opencrate:
-    description: Allows the user to unlock loot crates
+    description: Allows the user to view and unlock loot crates
     default: true
