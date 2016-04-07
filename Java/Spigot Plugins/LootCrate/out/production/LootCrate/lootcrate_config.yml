@@ -1,0 +1,5 @@
+cratespawning:
+  spawncrates: true
+  interval: 300
+  radius: 1000
+  broadcastCrates: true

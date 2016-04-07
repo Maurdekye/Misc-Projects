@@ -49,6 +49,7 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
     private CustomConfig cratePositionConfig;
     private CustomConfig crateLayoutConfig;
     CustomConfig tempCreativeTrackerConfig;
+    private CustomConfig optionsConfig;
 
     private ConsoleCommandSender csend;
 
@@ -70,10 +71,13 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
         cratePositionConfig = new CustomConfig(this, "crate_positions.yml");
         crateLayoutConfig = new CustomConfig(this, "crate_layouts.yml");
         tempCreativeTrackerConfig = new CustomConfig(this, "temp_creatives.yml");
+        optionsConfig = new CustomConfig(this, "lootcrate_config.yml");
         crateLayoutConfig.getConfig().options().copyDefaults(true);
+        optionsConfig.getConfig().options().copyDefaults(true);
         cratePositionConfig.saveConfig();
         crateLayoutConfig.saveConfig();
         tempCreativeTrackerConfig.saveConfig();
+        optionsConfig.saveConfig();
 
         // load in crate layouts
         for (String key : crateLayoutConfig.getConfig().getKeys(false))
@@ -152,6 +156,14 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
         for (String key : tempCreativeTrackerConfig.getConfig().getKeys(false))
         {
             tempCreativeTimestamps.put(UUID.fromString(key), tempCreativeTrackerConfig.getConfig().getLong(key));
+        }
+
+        // startup random crate dropper
+        if (optionsConfig.getConfig().getBoolean("cratespawning.spawncrates")) {
+            int interval = optionsConfig.getConfig().getInt("cratespawning.interval", 300) * 20;
+            final int radius = optionsConfig.getConfig().getInt("cratespawning.radius", 1000);
+            final boolean broadcast = optionsConfig.getConfig().getBoolean("cratespawning.broadcast", false);
+            getServer().getScheduler().scheduleSyncRepeatingTask(this, () -> dropRandomCrate(Utility.getDefaultSpawn(this), radius, broadcast), 0, interval);
         }
     }
 
@@ -234,6 +246,10 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
                 tempCreativeTimestamps.remove(ply.getUniqueId());
                 tempCreativeTrackerConfig.getConfig().set(plyId.toString(), null);
                 tempCreativeTrackerConfig.saveConfig();
+            }
+            else
+            {
+                ply.setGameMode(GameMode.CREATIVE);
             }
         }
     }
@@ -558,6 +574,8 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
         }
     }
 
+    // Other Methods
+
     private void removeCrate(Crate c)
     {
         cratePositionConfig.getConfig().set(Utility.serializeLocation(c.location.getLocation()), null);
@@ -579,11 +597,29 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
         cratePositionConfig.saveConfig();
     }
 
-    private ItemStack getCrateItemstack(CrateLayout l)
+    private ItemStack getCrateItemstack(CrateLayout layout)
     {
-        ItemStack crateDrop = Utility.setName(new ItemStack(Material.CHEST), l.getPrintname(true));
-        crateDrop = Utility.addLoreLine(crateDrop, ChatColor.BLACK + l.type);
+        ItemStack crateDrop = Utility.setName(new ItemStack(Material.CHEST), layout.getPrintname(true));
+        crateDrop = Utility.addLoreLine(crateDrop, ChatColor.BLACK + layout.type);
         return crateDrop;
+    }
+
+    private void dropRandomCrate(Location center, double radius, boolean broadcast)
+    {
+        Location droplocation = center.add(Utility.randomInsideUnitCircle().multiply(radius));
+        Block newChest = droplocation.getWorld().getHighestBlockAt(droplocation);
+        while (newChest.getLocation().getY() >= droplocation.getWorld().getMaxHeight())
+        {
+            droplocation = center.add(Utility.randomInsideUnitCircle().multiply(radius));
+            newChest = Utility.getHighestSpaceOverSolidBlock(center.getWorld(), droplocation.getBlockX(), droplocation.getBlockZ());
+        }
+        CrateLayout layout = crateLayouts.get(Utility.randomInt(0, crateLayouts.size()));
+        addCrate(new Crate(newChest.getRelative(BlockFace.UP), layout));
+        if (broadcast)
+        {
+            getServer().broadcastMessage("A " + layout.printname + ChatColor.RESET + " has dropped at " + ChatColor.GOLD + newChest.getX() + ", " + newChest.getZ() + ChatColor.RESET + "!");
+        }
+        csend.sendMessage(layout.printname + ChatColor.RESET + " spawned at " + newChest.getLocation().toVector());
     }
 
 }
@@ -644,6 +680,18 @@ class Utility
         return (int)(Math.random() * (end - start)) + start;
     }
 
+    static Vector randomInsideUnitCircle()
+    {
+        double x = 1;
+        double y = 1;
+        while (x*x + y*y > 1)
+        {
+            x = Math.random() * 2 - 1;
+            y = Math.random() * 2 - 1;
+        }
+        return new Vector(x, 0, y);
+    }
+
     static void setChestInventoryName(Block chestblock, String name)
     {
         CraftChest chest = (CraftChest) chestblock.getState();
@@ -682,6 +730,25 @@ class Utility
         int y = Integer.parseInt(parts[2]);
         int z = Integer.parseInt(parts[3]);
         return world.getBlockAt(x, y, z).getLocation();
+    }
+
+    public static Location getDefaultSpawn(JavaPlugin plugin)
+    {
+        return plugin.getServer().getWorlds().get(0).getSpawnLocation();
+    }
+
+    public static Block getHighestSpaceOverSolidBlock(World world, int x, int z)
+    {
+        Location start = world.getHighestBlockAt(x, z).getLocation();
+        BlockIterator iter = new BlockIterator(world, start.toVector().add(new Vector(0.5, 0.5, 0.5)), new Vector(0, -1, 0), 0, 255);
+        Block highestSolid = iter.next();
+        while (!highestSolid.getType().isSolid() && iter.hasNext())
+            highestSolid = iter.next();
+        if (highestSolid.getY() >= world.getMaxHeight())
+            return null;
+        if (!iter.hasNext())
+            return null;
+        return highestSolid.getRelative(BlockFace.UP);
     }
 }
 
