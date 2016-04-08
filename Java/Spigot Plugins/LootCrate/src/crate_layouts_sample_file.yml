@@ -1,0 +1,238 @@
+# Sample crate_layouts.yml file
+
+free_crate:
+  name: ?7Free Crate
+  spawn_chance: 50
+  reawards:
+    1:
+      prize: common_key
+      amount: 1
+      chance: 50
+    2:
+      prize: common_key
+      amount: 4
+      chance: 10
+    3:
+      prize: mystical_key
+      amount: 1
+      chance: 1
+common_crate:
+  name: ?aCommon Crate
+  spawn_chance: 50
+  required_key: common_key
+  rewards:
+    1:
+      prize: nothing
+      amount: 0
+      chance: 25
+    2:
+      prize: iron_bars
+      amount: 16
+      chance: 25
+    3:
+      prize: money
+      amount: 200
+      chance: 20
+    4:
+      prize: common_key
+      amount: 2
+      chance: 10
+    5:
+      prize: iron_combat_set
+      amount: 128
+      chance: 15
+    6:
+      prize: assortment
+      amount: 2
+      chance: 10
+    7:
+      prize: mystical_key
+      amount: 1
+      chance: 8
+    8:
+      prize: diamonds
+      amount: 24
+      chance: 2
+uncommon_crate:
+  name: ?2Uncommon Crate
+  spawn_chance: 30
+  required_key: common_key
+  rewards:
+    1:
+      prize: nothing
+      amount: 0
+      chance: 10
+    2:
+      prize: common_key
+      amount: 8
+      chance: 20
+    3:
+      prize: mystical_key
+      amount: 2
+      chance: 20
+    4:
+      prize: plants
+      amount: 6
+      chance: 20
+    5:
+      prize: assorted_ores
+      amount: 8
+      chance: 10
+    6:
+      prize: iron_toolset
+      amount: 0
+      chance: 10
+    7:
+      prize: diamonds
+      amount: 32
+      chance: 5
+mystical_crate:
+  name: ?d?oMystical Crate
+  spawn_chance: 10
+  required_key: mystical_key
+  broadcast_on_drop: true
+  rewards:
+    1:
+      prize: iron_bars
+      amount: 128
+      chance: 30
+    2:
+      prize: assorted_ores
+      amount: 8
+      chance: 20
+    3:
+      prize: money
+      amount: 4000
+      chance: 10
+    4:
+      prize: diamonds
+      amount: 48
+      chance: 10
+    5:
+      prize: massive_health
+      amount: 3
+      chance: 5
+    6:
+      prize: assorted_ores
+      amount: 40
+      chance: 5
+    7:
+      prize: legendary_key
+      amount: 1
+      chance: 5
+    8:
+      prize: massive_damage
+      amount: 30
+      chance: 5
+    9:
+      prize: raw_ore_blocks
+      amount: 15
+      chance: 5
+legendary_crate_1:
+  name: ?e?lLegendary Crate
+  spawn_chance: 4
+  required_key: legendary_key
+  broadcast_on_drop: true
+  rewards:
+    1:
+      prize: diamonds
+      amount: 64
+      chance: 10
+    2:
+      prize: assorted_ores
+      amount: 16
+      chance: 5
+    3:
+      prize: money
+      amount: 10000
+      chance: 5
+    4:
+      prize: common_key
+      amount: 24
+      chance: 5
+    5:
+      prize: mystical_key
+      amount: 8
+      chance: 2
+    6:
+      prize: lucky_trousers
+      amount: 0
+      chance: 1
+    7:
+      prize: waterglide_boots
+      amount: 0
+      chance: 1
+legendary_crate_2:
+  name: ?e?lLegendary Crate
+  spawn_chance: 4
+  required_key: legendary_key
+  broadcast_on_drop: true
+  rewards:
+    1:
+      prize: diamonds
+      amount: 64
+      chance: 10
+    2:
+      prize: assorted_ores
+      amount: 16
+      chance: 5
+    3:
+      prize: money
+      amount: 10000
+      chance: 5
+    4:
+      prize: common_key
+      amount: 24
+      chance: 5
+    5:
+      prize: ancient_key
+      amount: 1
+      chance: 2
+    6:
+      prize: frostspark_cleats
+      amount: 0
+      chance: 1
+    7:
+      prize: hydrodyne_helmet
+      amount: 0
+      chance: 1
+ancient_crate_1:
+  name: ?8?oAncient Crate
+  spawn_chance: 1
+  required_key: ancient_key
+  broadcast_on_drop: true
+  rewards:
+    1:
+      prize: nothing
+      amount: 0
+      chance: 10
+    2:
+      prize: heavens_blade
+      amount: 0
+      chance: 2
+    3:
+      prize: veilstrike_bow
+      amount: 128
+      chance: 1
+ancient_crate_2:
+  name: ?8?oAncient Crate
+  spawn_chance: 0.2
+  required_key: ancient_key
+  broadcast_on_drop: true
+  rewards:
+    1:
+      prize: nothing
+      amount: 0
+      chance: 100
+    2:
+      prize: unyielding_battersea
+      amount: 0
+      chance: 20
+    3:
+      prize: giga_drill_breaker
+      amount: 128
+      chance: 10
+    4:
+      prize: ultimate_reward
+      amount: 2
+      chance: 0.1

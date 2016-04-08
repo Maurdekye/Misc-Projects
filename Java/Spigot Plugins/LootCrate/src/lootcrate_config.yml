@@ -11,3 +11,7 @@ treefeller:
 transmogrifier:
   maxblocks: 64
   speed: 3
+terramorpher:
+  size: 2
+giga_drill_breaker:
+  size: 1

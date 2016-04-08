@@ -1,0 +1,18 @@
+# Sample crate_keys.yml file
+
+common_key:
+  material: tripwire_hook
+  name: ?2Common Key
+  description: A normal crate key.
+mystical_key:
+  material: tripwire_hook
+  name: ?d?oMystical Key
+  description: A mystical key of unknown origin. Surely rare.
+legendary_key:
+  material: tripwire_hook
+  name: ?e?lLegendary Key
+  description: A legendary key that unlocks untold riches.
+ancient_key:
+  material: tripwire_hook
+  name: ?8?oAncient Key
+  description: An ancient key of old times. What it unlocks has been long forgotten.
