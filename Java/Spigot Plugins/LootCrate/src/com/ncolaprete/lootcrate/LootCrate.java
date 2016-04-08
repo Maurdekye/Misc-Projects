@@ -44,7 +44,7 @@ import java.util.*;
 
 public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
 
-    private ArrayList<Crate> allCrates;
+    private ArrayList<Crate> cratePositions;
     private ArrayList<CrateLayout> crateLayouts;
     HashMap<UUID, Long> tempCreativeTimestamps;
 
@@ -53,19 +53,19 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
     CustomConfig tempCreativeTrackerConfig;
     private CustomConfig optionsConfig;
 
-    private ConsoleCommandSender csend;
+    private ConsoleCommandSender csend = getServer().getConsoleSender();
 
     // Overridden Methods
 
     public void onEnable()
     {
+        // register listeners / repeating events
         getServer().getPluginManager().registerEvents(this, this);
         getServer().getScheduler().scheduleSyncRepeatingTask(this, this::checkAllPlayersForSpecialItems, 0, 20);
         getServer().getScheduler().scheduleSyncRepeatingTask(this, this::checkForCreativeTimeUp, 0, 1200);
 
-        csend = getServer().getConsoleSender();
-
-        allCrates = new ArrayList<>();
+        // initialize arrays
+        cratePositions = new ArrayList<>();
         crateLayouts = new ArrayList<>();
         tempCreativeTimestamps = new HashMap<>();
 
@@ -489,7 +489,7 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
         {
             Block block = ev.getClickedBlock();
             Crate crateToOpen = null;
-            for (Crate crate : allCrates)
+            for (Crate crate : cratePositions)
             {
                 if (crate.location.equals(block))
                 {
@@ -526,12 +526,12 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
     @EventHandler
     public void blockBreak(BlockBreakEvent ev)
     {
-        for (int i=0;i<allCrates.size();i++)
+        for (int i=0;i<cratePositions.size();i++)
         {
-            if (allCrates.get(i).location.equals(ev.getBlock()))
+            if (cratePositions.get(i).location.equals(ev.getBlock()))
             {
                 ev.setCancelled(true);
-                ItemStack crateDrop = getCrateItemstack(allCrates.get(i).layout);
+                ItemStack crateDrop = getCrateItemstack(cratePositions.get(i).layout);
                 ev.getBlock().setType(Material.AIR);
                 ev.getBlock().getWorld().dropItemNaturally(ev.getBlock().getLocation().add(0.5, 0.5, 0.5), crateDrop);
                 removeCrate(i);
@@ -568,7 +568,7 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
         {
             for (BlockFace f : cardinalDirections)
             {
-                for (Crate c : allCrates)
+                for (Crate c : cratePositions)
                 {
                     if (ev.getBlock().getRelative(f).equals(c.location))
                     {
@@ -621,19 +621,19 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
     {
         cratePositionConfig.getConfig().set(Utility.serializeLocation(c.location.getLocation()), null);
         cratePositionConfig.saveConfig();
-        allCrates.remove(c);
+        cratePositions.remove(c);
     }
 
     private void removeCrate(int index)
     {
-        cratePositionConfig.getConfig().set(Utility.serializeLocation(allCrates.get(index).location.getLocation()), null);
+        cratePositionConfig.getConfig().set(Utility.serializeLocation(cratePositions.get(index).location.getLocation()), null);
         cratePositionConfig.saveConfig();
-        allCrates.remove(index);
+        cratePositions.remove(index);
     }
 
     private void addCrate(Crate c)
     {
-        allCrates.add(c);
+        cratePositions.add(c);
         cratePositionConfig.getConfig().set(Utility.serializeLocation(c.location.getLocation()), c.layout.type);
         cratePositionConfig.saveConfig();
     }
