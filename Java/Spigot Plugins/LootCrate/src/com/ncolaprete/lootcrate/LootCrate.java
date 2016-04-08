@@ -12,6 +12,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
+import org.bukkit.configuration.Configuration;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.craftbukkit.v1_9_R1.block.CraftChest;
@@ -41,16 +42,20 @@ import javax.lang.model.type.ArrayType;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
 
-    private ArrayList<Crate> cratePositions;
+    public ArrayList<CrateKey> crateKeys;
     private ArrayList<CrateLayout> crateLayouts;
-    HashMap<UUID, Long> tempCreativeTimestamps;
+    private ArrayList<Crate> cratePositions;
+    public HashMap<UUID, Long> tempCreativeTimestamps;
+    private ArrayList<Job> activeJobs;
 
-    private CustomConfig cratePositionConfig;
+    private CustomConfig crateKeyConfig;
     private CustomConfig crateLayoutConfig;
-    CustomConfig tempCreativeTrackerConfig;
+    private CustomConfig cratePositionConfig;
+    public CustomConfig tempCreativeTimestampConfig;
     private CustomConfig optionsConfig;
 
     private ConsoleCommandSender csend = getServer().getConsoleSender();
@@ -61,68 +66,135 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
     {
         // register listeners / repeating events
         getServer().getPluginManager().registerEvents(this, this);
+        getServer().getScheduler().scheduleSyncRepeatingTask(this, this::updateJobs, 0, 2);
         getServer().getScheduler().scheduleSyncRepeatingTask(this, this::checkAllPlayersForSpecialItems, 0, 20);
         getServer().getScheduler().scheduleSyncRepeatingTask(this, this::checkForCreativeTimeUp, 0, 1200);
 
         // initialize arrays
-        cratePositions = new ArrayList<>();
+        crateKeys = new ArrayList<>();
         crateLayouts = new ArrayList<>();
+        cratePositions = new ArrayList<>();
         tempCreativeTimestamps = new HashMap<>();
+        activeJobs = new ArrayList<>();
 
         // load up configs
-        cratePositionConfig = new CustomConfig(this, "crate_positions.yml");
+        crateKeyConfig = new CustomConfig(this, "crate_keys.yml");
         crateLayoutConfig = new CustomConfig(this, "crate_layouts.yml");
-        tempCreativeTrackerConfig = new CustomConfig(this, "temp_creatives.yml");
+        cratePositionConfig = new CustomConfig(this, "crate_positions.yml");
+        tempCreativeTimestampConfig = new CustomConfig(this, "temp_creatives.yml");
         optionsConfig = new CustomConfig(this, "lootcrate_config.yml");
+
+        crateKeyConfig.getConfig().options().copyDefaults(true);
         crateLayoutConfig.getConfig().options().copyDefaults(true);
         optionsConfig.getConfig().options().copyDefaults(true);
-        cratePositionConfig.saveConfig();
+
+        crateKeyConfig.saveConfig();
         crateLayoutConfig.saveConfig();
-        tempCreativeTrackerConfig.saveConfig();
+        cratePositionConfig.saveConfig();
+        tempCreativeTimestampConfig.saveConfig();
         optionsConfig.saveConfig();
+
+        // load in crate keys
+        for (String key : crateKeyConfig.getConfig().getKeys(false))
+        {
+            ConfigurationSection keysection = crateKeyConfig.getConfig().getConfigurationSection(key);
+            String type = key;
+            try {
+                Prize.valueOf(key);
+                csend.sendMessage(ChatColor.RED + "Error! Key name '" + type + "' conflicts with existing prize!");
+                continue;
+            } catch (Exception e){};
+            String materialname = keysection.getString("material", "tripwire_hook");
+            Material material = Material.getMaterial(materialname.toUpperCase());
+            if (material == null)
+            {
+                csend.sendMessage(ChatColor.RED + "Error! '" + materialname + "' is not a valid block or item.");
+                continue;
+            }
+            String name = keysection.getString("name", ChatColor.RED + "Undefined Key");
+            name = ChatColor.translateAlternateColorCodes('?', name);
+            String lorestring = keysection.getString("description", "");
+            lorestring = ChatColor.translateAlternateColorCodes('?', lorestring);
+            List<String> lore = Arrays.asList(lorestring.split("\\\\n"));
+            crateKeys.add(new CrateKey(type, material, name, lore));
+        }
+
+        if (crateKeys.size() == 0)
+        {
+            csend.sendMessage(ChatColor.RED + "Error; No crate keys detected! Add them to crate_keys.yml and reload the plugin.");
+        }
 
         // load in crate layouts
         for (String key : crateLayoutConfig.getConfig().getKeys(false))
         {
+            ConfigurationSection cratesection = crateLayoutConfig.getConfig().getConfigurationSection(key);
             String type = key;
-            String printname = crateLayoutConfig.getConfig().getString(key + ".name");
+            String printname = cratesection.getString("name");
             printname = ChatColor.translateAlternateColorCodes('?', printname);
-            String reqKeyName = crateLayoutConfig.getConfig().getString(key + ".required_key");
-            double spawnChance = crateLayoutConfig.getConfig().getDouble(key + ".spawn_chance");
-            CrateKey reqKey;
-            try
+            String reqKeyName = cratesection.getString("required_key");
+            double spawnChance = cratesection.getDouble("spawn_chance");
+            CrateKey reqKey = null;
+            for (CrateKey ck : crateKeys)
             {
-                reqKey = CrateKey.valueOf(reqKeyName.toUpperCase());
-            } catch (Exception e)
+                if (ck.type.equalsIgnoreCase(reqKeyName))
+                {
+                    reqKey = ck;
+                    break;
+                }
+            }
+            if (reqKey == null)
             {
-                csend.sendMessage(ChatColor.RED + "Error! Unknown crate key: " + reqKeyName);
+                csend.sendMessage(ChatColor.RED + "Error! crate key '" + reqKeyName + "' not found in crate_keys.yml!");
                 continue;
             }
             ArrayList<Reward> rewardList = new ArrayList<>();
-            ConfigurationSection rewardsSection = crateLayoutConfig.getConfig().getConfigurationSection(key + ".rewards");
-            for (String rewardKey : rewardsSection.getKeys(false))
+            for (String rewardKey : cratesection.getConfigurationSection("rewards").getKeys(false))
             {
-                String prizeName = rewardsSection.getString(rewardKey + ".prize");
-                Prize prize;
+                ConfigurationSection rewardsection = cratesection.getConfigurationSection("rewards." + rewardKey);
+                String prizeName = rewardsection.getString(".prize");
+                Prize prize = null;
                 double rewardChance;
                 int amount;
+                int keyPrizeIndex = 0;
                 try {
                     prize = Prize.valueOf(prizeName.toUpperCase());
+                    if (prize == Prize._CRATE_KEY)
+                    {
+                        csend.sendMessage(ChatColor.RED + "Error: cannot reference the '_crate_key' prize directly. Use key names as prizes instead.");
+                        continue;
+                    }
                 } catch (Exception e) {
-                    csend.sendMessage(ChatColor.RED + "Error! Unknown prize: " + prizeName);
+                    for (CrateKey ck : crateKeys)
+                    {
+                        if (ck.type.equalsIgnoreCase(prizeName))
+                        {
+                            prize = Prize._CRATE_KEY;
+                            break;
+                        }
+                        keyPrizeIndex++;
+                    }
+                    if (prize == null)
+                    {
+                        csend.sendMessage(ChatColor.RED + "Error! Unknown prize: " + prizeName);
+                        continue;
+                    }
+                }
+                try {
+                    rewardChance = Double.parseDouble(rewardsection.getString("chance"));
+                } catch (Exception e) {
+                    csend.sendMessage(ChatColor.RED + "Error! '" + rewardsection.getString("chance") + "' is not a number!");
                     continue;
                 }
                 try {
-                    rewardChance = Double.parseDouble(rewardsSection.getString(rewardKey + ".chance"));
+                    amount = Integer.parseInt(rewardsection.getString("amount"));
                 } catch (Exception e) {
-                    csend.sendMessage(ChatColor.RED + "Error! '" + rewardsSection.getString(rewardKey + ".chance") + "' is not a number!");
+                    csend.sendMessage(ChatColor.RED + "Error! '" + rewardsection.getString("amount") + "' is not an integer!");
                     continue;
                 }
-                try {
-                    amount = Integer.parseInt(rewardsSection.getString(rewardKey + ".amount"));
-                } catch (Exception e) {
-                    csend.sendMessage(ChatColor.RED + "Error! '" + rewardsSection.getString(rewardKey + ".amount") + "' is not an integer!");
-                    continue;
+
+                if (prize == Prize._CRATE_KEY)
+                {
+                    amount = crateKeys.size() * (amount - 1) + keyPrizeIndex;
                 }
 
                 rewardList.add(new Reward(prize, amount, rewardChance));
@@ -155,16 +227,17 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
         }
 
         // load in temporary creatives
-        for (String key : tempCreativeTrackerConfig.getConfig().getKeys(false))
+        for (String key : tempCreativeTimestampConfig.getConfig().getKeys(false))
         {
-            tempCreativeTimestamps.put(UUID.fromString(key), tempCreativeTrackerConfig.getConfig().getLong(key));
+            tempCreativeTimestamps.put(UUID.fromString(key), tempCreativeTimestampConfig.getConfig().getLong(key));
         }
 
         // startup random crate dropper
-        if (optionsConfig.getConfig().getBoolean("cratespawning.spawncrates")) {
-            int interval = optionsConfig.getConfig().getInt("cratespawning.interval", 300) * 20;
-            final int radius = optionsConfig.getConfig().getInt("cratespawning.radius", 1000);
-            final boolean broadcast = optionsConfig.getConfig().getBoolean("cratespawning.broadcast", false);
+        ConfigurationSection cratespawningSection = optionsConfig.getConfig().getConfigurationSection("cratespawning");
+        if (cratespawningSection.getBoolean("spawncrates")) {
+            int interval = cratespawningSection.getInt("interval", 300) * 20;
+            final int radius = cratespawningSection.getInt("radius", 1000);
+            final boolean broadcast = cratespawningSection.getBoolean("broadcast", false);
             getServer().getScheduler().scheduleSyncRepeatingTask(this, () -> dropRandomCrate(Utility.getDefaultSpawn(this), radius, broadcast), 0, interval);
         }
     }
@@ -172,93 +245,7 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
     public void onDisable()
     {
         cratePositionConfig.saveConfig();
-        tempCreativeTrackerConfig.saveConfig();
-    }
-
-    private void checkAllPlayersForSpecialItems()
-    {
-        for (Player ply : getServer().getOnlinePlayers())
-        {
-            checkPlayerForSpecialItem(ply);
-        }
-    }
-    
-    private void checkPlayerForSpecialItem(Player ply)
-    {
-        // Frostspark Cleats
-        if (Utility.itemHasLoreLine(ply.getInventory().getBoots(), ChatColor.BLACK + "frostspark_cleats"))
-        {
-            ply.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 40, 2), true);
-            ply.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 40, 1), true);
-        }
-
-        // Lucky Trousers
-        if (Utility.itemHasLoreLine(ply.getInventory().getLeggings(), ChatColor.BLACK + "lucky_trousers"))
-        {
-            ply.addPotionEffect(new PotionEffect(PotionEffectType.LUCK, 40, 2), true);
-        }
-
-        // Knackerbreaker Chesterplate
-        if (Utility.itemHasLoreLine(ply.getInventory().getChestplate(), ChatColor.BLACK + "knackerbreaker_chesterplate"))
-        {
-            ply.addPotionEffect(new PotionEffect(PotionEffectType.ABSORPTION, 40, 0), true);
-        }
-
-        // Hydrodyne Helmet
-        if (Utility.itemHasLoreLine(ply.getInventory().getHelmet(), ChatColor.BLACK + "hydrodyne_helmet"))
-        {
-            ply.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION, 250, 0), true);
-            ply.addPotionEffect(new PotionEffect(PotionEffectType.WATER_BREATHING, 40, 0), true);
-        }
-
-        // Giga Drill Breaker
-        if (Utility.itemHasLoreLine(ply.getInventory().getItemInMainHand(), ChatColor.BLACK + "giga_drill_breaker"))
-        {
-            ply.addPotionEffect(new PotionEffect(PotionEffectType.FAST_DIGGING, 25, 3), true);
-        }
-
-        // Unyielding Battersea
-        if ((Utility.itemHasLoreLine(ply.getInventory().getItemInOffHand(), ChatColor.BLACK + "unyielding_battersea") ||
-                Utility.itemHasLoreLine(ply.getInventory().getItemInMainHand(), ChatColor.BLACK + "unyielding_battersea")) &&
-                ply.isBlocking())
-        {
-            ply.addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 40, 0), true);
-            ply.addPotionEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE, 40, 0), true);
-        }
-
-        // Veilstrike Bow
-        if (Utility.itemHasLoreLine(ply.getInventory().getItemInMainHand(), ChatColor.BLACK + "veilstrike_bow"))
-        {
-            ply.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, 25, 0), true);
-        }
-
-        // Heaven's Blade
-        if (Utility.itemHasLoreLine(ply.getInventory().getItemInMainHand(), ChatColor.BLACK + "heavens_blade"))
-        {
-            ply.addPotionEffect(new PotionEffect(PotionEffectType.INCREASE_DAMAGE, 25, 4), true);
-        }
-    }
-
-    private void checkForCreativeTimeUp()
-    {
-        for (UUID plyId : tempCreativeTimestamps.keySet())
-        {
-            Player ply = getServer().getPlayer(plyId);
-            if (ply == null)
-                continue;
-            if (System.currentTimeMillis() > tempCreativeTimestamps.get(plyId))
-            {
-                ply.setGameMode(GameMode.SURVIVAL);
-                ply.sendMessage(ChatColor.DARK_AQUA + "Your creative time is up.");
-                tempCreativeTimestamps.remove(ply.getUniqueId());
-                tempCreativeTrackerConfig.getConfig().set(plyId.toString(), null);
-                tempCreativeTrackerConfig.saveConfig();
-            }
-            else
-            {
-                ply.setGameMode(GameMode.CREATIVE);
-            }
-        }
+        tempCreativeTimestampConfig.saveConfig();
     }
 
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args)
@@ -268,22 +255,38 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
         // givekey
         if (command.getName().equalsIgnoreCase("givekey"))
         {
+
+            // Check if there are any crate keys loaded
+            if (crateKeys.size() == 0)
+            {
+                sender.sendMessage(ChatColor.RED + "Error: No crate keys loaded. Add them to crate_keys.yml and reload the plugin.");
+                return true;
+            }
+
             // Check if enough arguments were provided
             if (args.length == 0)
             {
                 StringBuilder rewardslist = new StringBuilder();
                 rewardslist.append("Available crate keys are: ");
-                for (CrateKey k : CrateKey.values())
-                    rewardslist.append(k.name().toLowerCase() + ", ");
+                for (CrateKey k : crateKeys)
+                    rewardslist.append(k.type.toLowerCase() + ", ");
                 ply.sendMessage(rewardslist.substring(0, rewardslist.length()-2));
                 return false;
             }
 
             // Find crate key to give
-            CrateKey key;
-            try {
-                key = CrateKey.valueOf(args[0].toLowerCase());
-            } catch (Exception e) {
+            CrateKey key = null;
+            for (CrateKey k : crateKeys)
+            {
+                if (k.type.equalsIgnoreCase(args[0]))
+                {
+                    key = k;
+                    break;
+                }
+            }
+
+            if (key == null)
+            {
                 sender.sendMessage(ChatColor.RED + "Could not find crate key '" + args[0] + "'.");
                 return true;
             }
@@ -441,7 +444,7 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
             // Find prize type to give
             Prize type;
             try {
-                type = Prize.valueOf(args[0].toLowerCase());
+                type = Prize.valueOf(args[0].toUpperCase());
             } catch (Exception e) {
                 sender.sendMessage(ChatColor.RED + "Could not find prize " + args[0] + ".");
                 return true;
@@ -478,6 +481,45 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
             type.giveReward(this, ply, amount, chestBlock);
         }
         return true;
+    }
+
+    // Repeating Runnables
+
+    private void updateJobs()
+    {
+        for (Job job : activeJobs)
+            job.update();
+        activeJobs.removeIf(j -> j.isDone());
+    }
+
+    private void checkAllPlayersForSpecialItems()
+    {
+        for (Player ply : getServer().getOnlinePlayers())
+        {
+            checkPlayerForSpecialItem(ply);
+        }
+    }
+
+    private void checkForCreativeTimeUp()
+    {
+        for (UUID plyId : tempCreativeTimestamps.keySet())
+        {
+            Player ply = getServer().getPlayer(plyId);
+            if (ply == null)
+                continue;
+            if (System.currentTimeMillis() > tempCreativeTimestamps.get(plyId))
+            {
+                ply.setGameMode(GameMode.SURVIVAL);
+                ply.sendMessage(ChatColor.DARK_AQUA + "Your creative time is up.");
+                tempCreativeTimestamps.remove(ply.getUniqueId());
+                tempCreativeTimestampConfig.getConfig().set(plyId.toString(), null);
+                tempCreativeTimestampConfig.saveConfig();
+            }
+            else
+            {
+                ply.setGameMode(GameMode.CREATIVE);
+            }
+        }
     }
 
     // Event Handlers
@@ -526,16 +568,26 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
     @EventHandler
     public void blockBreak(BlockBreakEvent ev)
     {
-        for (int i=0;i<cratePositions.size();i++)
+        // Treefeller Chainsaw
+        if (TreefellerJob.validBlocks.contains(ev.getBlock().getType()) &&
+                Utility.itemHasLoreLine(ev.getPlayer().getInventory().getItemInMainHand(), ChatColor.BLACK + "treefeller_chainsaw"))
         {
-            if (cratePositions.get(i).location.equals(ev.getBlock()))
-            {
-                ev.setCancelled(true);
-                ItemStack crateDrop = getCrateItemstack(cratePositions.get(i).layout);
-                ev.getBlock().setType(Material.AIR);
-                ev.getBlock().getWorld().dropItemNaturally(ev.getBlock().getLocation().add(0.5, 0.5, 0.5), crateDrop);
-                removeCrate(i);
-                break;
+            activeJobs.add(new TreefellerJob(ev.getBlock()));
+        }
+
+        // Manage picking up of crates
+        if (ev.getBlock().getType() == Material.CHEST)
+        {
+            for (int i = 0; i < cratePositions.size(); i++) {
+                if (cratePositions.get(i).location.equals(ev.getBlock()))
+                {
+                    ev.setCancelled(true);
+                    ItemStack crateDrop = getCrateItemstack(cratePositions.get(i).layout);
+                    ev.getBlock().setType(Material.AIR);
+                    ev.getBlock().getWorld().dropItemNaturally(ev.getBlock().getLocation().add(0.5, 0.5, 0.5), crateDrop);
+                    removeCrate(i);
+                    break;
+                }
             }
         }
     }
@@ -641,6 +693,7 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
     private ItemStack getCrateItemstack(CrateLayout layout)
     {
         ItemStack crateDrop = Utility.setName(new ItemStack(Material.CHEST), layout.getPrintname(true));
+        crateDrop = Utility.addLoreLine(crateDrop, ChatColor.RESET + "" + ChatColor.GRAY + "Requires a " + layout.keyRequired.displayname + ChatColor.RESET + ChatColor.GRAY + " to unlock");
         crateDrop = Utility.addLoreLine(crateDrop, ChatColor.BLACK + layout.type);
         return crateDrop;
     }
@@ -664,6 +717,63 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
         }
         csend.sendMessage(layout.printname + ChatColor.RESET + " spawned at " + Utility.formatVector(newChest.getLocation().toVector()));
     }
+
+    private void checkPlayerForSpecialItem(Player ply)
+    {
+        // Frostspark Cleats
+        if (Utility.itemHasLoreLine(ply.getInventory().getBoots(), ChatColor.BLACK + "frostspark_cleats"))
+        {
+            ply.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 40, 2), true);
+            ply.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 40, 1), true);
+        }
+
+        // Lucky Trousers
+        if (Utility.itemHasLoreLine(ply.getInventory().getLeggings(), ChatColor.BLACK + "lucky_trousers"))
+        {
+            ply.addPotionEffect(new PotionEffect(PotionEffectType.LUCK, 40, 2), true);
+        }
+
+        // Knackerbreaker Chesterplate
+        if (Utility.itemHasLoreLine(ply.getInventory().getChestplate(), ChatColor.BLACK + "knackerbreaker_chesterplate"))
+        {
+            ply.addPotionEffect(new PotionEffect(PotionEffectType.ABSORPTION, 40, 0), true);
+        }
+
+        // Hydrodyne Helmet
+        if (Utility.itemHasLoreLine(ply.getInventory().getHelmet(), ChatColor.BLACK + "hydrodyne_helmet"))
+        {
+            ply.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION, 250, 0), true);
+            ply.addPotionEffect(new PotionEffect(PotionEffectType.WATER_BREATHING, 40, 0), true);
+        }
+
+        // Giga Drill Breaker
+        if (Utility.itemHasLoreLine(ply.getInventory().getItemInMainHand(), ChatColor.BLACK + "giga_drill_breaker"))
+        {
+            ply.addPotionEffect(new PotionEffect(PotionEffectType.FAST_DIGGING, 25, 3), true);
+        }
+
+        // Unyielding Battersea
+        if ((Utility.itemHasLoreLine(ply.getInventory().getItemInOffHand(), ChatColor.BLACK + "unyielding_battersea") ||
+                Utility.itemHasLoreLine(ply.getInventory().getItemInMainHand(), ChatColor.BLACK + "unyielding_battersea")) &&
+                ply.isBlocking())
+        {
+            ply.addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 40, 0), true);
+            ply.addPotionEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE, 40, 0), true);
+        }
+
+        // Veilstrike Bow
+        if (Utility.itemHasLoreLine(ply.getInventory().getItemInMainHand(), ChatColor.BLACK + "veilstrike_bow"))
+        {
+            ply.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, 25, 0), true);
+        }
+
+        // Heaven's Blade
+        if (Utility.itemHasLoreLine(ply.getInventory().getItemInMainHand(), ChatColor.BLACK + "heavens_blade"))
+        {
+            ply.addPotionEffect(new PotionEffect(PotionEffectType.INCREASE_DAMAGE, 25, 4), true);
+        }
+    }
+
 
 }
 
@@ -837,6 +947,38 @@ class Utility
         return separatedItems;
     }
 
+    static List<Block> getSurroundingBlocks(Block block, boolean sides, boolean diagonals, boolean corners)
+    {
+        ArrayList<Block> surrounds = new ArrayList<>();
+        List<BlockFace> cardinalFaces = Arrays.asList(BlockFace.NORTH, BlockFace.SOUTH, BlockFace.EAST, BlockFace.WEST, BlockFace.UP, BlockFace.DOWN);
+        if (sides)
+        {
+            surrounds.addAll(cardinalFaces.stream().map(block::getRelative).collect(Collectors.toList()));
+            surrounds.add(block.getRelative(BlockFace.UP));
+            surrounds.add(block.getRelative(BlockFace.DOWN));
+        }
+        if (diagonals)
+        {
+            List<BlockFace> diagonalFaces = Arrays.asList(BlockFace.NORTH_EAST, BlockFace.NORTH_WEST, BlockFace.SOUTH_EAST, BlockFace.SOUTH_WEST);
+            for (BlockFace face : cardinalFaces)
+            {
+                surrounds.add(block.getRelative(face).getRelative(BlockFace.UP));
+                surrounds.add(block.getRelative(face).getRelative(BlockFace.DOWN));
+            }
+            surrounds.addAll(diagonalFaces.stream().map(block::getRelative).collect(Collectors.toList()));
+        }
+        if (corners)
+        {
+            for (BlockFace fa : Arrays.asList(BlockFace.NORTH, BlockFace.SOUTH))
+            {
+                for (BlockFace fb : Arrays.asList(BlockFace.EAST, BlockFace.WEST))
+                {
+                    surrounds.addAll(Arrays.asList(BlockFace.UP, BlockFace.DOWN).stream().map(fc -> block.getRelative(fa).getRelative(fb).getRelative(fc)).collect(Collectors.toList()));
+                }
+            }
+        }
+        return surrounds;
+    }
 }
 
 class Crate
@@ -878,8 +1020,8 @@ class CrateLayout
     String printname;
     String type;
     double spawnChance;
-    private CrateKey keyRequired;
-    private ArrayList<Reward> contents;
+    CrateKey keyRequired;
+    ArrayList<Reward> contents;
 
     CrateLayout(String printname, String type, double spawnChance, CrateKey keyRequired, ArrayList<Reward> contents)
     {
@@ -916,11 +1058,16 @@ class CrateLayout
 
     Inventory showContents(LootCrate plugin, Player ply, Block chestblock)
     {
-        Inventory display = Bukkit.createInventory(null, (contents.size()/9)*9 /*lock the size to multiples of 9*/, getPrintname(true));
+        Inventory display = Bukkit.createInventory(null, (int)Math.floor((contents.size()-1)/9.0 + 1)*9 /*lock the size to multiples of 9*/, getPrintname(true));
+        double totalProbability = 0;
+        for (Reward r : contents)
+            totalProbability += r.rewardChance;
         for (Reward r : contents)
         {
+            double chance = (r.rewardChance / totalProbability) * 10000;
+            chance = Math.round(chance) / 100;
             ItemStack displayItem =  r.item.getVisualisation(plugin, ply, r.amount, chestblock);
-            displayItem = Utility.addLoreLine(displayItem, ChatColor.WHITE + "%" + r.rewardChance + " chance");
+            displayItem = Utility.addLoreLine(displayItem, ChatColor.WHITE + "%" + chance + " chance");
             display.addItem(displayItem);
         }
         return display;
@@ -936,6 +1083,39 @@ class CrateLayout
         if (isLocked)
             return printname + LockedTag;
         return printname + UnlockedTag;
+    }
+}
+
+class CrateKey
+{
+    public String type;
+    public Material material;
+    public String displayname;
+    public List<String> lore;
+
+    public CrateKey(String type, Material material, String displayname, List<String> lore)
+    {
+        this.type = type;
+        this.material = material;
+        this.displayname = displayname;
+        this.lore = lore;
+    }
+
+    public ItemStack getKey(boolean isDisplayKey)
+    {
+        ItemStack key = new ItemStack(material);
+        key = Utility.setName(key, displayname);
+        if (isDisplayKey)
+            return key;
+        for (String line : lore)
+            key = Utility.addLoreLine(key, line);
+        key = Utility.addLoreLine(key, getLoreTagString());
+        return key;
+    }
+
+    public String getLoreTagString()
+    {
+        return ChatColor.BLACK + type;
     }
 }
 
@@ -955,43 +1135,36 @@ class Reward
 
 enum Prize
 {
-    ANCIENT_KEY (params -> {
-        if (params.amountToGive > 1)
-            params.rewardee.sendMessage(ChatColor.GRAY + "You got " + params.amountToGive + " Ancient Keys!");
+    _CRATE_KEY (params -> {
+        if (params.plugin.crateKeys.size() == 0)
+            return null;
+        int amount = params.amountToGive / params.plugin.crateKeys.size() + 1;
+        int keyindex = params.amountToGive % params.plugin.crateKeys.size();
+        CrateKey key = params.plugin.crateKeys.get(keyindex);
+        ItemStack keyItem = key.getKey(false);
+        keyItem.setAmount(amount);
+        if (amount == 1)
+            params.rewardee.sendMessage(ChatColor.GRAY + "You got a " + key.displayname + ChatColor.RESET + ChatColor.GRAY + "!");
         else
-            params.rewardee.sendMessage(ChatColor.GRAY + "You got an Ancient Key!");
-        return Collections.singletonList(CrateKey.ANCIENT_KEY.getKey(false));
-    }, params -> CrateKey.ANCIENT_KEY.getKey(true)),
-
-    LEGENDARY_KEY (params -> {
-        if (params.amountToGive > 1)
-            params.rewardee.sendMessage(ChatColor.YELLOW + "You got " + params.amountToGive + " Legendary Keys!");
-        else
-            params.rewardee.sendMessage(ChatColor.YELLOW + "You got a Legendary Key!");
-        return Collections.singletonList(CrateKey.LEGENDARY_KEY.getKey(false));
-    }, params -> CrateKey.LEGENDARY_KEY.getKey(true)),
-
-    MYSTICAL_KEY (params -> {
-        if (params.amountToGive > 1)
-            params.rewardee.sendMessage(ChatColor.LIGHT_PURPLE + "You got " + params.amountToGive + " Mystical Keys!");
-        else
-            params.rewardee.sendMessage(ChatColor.LIGHT_PURPLE + "You got a Mystical Key!");
-        return Collections.singletonList(CrateKey.LEGENDARY_KEY.getKey(false));
-    }, params -> CrateKey.MYSTICAL_KEY.getKey(true)),
-
-    COMMON_KEY (params -> {
-        if (params.amountToGive > 1)
-            params.rewardee.sendMessage(ChatColor.GREEN + "You got " + params.amountToGive + " Common Keys!");
-        else
-            params.rewardee.sendMessage(ChatColor.GREEN + "You got a Common Key!");
-        return Collections.singletonList(CrateKey.COMMON_KEY.getKey(false));
-    }, params -> CrateKey.COMMON_KEY.getKey(true)),
+            params.rewardee.sendMessage(ChatColor.GRAY + "You got " + amount + " " + key.displayname + "s" + ChatColor.RESET + ChatColor.GRAY + "!");
+        return Collections.singletonList(keyItem);
+    }, params -> {
+        if (params.plugin.crateKeys.size() == 0)
+            return new ItemStack(Material.TRIPWIRE_HOOK);
+        int amount = params.amountToGive / params.plugin.crateKeys.size() + 1;
+        int keyindex = params.amountToGive % params.plugin.crateKeys.size();
+        CrateKey key = params.plugin.crateKeys.get(keyindex);
+        ItemStack keyItem = key.getKey(true);
+        if (amount == 1)
+            return keyItem;
+        return Utility.setName(keyItem, amount + " " + key.displayname + "s");
+    }),
 
     ULTIMATE_REWARD (params -> {
         params.rewardee.setGameMode(GameMode.CREATIVE);
-        params.plugin.tempCreativeTrackerConfig.getConfig().set(params.rewardee.getUniqueId().toString(), System.currentTimeMillis() + params.amountToGive * 3600000);
+        params.plugin.tempCreativeTimestampConfig.getConfig().set(params.rewardee.getUniqueId().toString(), System.currentTimeMillis() + params.amountToGive * 3600000);
         params.plugin.tempCreativeTimestamps.put(params.rewardee.getUniqueId(), System.currentTimeMillis() + params.amountToGive * 3600000);
-        params.plugin.tempCreativeTrackerConfig.saveConfig();
+        params.plugin.tempCreativeTimestampConfig.saveConfig();
         if (params.amountToGive == 1)
             params.rewardee.sendMessage("You have received the ultimate reward: " + ChatColor.BOLD + "you may be in creative for 1 hour.");
         else
@@ -1078,6 +1251,20 @@ enum Prize
     }, params -> {
         ItemStack item = new ItemStack(Material.DIAMOND_HELMET);
         return Utility.setName(item, ChatColor.BLUE + "Hydrodyne Helmet");
+    }),
+
+    TREEFELLER_CHAINSAW (params -> {
+        ItemStack item = new ItemStack(Material.DIAMOND_AXE);
+        item = Utility.setName(item, ChatColor.DARK_GREEN + "" + ChatColor.ITALIC + "Treefeller Chainsaw");
+        item = Utility.addLoreLine(item, "Let gravity do the work for you!");
+        item = Utility.addLoreLine(item, ChatColor.RESET + "The chainsaw fells entire trees with a single blow");
+        item = Utility.addLoreLine(item, ChatColor.BLACK + "treefeller_chainsaw");
+        item.addEnchantment(Enchantment.DURABILITY, 2);
+        params.rewardee.sendMessage(ChatColor.DARK_GREEN + "You got the Treefeller Chainsaw!");
+        return Collections.singletonList(item);
+    }, params -> {
+        ItemStack item = new ItemStack(Material.DIAMOND_AXE);
+        return Utility.setName(item, ChatColor.DARK_GREEN + "" + ChatColor.ITALIC + "Treefeller Chainsaw");
     }),
 
     GIGA_DRILL_BREAKER (params -> {
@@ -1240,7 +1427,7 @@ enum Prize
         return rewards;
     }, params -> {
         ItemStack item = new ItemStack(Material.REDSTONE_ORE);
-        return Utility.setName(item, ChatColor.AQUA + "Assorted Raw Ore Blocks");
+        return Utility.setName(item, ChatColor.AQUA + "" + params.amountToGive + "xAssorted Raw Ore Blocks");
     }),
 
     ASSORTED_ORES (params -> {
@@ -1266,7 +1453,7 @@ enum Prize
         return rewards;
     }, params -> {
         ItemStack item = new ItemStack(Material.COAL);
-        return Utility.setName(item, ChatColor.AQUA + "Assorted Ores");
+        return Utility.setName(item, ChatColor.AQUA + "" + params.amountToGive + "xAssorted Ores");
     }),
 
     ASSORTMENT (params -> {
@@ -1292,7 +1479,7 @@ enum Prize
         return rewards;
     }, params -> {
         ItemStack item = new ItemStack(Material.CHEST);
-        item = Utility.setName(item, ChatColor.GREEN + "An Assortment of Items");
+        item = Utility.setName(item, ChatColor.GREEN + "" + params.amountToGive + "xAssorted Items");
         return item;
     }),
 
@@ -1318,14 +1505,14 @@ enum Prize
         return rewards;
     }, params -> {
         ItemStack item = new ItemStack(Material.SAPLING);
-        item = Utility.setName(item, ChatColor.DARK_GREEN + "An Assorted Planter Set");
+        item = Utility.setName(item, ChatColor.DARK_GREEN + "" + params.amountToGive + "xAssorted Plants");
         return item;
     }),
 
     MONEY (params -> {
         params.rewardee.getServer().dispatchCommand(params.rewardee.getServer().getConsoleSender(), "eco give " + params.rewardee.getName() + " " + params.amountToGive);
         params.rewardee.sendMessage("You got $" + params.amountToGive + "!");
-        return null;
+        return Collections.singletonList(Utility.setName(new ItemStack(Material.PAPER), ChatColor.DARK_AQUA + "$" + params.amountToGive + " invoice"));
     }, params -> {
         ItemStack item = new ItemStack(Material.GOLD_INGOT, 1);
         item = Utility.setName(item, ChatColor.DARK_AQUA + "$" + params.amountToGive);
@@ -1500,57 +1687,57 @@ enum Prize
     }
 }
 
-enum CrateKey
+interface Job
 {
-    COMMON_KEY (isDisplay -> {
-        ItemStack key = new ItemStack(Material.TRIPWIRE_HOOK);
-        key = Utility.setName(key, ChatColor.GREEN + "Common Key");
-        if (isDisplay) return key;
-        return Utility.addLoreLine(key, "A normal crate key.");
-    }),
+    void update();
+    boolean isDone();
+}
 
-    MYSTICAL_KEY (isDisplay -> {
-        ItemStack key = new ItemStack(Material.TRIPWIRE_HOOK);
-        key = Utility.setName(key, ChatColor.LIGHT_PURPLE + "" + ChatColor.ITALIC + "Mystical Key");
-        if (isDisplay) return key;
-        return Utility.addLoreLine(key, "A Mystical key of unknown origin. Surely very rare.");
-    }),
+class TreefellerJob implements Job
+{
+    Block initialBlock;
+    HashSet<Block> currentSet;
+    int blocksBroken;
 
-    LEGENDARY_KEY (isDisplay -> {
-        ItemStack key = new ItemStack(Material.TRIPWIRE_HOOK);
-        key = Utility.setName(key, ChatColor.YELLOW + "" + ChatColor.BOLD + "Legendary Key");
-        if (isDisplay) return key;
-        return Utility.addLoreLine(key, "An incredibly rare key of legends. It unlocks untold riches.");
-    }),
+    public static final List<Material> validBlocks = Arrays.asList(Material.LOG, Material.LOG_2, Material.LEAVES, Material.LEAVES_2);
+    public static final int maximumdestruction = 256;
 
-    ANCIENT_KEY (isDisplay -> {
-        ItemStack key = new ItemStack(Material.TRIPWIRE_HOOK);
-        key = Utility.setName(key, ChatColor.DARK_GRAY + "Ancient Key");
-        if (isDisplay) return key;
-        return Utility.addLoreLine(key, "An old key from long ago. History has long forgotten what it unlocks.");
-    });
-
-    ItemStackRetriever retriever;
-
-    CrateKey(ItemStackRetriever retriever)
+    public TreefellerJob(Block initialBlock)
     {
-        this.retriever = retriever;
+        this.initialBlock = initialBlock;
+        this.currentSet = new HashSet<>();
+        this.blocksBroken = 0;
+        currentSet.add(initialBlock);
     }
 
-    public ItemStack getKey(boolean isDisplayModel)
+    public void update()
     {
-        ItemStack basekey = retriever.retrieveItemStack(isDisplayModel);
-        if (isDisplayModel) return basekey;
-        return Utility.addLoreLine(basekey, getLoreTagString());
+        for (Block currentblock : currentSet)
+        {
+            if (blocksBroken >= maximumdestruction)
+                return;
+            currentblock.breakNaturally(new ItemStack(Material.DIAMOND_AXE));
+            blocksBroken++;
+        }
+        HashSet<Block> nextUpdate = new HashSet<>();
+        for (Block currentblock : currentSet)
+        {
+            for (Block nblock : Utility.getSurroundingBlocks(currentblock, true, true, true))
+            {
+                if (!validBlocks.contains(nblock.getType()))
+                    continue;
+                if (nblock.getY() < initialBlock.getY())
+                    continue;
+                if (nextUpdate.contains(nblock))
+                    continue;
+                nextUpdate.add(nblock);
+            }
+        }
+        currentSet = nextUpdate;
     }
 
-    public String getLoreTagString()
+    public boolean isDone()
     {
-        return ChatColor.BLACK + toString().toLowerCase();
-    }
-
-    interface ItemStackRetriever
-    {
-        ItemStack retrieveItemStack(boolean isDisplayModel);
+        return currentSet.size() == 0 || blocksBroken >= maximumdestruction;
     }
 }
