@@ -1983,6 +1983,7 @@ class TransmogrificationJob implements Job
 {
     Block initialBlock;
     Material initialMaterial;
+    byte initialData;
     Player ply;
     ArrayList<Block> currentSet;
     int progressThroughSet;
@@ -1995,6 +1996,7 @@ class TransmogrificationJob implements Job
     {
         this.initialBlock = initialBlock;
         this.initialMaterial = initialBlock.getType();
+        this.initialData = initialBlock.getData();
         this.ply = ply;
         this.modificationsPerAction = modificationsPerAction;
         this.maxModification = maxModification;
@@ -2019,13 +2021,16 @@ class TransmogrificationJob implements Job
                 progressThroughSet = 0;
                 getNewSet();
             } else {
-                if (offhanditem.getAmount() == 1)
+                if (ply.getGameMode() != GameMode.CREATIVE)
                 {
-                    ply.getInventory().setItem(40, null);
-                    outOfBlocks = true;
+                    if (offhanditem.getAmount() == 1)
+                    {
+                        ply.getInventory().setItem(40, null);
+                        outOfBlocks = true;
+                    }
+                    else
+                        offhanditem.setAmount(offhanditem.getAmount() - 1);
                 }
-                else
-                    offhanditem.setAmount(offhanditem.getAmount() - 1);
                 Block cblock = currentSet.get(progressThroughSet);
                 cblock.getWorld().playEffect(cblock.getLocation(), Effect.TILE_BREAK, new MaterialData(cblock.getType()));
                 cblock.breakNaturally();
@@ -2044,7 +2049,7 @@ class TransmogrificationJob implements Job
         {
             for (Block nblock : Utility.getSurroundingBlocks(currentblock, true, true, true))
             {
-                if (initialMaterial != nblock.getType())
+                if (!(initialMaterial == nblock.getType() && initialData == nblock.getData()))
                     continue;
                 if (nextUpdate.contains(nblock))
                     continue;
