@@ -16,11 +16,13 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.craftbukkit.v1_9_R1.block.CraftChest;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.*;
+import org.bukkit.entity.Entity;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -70,6 +72,8 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
     public int TerramorpherSize;
 
     public int GigaDrillBreakerSize;
+
+    public double WandOfLeapingPower;
 
     // Overridden Methods
 
@@ -156,7 +160,7 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
             String printname = cratesection.getString("name");
             printname = ChatColor.translateAlternateColorCodes('?', printname);
             String reqKeyName = cratesection.getString("required_key", "_no_key");
-            double spawnChance = cratesection.getDouble("spawn_chance");
+            double spawnChance = cratesection.getDouble("spawn_chance", 0);
             boolean broadcast = cratesection.getBoolean("broadcast_on_drop", false);
             CrateKey reqKey = null;
             if (!reqKeyName.equalsIgnoreCase("_no_key"))
@@ -276,6 +280,9 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
 
         ConfigurationSection gigadrillbreakerCfg = optionsConfig.getConfig().getConfigurationSection("giga_drill_breaker");
         GigaDrillBreakerSize = gigadrillbreakerCfg.getInt("size");
+
+        ConfigurationSection wandofleapingCfg = optionsConfig.getConfig().getConfigurationSection("wand_of_leaping");
+        WandOfLeapingPower = wandofleapingCfg.getInt("power");
 
         // startup random crate dropper
         ConfigurationSection cratespawningSection = optionsConfig.getConfig().getConfigurationSection("cratespawning");
@@ -572,8 +579,10 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
     @EventHandler
     public void playerInteract(PlayerInteractEvent ev)
     {
+        Player ply = ev.getPlayer();
+
         // manage opening of crates
-        if (ev.getAction() == Action.RIGHT_CLICK_BLOCK && !ev.getPlayer().isSneaking())
+        if (ev.getAction() == Action.RIGHT_CLICK_BLOCK && !ply.isSneaking())
         {
             Block block = ev.getClickedBlock();
             if (block.getType() != Material.CHEST)
@@ -589,13 +598,13 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
             }
             if (crateToOpen == null)
                 return;
-            if (!ev.getPlayer().hasPermission("lootcrate.opencrate"))
+            if (!ply.hasPermission("lootcrate.opencrate"))
             {
-                ev.getPlayer().sendMessage(ChatColor.RED + "You don't have permission to open crates.");
+                ply.sendMessage(ChatColor.RED + "You don't have permission to open crates.");
                 ev.setCancelled(true);
                 return;
             }
-            ItemStack handItem = ev.getPlayer().getInventory().getItemInMainHand();
+            ItemStack handItem = ply.getInventory().getItemInMainHand();
             if (crateToOpen.isKeyValid(handItem))
             {
                 if (!crateToOpen.layout.isFree())
@@ -603,23 +612,23 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
                     if (handItem.getAmount() > 1)
                         handItem.setAmount(handItem.getAmount() - 1);
                     else
-                        ev.getPlayer().getInventory().remove(handItem);
-                    crateToOpen.unlockAndGivePrize(this, ev.getPlayer());
+                        ply.getInventory().remove(handItem);
+                    crateToOpen.unlockAndGivePrize(this, ply);
                     removeCrate(crateToOpen);
                 }
             }
             else
             {
                 ev.setCancelled(true);
-                ev.getPlayer().openInventory(crateToOpen.showContents(this, ev.getPlayer()));
+                ply.openInventory(crateToOpen.showContents(this, ply));
             }
         }
 
         // Transmogrifier
         if (ev.getAction() == Action.LEFT_CLICK_BLOCK &&
-                Utility.itemHasLoreLine(ev.getPlayer().getInventory().getItemInMainHand(), Prize.TRANSMOGRIFIER.getLoreTag()))
+                Utility.itemHasLoreLine(ply.getInventory().getItemInMainHand(), Prize.TRANSMOGRIFIER.getLoreTag()))
         {
-            ItemStack offhandItem = ev.getPlayer().getInventory().getItemInOffHand();
+            ItemStack offhandItem = ply.getInventory().getItemInOffHand();
             if (offhandItem == null)
                 return;
             if (!offhandItem.getType().isBlock())
@@ -630,7 +639,20 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
                 return;
             if (ev.getClickedBlock().getType() == offhandItem.getType() && ev.getClickedBlock().getData() == offhandItem.getDurability())
                 return;
-            activeJobs.add(new TransmogrificationJob(ev.getClickedBlock(), ev.getPlayer(), TransmogiphySpeed, MaxBlocksPerTransmogrophy));
+            activeJobs.add(new TransmogrificationJob(ev.getClickedBlock(), ply, TransmogiphySpeed, MaxBlocksPerTransmogrophy));
+        }
+
+        // Wand of Leaping
+        if ((ev.getAction() == Action.LEFT_CLICK_BLOCK || ev.getAction() == Action.LEFT_CLICK_AIR) &&
+                Utility.itemHasLoreLine(ply.getInventory().getItemInMainHand(), Prize.WAND_OF_LEAPING.getLoreTag()))
+        {
+            if (!Utility.isOnGround(ply))
+                return;
+            Vector direction = ply.getLocation().getDirection().normalize();
+            direction = direction.multiply(WandOfLeapingPower);
+            ply.setVelocity(direction);
+            Utility.reduceDurability(ply, ply.getInventory().getItemInMainHand(), 1);
+            ply.playSound(ply.getLocation(), Sound.ENTITY_PLAYER_ATTACK_SWEEP, 1, 1);
         }
     }
 
@@ -765,6 +787,21 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
         }
     }
 
+    @EventHandler
+    public void entityDamage(EntityDamageEvent ev)
+    {
+        if (!(ev.getEntity() instanceof Player))
+            return;
+        Player ply = (Player) ev.getEntity();
+
+        // Wand of Leaping
+        if (ev.getCause() == EntityDamageEvent.DamageCause.FALL &&
+                Utility.itemHasLoreLine(ply.getInventory().getItemInMainHand(), Prize.WAND_OF_LEAPING.getLoreTag()))
+        {
+            ev.setCancelled(true);
+        }
+    }
+
     // Other Methods
 
     private void removeCrate(Crate c)
@@ -790,22 +827,35 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
 
     private void dropRandomCrate(Location center, double radius)
     {
+        // get layout to use
+        ArrayList<Double> weights = new ArrayList<>();
+        for (CrateLayout l : crateLayouts)
+            weights.add(l.spawnChance);
+        int index = Utility.randomWeightedIndex(weights);
+        if (index == -1)
+        {
+            csend.sendMessage(ChatColor.RED + "Error: Attempted to place crate when none have any chance to drop. Please disable random crate drops in lootcrate_options.yml if this is intended.");
+            return;
+        }
+        CrateLayout layout = crateLayouts.get(Utility.randomWeightedIndex(weights));
+
+        // get location to use
         Location droplocation;
         Block newChest;
         do {
             droplocation = center.add(Utility.randomInsideUnitCircle().multiply(radius));
             newChest = Utility.getHighestSolidBlock(center.getWorld(), droplocation.getBlockX(), droplocation.getBlockZ());
         } while (newChest.getLocation().getY() >= droplocation.getWorld().getMaxHeight());
-        ArrayList<Double> weights = new ArrayList<>();
-        for (CrateLayout l : crateLayouts)
-            weights.add(l.spawnChance);
-        CrateLayout layout = crateLayouts.get(Utility.randomWeightedIndex(weights));
-        addCrate(new Crate(newChest.getRelative(BlockFace.UP), layout));
+
+        // broadcast crate position
         if (layout.shouldBroadcast)
         {
             getServer().broadcastMessage("A " + layout.printname + ChatColor.RESET + " has dropped at " + ChatColor.GOLD + newChest.getX() + ", " + newChest.getZ() + ChatColor.RESET + "!");
         }
         csend.sendMessage(layout.printname + ChatColor.RESET + " spawned at " + Utility.formatVector(newChest.getLocation().toVector()));
+
+        // drop crate
+        addCrate(new Crate(newChest.getRelative(BlockFace.UP), layout));
     }
 
     private void checkPlayerForSpecialItem(Player ply)
@@ -938,6 +988,8 @@ class Utility
         double sum = 0;
         for (double f : weights)
             sum += f;
+        if (sum == 0)
+            return -1;
         double rand = Math.random() * sum;
         for (int i=0;i<weights.size();i++)
         {
@@ -1126,6 +1178,24 @@ class Utility
             lastBlock = nextBlock;
         } while (iter.hasNext());
         return BlockFace.SELF;
+    }
+
+    static boolean isOnGround(Player ply)
+    {
+        return ((Entity) ply).isOnGround();
+    }
+
+    static boolean reduceDurability(Player ply, ItemStack tool, int amount)
+    {
+        tool.setDurability((short) (tool.getDurability() + amount));
+        if (tool.getDurability() >= tool.getType().getMaxDurability())
+        {
+            ply.playSound(ply.getLocation(), Sound.ENTITY_ITEM_BREAK, 1, 1);
+            ply.spawnParticle(Particle.ITEM_CRACK, ply.getLocation(), 20);
+            ply.getInventory().remove(tool);
+            return true;
+        }
+        return false;
     }
 }
 
@@ -1424,10 +1494,22 @@ enum Prize
 
     // Tools
 
+    WAND_OF_LEAPING (params -> {
+        ItemStack item = new ItemStack(Material.GOLD_HOE);
+        Utility.setName(item, ChatColor.LIGHT_PURPLE + "" + ChatColor.ITALIC + "Wand of Leaping");
+        Utility.addLoreLine(item, ChatColor.RESET + "Allows the user to leap great distances and avoid fall damage");
+        item.addEnchantment(Enchantment.DURABILITY, 1);
+        params.rewardee.sendMessage(ChatColor.LIGHT_PURPLE + "You got the " + ChatColor.ITALIC + "Wand of Leaping!");
+        return Collections.singletonList(item);
+    }, params -> {
+        ItemStack item = new ItemStack(Material.GOLD_HOE);
+        return Utility.setName(item, ChatColor.LIGHT_PURPLE + "" + ChatColor.ITALIC + "Wand of Leaping");
+    }),
+
     TERRAMORPHER (params -> {
         ItemStack item = new ItemStack(Material.DIAMOND_SPADE);
-        item = Utility.setName(item, ChatColor.GREEN + "" + ChatColor.BOLD + "Terramorpher");
-        item = Utility.addLoreLine(item, ChatColor.RESET + "The terramorpher digs multiple blocks at once");
+        Utility.setName(item, ChatColor.GREEN + "" + ChatColor.BOLD + "Terramorpher");
+        Utility.addLoreLine(item, ChatColor.RESET + "The terramorpher digs multiple blocks at once");
         item.addEnchantment(Enchantment.DURABILITY, 2);
         item.addEnchantment(Enchantment.DIG_SPEED, 3);
         params.rewardee.sendMessage(ChatColor.GREEN + "You got the " + ChatColor.BOLD + "Terramorpher!");
@@ -1439,9 +1521,9 @@ enum Prize
 
     TRANSMOGRIFIER (params -> {
         ItemStack item = new ItemStack(Material.DIAMOND_HOE);
-        item = Utility.setName(item, ChatColor.GOLD + "" + ChatColor.BOLD + "Transmogrifier");
-        item = Utility.addLoreLine(item, ChatColor.RESET + "The transmogrifier will swap blocks with those in your offhand with a left click");
-        item = Utility.addLoreLine(item, ChatColor.RESET + "...you can also till soil with it.");
+        Utility.setName(item, ChatColor.GOLD + "" + ChatColor.BOLD + "Transmogrifier");
+        Utility.addLoreLine(item, ChatColor.RESET + "The transmogrifier will swap blocks with those in your offhand with a left click");
+        Utility.addLoreLine(item, ChatColor.RESET + "...you can also till soil with it.");
         item.addEnchantment(Enchantment.DURABILITY, 2);
         params.rewardee.sendMessage(ChatColor.GOLD + "You got the " + ChatColor.BOLD + "Transmogrifier!");
         return Collections.singletonList(item);
@@ -1452,9 +1534,9 @@ enum Prize
 
     TREEFELLER_CHAINSAW (params -> {
         ItemStack item = new ItemStack(Material.DIAMOND_AXE);
-        item = Utility.setName(item, ChatColor.DARK_GREEN + "" + ChatColor.ITALIC + "Treefeller Chainsaw");
-        item = Utility.addLoreLine(item, "Let gravity do the work for you!");
-        item = Utility.addLoreLine(item, ChatColor.RESET + "The chainsaw fells entire trees with a single blow");
+        Utility.setName(item, ChatColor.DARK_GREEN + "" + ChatColor.ITALIC + "Treefeller Chainsaw");
+        Utility.addLoreLine(item, "Let gravity do the work for you!");
+        Utility.addLoreLine(item, ChatColor.RESET + "The chainsaw fells entire trees with a single blow");
         item.addEnchantment(Enchantment.DURABILITY, 2);
         params.rewardee.sendMessage(ChatColor.DARK_GREEN + "You got the Treefeller Chainsaw!");
         return Collections.singletonList(item);
@@ -1465,8 +1547,8 @@ enum Prize
 
     GIGA_DRILL_BREAKER (params -> {
         ItemStack item = new ItemStack(Material.DIAMOND_PICKAXE);
-        item = Utility.setName(item, ChatColor.AQUA + "" + ChatColor.BOLD + "Giga Drill Breaker");
-        item = Utility.addLoreLine(item, ChatColor.AQUA + "Bust through the heavens with your Drill!");
+        Utility.setName(item, ChatColor.AQUA + "" + ChatColor.BOLD + "Giga Drill Breaker");
+        Utility.addLoreLine(item, ChatColor.AQUA + "Bust through the heavens with your Drill!");
         item.addEnchantment(Enchantment.DIG_SPEED, 5);
         item.addEnchantment(Enchantment.DURABILITY, 3);
         params.rewardee.sendMessage(ChatColor.AQUA + "You got the Giga Drill Breaker; thrust through the heavens with your spirit!");
@@ -1478,9 +1560,9 @@ enum Prize
 
     UNYIELDING_BATTERSEA (params -> {
         ItemStack item = new ItemStack(Material.SHIELD);
-        item = Utility.setName(item, ChatColor.YELLOW + "Unyielding Battersea");
-        item = Utility.addLoreLine(item, "An olden shield used by unending legions");
-        item = Utility.addLoreLine(item, ChatColor.RESET + "The battersea grants increase resistances while equipped");
+        Utility.setName(item, ChatColor.YELLOW + "Unyielding Battersea");
+        Utility.addLoreLine(item, "An olden shield used by unending legions");
+        Utility.addLoreLine(item, ChatColor.RESET + "The battersea grants increase resistances while equipped");
         item.addEnchantment(Enchantment.DURABILITY, 3);
         item.addEnchantment(Enchantment.MENDING, 1);
         params.rewardee.sendMessage(ChatColor.YELLOW + "You got the Unyielding Battersea!");
@@ -1492,9 +1574,9 @@ enum Prize
 
     VEILSTRIKE_BOW (params -> {
         ItemStack item = new ItemStack(Material.BOW);
-        item = Utility.setName(item, ChatColor.YELLOW + "" + ChatColor.ITALIC + "Veilstrike Bow");
-        item = Utility.addLoreLine(item, "An ancient, powerful bow used by an extremely skilled marksman");
-        item = Utility.addLoreLine(item, ChatColor.RESET + "The bow grants invisibility and immense arrow speed");
+        Utility.setName(item, ChatColor.YELLOW + "" + ChatColor.ITALIC + "Veilstrike Bow");
+        Utility.addLoreLine(item, "An ancient, powerful bow used by an extremely skilled marksman");
+        Utility.addLoreLine(item, ChatColor.RESET + "The bow grants invisibility and immense arrow speed");
         item.addEnchantment(Enchantment.ARROW_DAMAGE, 5);
         item.addEnchantment(Enchantment.ARROW_KNOCKBACK, 2);
         item.addEnchantment(Enchantment.DURABILITY, 2);
@@ -1508,8 +1590,8 @@ enum Prize
 
     HEAVENS_BLADE (params -> {
         ItemStack item = new ItemStack(Material.DIAMOND_SWORD);
-        item = Utility.setName(item, ChatColor.YELLOW + "" + ChatColor.BOLD + "Heaven's Blade");
-        item = Utility.addLoreLine(item, "A godly blade that weilds incredible desctructive power");
+        Utility.setName(item, ChatColor.YELLOW + "" + ChatColor.BOLD + "Heaven's Blade");
+        Utility.addLoreLine(item, "A godly blade that weilds incredible desctructive power");
         item.addEnchantment(Enchantment.DAMAGE_ALL, 5);
         item.addEnchantment(Enchantment.KNOCKBACK, 2);
         item.addEnchantment(Enchantment.FIRE_ASPECT, 2);
@@ -1565,9 +1647,9 @@ enum Prize
     }, params -> {
         ItemStack item = new ItemStack(Material.DIAMOND, 1);
         if (params.amountToGive > 1)
-            item = Utility.setName(item, ChatColor.DARK_AQUA + "" + params.amountToGive + " Diamonds");
+            Utility.setName(item, ChatColor.DARK_AQUA + "" + params.amountToGive + " Diamonds");
         else
-            item = Utility.setName(item, ChatColor.DARK_AQUA + "1 Diamond");
+            Utility.setName(item, ChatColor.DARK_AQUA + "1 Diamond");
         return item;
     }),
 
@@ -1580,9 +1662,9 @@ enum Prize
     }, params -> {
         ItemStack item = new ItemStack(Material.IRON_INGOT, 1);
         if (params.amountToGive > 1)
-            item = Utility.setName(item, ChatColor.DARK_AQUA + "" + params.amountToGive + " Iron Ingots");
+            Utility.setName(item, ChatColor.DARK_AQUA + "" + params.amountToGive + " Iron Ingots");
         else
-            item = Utility.setName(item, ChatColor.DARK_AQUA + "1 Iron Ingot");
+            Utility.setName(item, ChatColor.DARK_AQUA + "1 Iron Ingot");
         return item;
     }),
 
@@ -1595,9 +1677,9 @@ enum Prize
     }, params -> {
         ItemStack item = new ItemStack(Material.IRON_INGOT, 1);
         if (params.amountToGive > 1)
-            item = Utility.setName(item, ChatColor.DARK_AQUA + "" + params.amountToGive + " Gold Ingots");
+            Utility.setName(item, ChatColor.DARK_AQUA + "" + params.amountToGive + " Gold Ingots");
         else
-            item = Utility.setName(item, ChatColor.DARK_AQUA + "1 Gold Ingot");
+            Utility.setName(item, ChatColor.DARK_AQUA + "1 Gold Ingot");
         return item;
     }),
 
@@ -1673,7 +1755,7 @@ enum Prize
         return rewards;
     }, params -> {
         ItemStack item = new ItemStack(Material.CHEST);
-        item = Utility.setName(item, ChatColor.GREEN + "" + params.amountToGive + "xAssorted Items");
+        Utility.setName(item, ChatColor.GREEN + "" + params.amountToGive + "xAssorted Items");
         return item;
     }),
 
@@ -1699,7 +1781,7 @@ enum Prize
         return rewards;
     }, params -> {
         ItemStack item = new ItemStack(Material.SAPLING);
-        item = Utility.setName(item, ChatColor.DARK_GREEN + "" + params.amountToGive + "xAssorted Plants");
+        Utility.setName(item, ChatColor.DARK_GREEN + "" + params.amountToGive + "xAssorted Plants");
         return item;
     }),
 
@@ -1709,7 +1791,7 @@ enum Prize
         return Collections.singletonList(Utility.setName(new ItemStack(Material.PAPER), ChatColor.DARK_AQUA + "$" + params.amountToGive + " invoice"));
     }, params -> {
         ItemStack item = new ItemStack(Material.GOLD_INGOT, 1);
-        item = Utility.setName(item, ChatColor.DARK_AQUA + "$" + params.amountToGive);
+        Utility.setName(item, ChatColor.DARK_AQUA + "$" + params.amountToGive);
         return item;
     }),
 
@@ -1779,9 +1861,9 @@ enum Prize
     }, params -> {
         ItemStack item = new ItemStack(Material.GOLD_NUGGET);
         if (params.amountToGive > 1)
-            item = Utility.setName(item, ChatColor.DARK_AQUA + "" + params.amountToGive + " Individually Placed Gold Nuggets");
+            Utility.setName(item, ChatColor.DARK_AQUA + "" + params.amountToGive + " Individually Placed Gold Nuggets");
         else
-            item = Utility.setName(item, ChatColor.DARK_AQUA + "1 Gold Nugget");
+            Utility.setName(item, ChatColor.DARK_AQUA + "1 Gold Nugget");
         return item;
     }),
 
@@ -1805,7 +1887,7 @@ enum Prize
         return null;
     }, params -> {
         ItemStack item = new ItemStack(Material.FIREWORK);
-        item = Utility.setName(item, ChatColor.GOLD + "A Fireworks Show");
+        Utility.setName(item, ChatColor.GOLD + "A Fireworks Show");
         return item;
     }),
 
@@ -1814,7 +1896,7 @@ enum Prize
         return null;
     }, params -> {
         ItemStack item = new ItemStack(Material.THIN_GLASS);
-        item = Utility.setName(item, ChatColor.DARK_GRAY + "Nothing");
+        Utility.setName(item, ChatColor.DARK_GRAY + "Nothing");
         return item;
     });
 

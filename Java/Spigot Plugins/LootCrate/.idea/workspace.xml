@@ -25,25 +25,24 @@
       <file leaf-file-name="LootCrate.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/com/ncolaprete/lootcrate/LootCrate.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1239">
-              <caret line="2070" column="33" selection-start-line="2070" selection-start-column="33" selection-end-line="2070" selection-end-column="33" />
+            <state relative-caret-position="9900">
+              <caret line="828" column="5" selection-start-line="828" selection-start-column="5" selection-end-line="828" selection-end-column="5" />
               <folding>
-                <element signature="method#onEnable#0;class#LootCrate#0" expanded="false" />
                 <element signature="method#onDisable#0;class#LootCrate#0" expanded="false" />
                 <element signature="method#onCommand#0;class#LootCrate#0" expanded="false" />
                 <element signature="method#updateJobs#0;class#LootCrate#0" expanded="false" />
                 <element signature="method#checkAllPlayersForSpecialItems#0;class#LootCrate#0" expanded="false" />
                 <element signature="method#checkForCreativeTimeUp#0;class#LootCrate#0" expanded="false" />
+                <element signature="method#blockBreak#0;class#LootCrate#0" expanded="false" />
                 <element signature="method#blockPlace#0;class#LootCrate#0" expanded="false" />
                 <element signature="method#inventoryClick#0;class#LootCrate#0" expanded="false" />
                 <element signature="method#playerItemHeld#0;class#LootCrate#0" expanded="false" />
                 <element signature="method#projectileLaunch#0;class#LootCrate#0" expanded="false" />
+                <element signature="method#entityDamage#0;class#LootCrate#0" expanded="false" />
                 <element signature="method#removeCrate#0;class#LootCrate#0" expanded="false" />
                 <element signature="method#removeCrate#1;class#LootCrate#0" expanded="false" />
                 <element signature="method#addCrate#0;class#LootCrate#0" expanded="false" />
-                <element signature="method#dropRandomCrate#0;class#LootCrate#0" expanded="false" />
                 <element signature="method#checkPlayerForSpecialItem#0;class#LootCrate#0" expanded="false" />
-                <element signature="class#Utility#0" expanded="false" />
                 <element signature="method#itemHasLoreLine#0;class#Utility#0" expanded="false" />
                 <element signature="method#addLoreLine#0;class#Utility#0" expanded="false" />
                 <element signature="method#setName#0;class#Utility#0" expanded="false" />
@@ -94,9 +93,14 @@
                 <element signature="method#getValidBlocks#0;class#TreefellerJob#0" expanded="false" />
                 <element signature="class#ShroomFellerJob#0" expanded="false" />
                 <element signature="method#ShroomFellerJob#1;class#ShroomFellerJob#0" expanded="false" />
-                <element signature="e#81959#81991#0" expanded="true" />
+                <element signature="class#TransmogrificationJob#0" expanded="false" />
+                <element signature="method#TransmogrificationJob#0;class#TransmogrificationJob#0" expanded="false" />
+                <element signature="method#update#0;class#TransmogrificationJob#0" expanded="false" />
+                <element signature="method#getNewSet#0;class#TransmogrificationJob#0" expanded="false" />
+                <element signature="method#isDone#0;class#TransmogrificationJob#0" expanded="false" />
                 <element signature="class#TerramorpherJob#0" expanded="false" />
                 <element signature="method#TerramorpherJob#0;class#TerramorpherJob#0" expanded="false" />
+                <element signature="method#update#0;class#TerramorpherJob#0" expanded="false" />
                 <element signature="class#Orientation#0;class#TerramorpherJob#0" expanded="false" />
                 <element signature="method#Orientation#0;class#Orientation#0;class#TerramorpherJob#0" expanded="false" />
                 <element signature="method#fromBlockFace#0;class#Orientation#0;class#TerramorpherJob#0" expanded="false" />
@@ -148,8 +152,8 @@
       <file leaf-file-name="lootcrate_config.yml" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/lootcrate_config.yml">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="528">
-              <caret line="16" column="9" selection-start-line="16" selection-start-column="9" selection-end-line="16" selection-end-column="9" />
+            <state relative-caret-position="594">
+              <caret line="18" column="10" selection-start-line="18" selection-start-column="10" selection-end-line="18" selection-end-column="10" />
               <folding />
             </state>
           </provider>
@@ -599,7 +603,7 @@
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
-      <option name="time" value="24" />
+      <option name="time" value="26" />
     </breakpoint-manager>
     <watches-manager />
   </component>
@@ -613,22 +617,21 @@
         <state relative-caret-position="0">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
-            <element signature="method#onEnable#0;class#LootCrate#0" expanded="false" />
             <element signature="method#onDisable#0;class#LootCrate#0" expanded="false" />
             <element signature="method#onCommand#0;class#LootCrate#0" expanded="false" />
             <element signature="method#updateJobs#0;class#LootCrate#0" expanded="false" />
             <element signature="method#checkAllPlayersForSpecialItems#0;class#LootCrate#0" expanded="false" />
             <element signature="method#checkForCreativeTimeUp#0;class#LootCrate#0" expanded="false" />
+            <element signature="method#blockBreak#0;class#LootCrate#0" expanded="false" />
             <element signature="method#blockPlace#0;class#LootCrate#0" expanded="false" />
             <element signature="method#inventoryClick#0;class#LootCrate#0" expanded="false" />
             <element signature="method#playerItemHeld#0;class#LootCrate#0" expanded="false" />
             <element signature="method#projectileLaunch#0;class#LootCrate#0" expanded="false" />
+            <element signature="method#entityDamage#0;class#LootCrate#0" expanded="false" />
             <element signature="method#removeCrate#0;class#LootCrate#0" expanded="false" />
             <element signature="method#removeCrate#1;class#LootCrate#0" expanded="false" />
             <element signature="method#addCrate#0;class#LootCrate#0" expanded="false" />
-            <element signature="method#dropRandomCrate#0;class#LootCrate#0" expanded="false" />
             <element signature="method#checkPlayerForSpecialItem#0;class#LootCrate#0" expanded="false" />
-            <element signature="class#Utility#0" expanded="false" />
             <element signature="method#itemHasLoreLine#0;class#Utility#0" expanded="false" />
             <element signature="method#addLoreLine#0;class#Utility#0" expanded="false" />
             <element signature="method#setName#0;class#Utility#0" expanded="false" />
@@ -679,9 +682,14 @@
             <element signature="method#getValidBlocks#0;class#TreefellerJob#0" expanded="false" />
             <element signature="class#ShroomFellerJob#0" expanded="false" />
             <element signature="method#ShroomFellerJob#1;class#ShroomFellerJob#0" expanded="false" />
-            <element signature="e#81959#81991#0" expanded="true" />
+            <element signature="class#TransmogrificationJob#0" expanded="false" />
+            <element signature="method#TransmogrificationJob#0;class#TransmogrificationJob#0" expanded="false" />
+            <element signature="method#update#0;class#TransmogrificationJob#0" expanded="false" />
+            <element signature="method#getNewSet#0;class#TransmogrificationJob#0" expanded="false" />
+            <element signature="method#isDone#0;class#TransmogrificationJob#0" expanded="false" />
             <element signature="class#TerramorpherJob#0" expanded="false" />
             <element signature="method#TerramorpherJob#0;class#TerramorpherJob#0" expanded="false" />
+            <element signature="method#update#0;class#TerramorpherJob#0" expanded="false" />
             <element signature="class#Orientation#0;class#TerramorpherJob#0" expanded="false" />
             <element signature="method#Orientation#0;class#Orientation#0;class#TerramorpherJob#0" expanded="false" />
             <element signature="method#fromBlockFace#0;class#Orientation#0;class#TerramorpherJob#0" expanded="false" />
@@ -726,22 +734,21 @@
         <state relative-caret-position="0">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
-            <element signature="method#onEnable#0;class#LootCrate#0" expanded="false" />
             <element signature="method#onDisable#0;class#LootCrate#0" expanded="false" />
             <element signature="method#onCommand#0;class#LootCrate#0" expanded="false" />
             <element signature="method#updateJobs#0;class#LootCrate#0" expanded="false" />
             <element signature="method#checkAllPlayersForSpecialItems#0;class#LootCrate#0" expanded="false" />
             <element signature="method#checkForCreativeTimeUp#0;class#LootCrate#0" expanded="false" />
+            <element signature="method#blockBreak#0;class#LootCrate#0" expanded="false" />
             <element signature="method#blockPlace#0;class#LootCrate#0" expanded="false" />
             <element signature="method#inventoryClick#0;class#LootCrate#0" expanded="false" />
             <element signature="method#playerItemHeld#0;class#LootCrate#0" expanded="false" />
             <element signature="method#projectileLaunch#0;class#LootCrate#0" expanded="false" />
+            <element signature="method#entityDamage#0;class#LootCrate#0" expanded="false" />
             <element signature="method#removeCrate#0;class#LootCrate#0" expanded="false" />
             <element signature="method#removeCrate#1;class#LootCrate#0" expanded="false" />
             <element signature="method#addCrate#0;class#LootCrate#0" expanded="false" />
-            <element signature="method#dropRandomCrate#0;class#LootCrate#0" expanded="false" />
             <element signature="method#checkPlayerForSpecialItem#0;class#LootCrate#0" expanded="false" />
-            <element signature="class#Utility#0" expanded="false" />
             <element signature="method#itemHasLoreLine#0;class#Utility#0" expanded="false" />
             <element signature="method#addLoreLine#0;class#Utility#0" expanded="false" />
             <element signature="method#setName#0;class#Utility#0" expanded="false" />
@@ -792,9 +799,14 @@
             <element signature="method#getValidBlocks#0;class#TreefellerJob#0" expanded="false" />
             <element signature="class#ShroomFellerJob#0" expanded="false" />
             <element signature="method#ShroomFellerJob#1;class#ShroomFellerJob#0" expanded="false" />
-            <element signature="e#81959#81991#0" expanded="true" />
+            <element signature="class#TransmogrificationJob#0" expanded="false" />
+            <element signature="method#TransmogrificationJob#0;class#TransmogrificationJob#0" expanded="false" />
+            <element signature="method#update#0;class#TransmogrificationJob#0" expanded="false" />
+            <element signature="method#getNewSet#0;class#TransmogrificationJob#0" expanded="false" />
+            <element signature="method#isDone#0;class#TransmogrificationJob#0" expanded="false" />
             <element signature="class#TerramorpherJob#0" expanded="false" />
             <element signature="method#TerramorpherJob#0;class#TerramorpherJob#0" expanded="false" />
+            <element signature="method#update#0;class#TerramorpherJob#0" expanded="false" />
             <element signature="class#Orientation#0;class#TerramorpherJob#0" expanded="false" />
             <element signature="method#Orientation#0;class#Orientation#0;class#TerramorpherJob#0" expanded="false" />
             <element signature="method#fromBlockFace#0;class#Orientation#0;class#TerramorpherJob#0" expanded="false" />
@@ -831,22 +843,21 @@
         <state relative-caret-position="0">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
-            <element signature="method#onEnable#0;class#LootCrate#0" expanded="false" />
             <element signature="method#onDisable#0;class#LootCrate#0" expanded="false" />
             <element signature="method#onCommand#0;class#LootCrate#0" expanded="false" />
             <element signature="method#updateJobs#0;class#LootCrate#0" expanded="false" />
             <element signature="method#checkAllPlayersForSpecialItems#0;class#LootCrate#0" expanded="false" />
             <element signature="method#checkForCreativeTimeUp#0;class#LootCrate#0" expanded="false" />
+            <element signature="method#blockBreak#0;class#LootCrate#0" expanded="false" />
             <element signature="method#blockPlace#0;class#LootCrate#0" expanded="false" />
             <element signature="method#inventoryClick#0;class#LootCrate#0" expanded="false" />
             <element signature="method#playerItemHeld#0;class#LootCrate#0" expanded="false" />
             <element signature="method#projectileLaunch#0;class#LootCrate#0" expanded="false" />
+            <element signature="method#entityDamage#0;class#LootCrate#0" expanded="false" />
             <element signature="method#removeCrate#0;class#LootCrate#0" expanded="false" />
             <element signature="method#removeCrate#1;class#LootCrate#0" expanded="false" />
             <element signature="method#addCrate#0;class#LootCrate#0" expanded="false" />
-            <element signature="method#dropRandomCrate#0;class#LootCrate#0" expanded="false" />
             <element signature="method#checkPlayerForSpecialItem#0;class#LootCrate#0" expanded="false" />
-            <element signature="class#Utility#0" expanded="false" />
             <element signature="method#itemHasLoreLine#0;class#Utility#0" expanded="false" />
             <element signature="method#addLoreLine#0;class#Utility#0" expanded="false" />
             <element signature="method#setName#0;class#Utility#0" expanded="false" />
@@ -897,9 +908,14 @@
             <element signature="method#getValidBlocks#0;class#TreefellerJob#0" expanded="false" />
             <element signature="class#ShroomFellerJob#0" expanded="false" />
             <element signature="method#ShroomFellerJob#1;class#ShroomFellerJob#0" expanded="false" />
-            <element signature="e#81959#81991#0" expanded="true" />
+            <element signature="class#TransmogrificationJob#0" expanded="false" />
+            <element signature="method#TransmogrificationJob#0;class#TransmogrificationJob#0" expanded="false" />
+            <element signature="method#update#0;class#TransmogrificationJob#0" expanded="false" />
+            <element signature="method#getNewSet#0;class#TransmogrificationJob#0" expanded="false" />
+            <element signature="method#isDone#0;class#TransmogrificationJob#0" expanded="false" />
             <element signature="class#TerramorpherJob#0" expanded="false" />
             <element signature="method#TerramorpherJob#0;class#TerramorpherJob#0" expanded="false" />
+            <element signature="method#update#0;class#TerramorpherJob#0" expanded="false" />
             <element signature="class#Orientation#0;class#TerramorpherJob#0" expanded="false" />
             <element signature="method#Orientation#0;class#Orientation#0;class#TerramorpherJob#0" expanded="false" />
             <element signature="method#fromBlockFace#0;class#Orientation#0;class#TerramorpherJob#0" expanded="false" />
@@ -936,22 +952,21 @@
         <state relative-caret-position="0">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
-            <element signature="method#onEnable#0;class#LootCrate#0" expanded="false" />
             <element signature="method#onDisable#0;class#LootCrate#0" expanded="false" />
             <element signature="method#onCommand#0;class#LootCrate#0" expanded="false" />
             <element signature="method#updateJobs#0;class#LootCrate#0" expanded="false" />
             <element signature="method#checkAllPlayersForSpecialItems#0;class#LootCrate#0" expanded="false" />
             <element signature="method#checkForCreativeTimeUp#0;class#LootCrate#0" expanded="false" />
+            <element signature="method#blockBreak#0;class#LootCrate#0" expanded="false" />
             <element signature="method#blockPlace#0;class#LootCrate#0" expanded="false" />
             <element signature="method#inventoryClick#0;class#LootCrate#0" expanded="false" />
             <element signature="method#playerItemHeld#0;class#LootCrate#0" expanded="false" />
             <element signature="method#projectileLaunch#0;class#LootCrate#0" expanded="false" />
+            <element signature="method#entityDamage#0;class#LootCrate#0" expanded="false" />
             <element signature="method#removeCrate#0;class#LootCrate#0" expanded="false" />
             <element signature="method#removeCrate#1;class#LootCrate#0" expanded="false" />
             <element signature="method#addCrate#0;class#LootCrate#0" expanded="false" />
-            <element signature="method#dropRandomCrate#0;class#LootCrate#0" expanded="false" />
             <element signature="method#checkPlayerForSpecialItem#0;class#LootCrate#0" expanded="false" />
-            <element signature="class#Utility#0" expanded="false" />
             <element signature="method#itemHasLoreLine#0;class#Utility#0" expanded="false" />
             <element signature="method#addLoreLine#0;class#Utility#0" expanded="false" />
             <element signature="method#setName#0;class#Utility#0" expanded="false" />
@@ -1002,9 +1017,14 @@
             <element signature="method#getValidBlocks#0;class#TreefellerJob#0" expanded="false" />
             <element signature="class#ShroomFellerJob#0" expanded="false" />
             <element signature="method#ShroomFellerJob#1;class#ShroomFellerJob#0" expanded="false" />
-            <element signature="e#81959#81991#0" expanded="true" />
+            <element signature="class#TransmogrificationJob#0" expanded="false" />
+            <element signature="method#TransmogrificationJob#0;class#TransmogrificationJob#0" expanded="false" />
+            <element signature="method#update#0;class#TransmogrificationJob#0" expanded="false" />
+            <element signature="method#getNewSet#0;class#TransmogrificationJob#0" expanded="false" />
+            <element signature="method#isDone#0;class#TransmogrificationJob#0" expanded="false" />
             <element signature="class#TerramorpherJob#0" expanded="false" />
             <element signature="method#TerramorpherJob#0;class#TerramorpherJob#0" expanded="false" />
+            <element signature="method#update#0;class#TerramorpherJob#0" expanded="false" />
             <element signature="class#Orientation#0;class#TerramorpherJob#0" expanded="false" />
             <element signature="method#Orientation#0;class#Orientation#0;class#TerramorpherJob#0" expanded="false" />
             <element signature="method#fromBlockFace#0;class#Orientation#0;class#TerramorpherJob#0" expanded="false" />
@@ -1041,22 +1061,21 @@
         <state relative-caret-position="0">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
-            <element signature="method#onEnable#0;class#LootCrate#0" expanded="false" />
             <element signature="method#onDisable#0;class#LootCrate#0" expanded="false" />
             <element signature="method#onCommand#0;class#LootCrate#0" expanded="false" />
             <element signature="method#updateJobs#0;class#LootCrate#0" expanded="false" />
             <element signature="method#checkAllPlayersForSpecialItems#0;class#LootCrate#0" expanded="false" />
             <element signature="method#checkForCreativeTimeUp#0;class#LootCrate#0" expanded="false" />
+            <element signature="method#blockBreak#0;class#LootCrate#0" expanded="false" />
             <element signature="method#blockPlace#0;class#LootCrate#0" expanded="false" />
             <element signature="method#inventoryClick#0;class#LootCrate#0" expanded="false" />
             <element signature="method#playerItemHeld#0;class#LootCrate#0" expanded="false" />
             <element signature="method#projectileLaunch#0;class#LootCrate#0" expanded="false" />
+            <element signature="method#entityDamage#0;class#LootCrate#0" expanded="false" />
             <element signature="method#removeCrate#0;class#LootCrate#0" expanded="false" />
             <element signature="method#removeCrate#1;class#LootCrate#0" expanded="false" />
             <element signature="method#addCrate#0;class#LootCrate#0" expanded="false" />
-            <element signature="method#dropRandomCrate#0;class#LootCrate#0" expanded="false" />
             <element signature="method#checkPlayerForSpecialItem#0;class#LootCrate#0" expanded="false" />
-            <element signature="class#Utility#0" expanded="false" />
             <element signature="method#itemHasLoreLine#0;class#Utility#0" expanded="false" />
             <element signature="method#addLoreLine#0;class#Utility#0" expanded="false" />
             <element signature="method#setName#0;class#Utility#0" expanded="false" />
@@ -1107,9 +1126,14 @@
             <element signature="method#getValidBlocks#0;class#TreefellerJob#0" expanded="false" />
             <element signature="class#ShroomFellerJob#0" expanded="false" />
             <element signature="method#ShroomFellerJob#1;class#ShroomFellerJob#0" expanded="false" />
-            <element signature="e#81959#81991#0" expanded="true" />
+            <element signature="class#TransmogrificationJob#0" expanded="false" />
+            <element signature="method#TransmogrificationJob#0;class#TransmogrificationJob#0" expanded="false" />
+            <element signature="method#update#0;class#TransmogrificationJob#0" expanded="false" />
+            <element signature="method#getNewSet#0;class#TransmogrificationJob#0" expanded="false" />
+            <element signature="method#isDone#0;class#TransmogrificationJob#0" expanded="false" />
             <element signature="class#TerramorpherJob#0" expanded="false" />
             <element signature="method#TerramorpherJob#0;class#TerramorpherJob#0" expanded="false" />
+            <element signature="method#update#0;class#TerramorpherJob#0" expanded="false" />
             <element signature="class#Orientation#0;class#TerramorpherJob#0" expanded="false" />
             <element signature="method#Orientation#0;class#Orientation#0;class#TerramorpherJob#0" expanded="false" />
             <element signature="method#fromBlockFace#0;class#Orientation#0;class#TerramorpherJob#0" expanded="false" />
@@ -1146,22 +1170,21 @@
         <state relative-caret-position="2277">
           <caret line="69" column="72" selection-start-line="69" selection-start-column="72" selection-end-line="69" selection-end-column="72" />
           <folding>
-            <element signature="method#onEnable#0;class#LootCrate#0" expanded="false" />
             <element signature="method#onDisable#0;class#LootCrate#0" expanded="false" />
             <element signature="method#onCommand#0;class#LootCrate#0" expanded="false" />
             <element signature="method#updateJobs#0;class#LootCrate#0" expanded="false" />
             <element signature="method#checkAllPlayersForSpecialItems#0;class#LootCrate#0" expanded="false" />
             <element signature="method#checkForCreativeTimeUp#0;class#LootCrate#0" expanded="false" />
+            <element signature="method#blockBreak#0;class#LootCrate#0" expanded="false" />
             <element signature="method#blockPlace#0;class#LootCrate#0" expanded="false" />
             <element signature="method#inventoryClick#0;class#LootCrate#0" expanded="false" />
             <element signature="method#playerItemHeld#0;class#LootCrate#0" expanded="false" />
             <element signature="method#projectileLaunch#0;class#LootCrate#0" expanded="false" />
+            <element signature="method#entityDamage#0;class#LootCrate#0" expanded="false" />
             <element signature="method#removeCrate#0;class#LootCrate#0" expanded="false" />
             <element signature="method#removeCrate#1;class#LootCrate#0" expanded="false" />
             <element signature="method#addCrate#0;class#LootCrate#0" expanded="false" />
-            <element signature="method#dropRandomCrate#0;class#LootCrate#0" expanded="false" />
             <element signature="method#checkPlayerForSpecialItem#0;class#LootCrate#0" expanded="false" />
-            <element signature="class#Utility#0" expanded="false" />
             <element signature="method#itemHasLoreLine#0;class#Utility#0" expanded="false" />
             <element signature="method#addLoreLine#0;class#Utility#0" expanded="false" />
             <element signature="method#setName#0;class#Utility#0" expanded="false" />
@@ -1212,9 +1235,14 @@
             <element signature="method#getValidBlocks#0;class#TreefellerJob#0" expanded="false" />
             <element signature="class#ShroomFellerJob#0" expanded="false" />
             <element signature="method#ShroomFellerJob#1;class#ShroomFellerJob#0" expanded="false" />
-            <element signature="e#81959#81991#0" expanded="true" />
+            <element signature="class#TransmogrificationJob#0" expanded="false" />
+            <element signature="method#TransmogrificationJob#0;class#TransmogrificationJob#0" expanded="false" />
+            <element signature="method#update#0;class#TransmogrificationJob#0" expanded="false" />
+            <element signature="method#getNewSet#0;class#TransmogrificationJob#0" expanded="false" />
+            <element signature="method#isDone#0;class#TransmogrificationJob#0" expanded="false" />
             <element signature="class#TerramorpherJob#0" expanded="false" />
             <element signature="method#TerramorpherJob#0;class#TerramorpherJob#0" expanded="false" />
+            <element signature="method#update#0;class#TerramorpherJob#0" expanded="false" />
             <element signature="class#Orientation#0;class#TerramorpherJob#0" expanded="false" />
             <element signature="method#Orientation#0;class#Orientation#0;class#TerramorpherJob#0" expanded="false" />
             <element signature="method#fromBlockFace#0;class#Orientation#0;class#TerramorpherJob#0" expanded="false" />
@@ -1251,22 +1279,21 @@
         <state relative-caret-position="0">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
-            <element signature="method#onEnable#0;class#LootCrate#0" expanded="false" />
             <element signature="method#onDisable#0;class#LootCrate#0" expanded="false" />
             <element signature="method#onCommand#0;class#LootCrate#0" expanded="false" />
             <element signature="method#updateJobs#0;class#LootCrate#0" expanded="false" />
             <element signature="method#checkAllPlayersForSpecialItems#0;class#LootCrate#0" expanded="false" />
             <element signature="method#checkForCreativeTimeUp#0;class#LootCrate#0" expanded="false" />
+            <element signature="method#blockBreak#0;class#LootCrate#0" expanded="false" />
             <element signature="method#blockPlace#0;class#LootCrate#0" expanded="false" />
             <element signature="method#inventoryClick#0;class#LootCrate#0" expanded="false" />
             <element signature="method#playerItemHeld#0;class#LootCrate#0" expanded="false" />
             <element signature="method#projectileLaunch#0;class#LootCrate#0" expanded="false" />
+            <element signature="method#entityDamage#0;class#LootCrate#0" expanded="false" />
             <element signature="method#removeCrate#0;class#LootCrate#0" expanded="false" />
             <element signature="method#removeCrate#1;class#LootCrate#0" expanded="false" />
             <element signature="method#addCrate#0;class#LootCrate#0" expanded="false" />
-            <element signature="method#dropRandomCrate#0;class#LootCrate#0" expanded="false" />
             <element signature="method#checkPlayerForSpecialItem#0;class#LootCrate#0" expanded="false" />
-            <element signature="class#Utility#0" expanded="false" />
             <element signature="method#itemHasLoreLine#0;class#Utility#0" expanded="false" />
             <element signature="method#addLoreLine#0;class#Utility#0" expanded="false" />
             <element signature="method#setName#0;class#Utility#0" expanded="false" />
@@ -1317,9 +1344,14 @@
             <element signature="method#getValidBlocks#0;class#TreefellerJob#0" expanded="false" />
             <element signature="class#ShroomFellerJob#0" expanded="false" />
             <element signature="method#ShroomFellerJob#1;class#ShroomFellerJob#0" expanded="false" />
-            <element signature="e#81959#81991#0" expanded="true" />
+            <element signature="class#TransmogrificationJob#0" expanded="false" />
+            <element signature="method#TransmogrificationJob#0;class#TransmogrificationJob#0" expanded="false" />
+            <element signature="method#update#0;class#TransmogrificationJob#0" expanded="false" />
+            <element signature="method#getNewSet#0;class#TransmogrificationJob#0" expanded="false" />
+            <element signature="method#isDone#0;class#TransmogrificationJob#0" expanded="false" />
             <element signature="class#TerramorpherJob#0" expanded="false" />
             <element signature="method#TerramorpherJob#0;class#TerramorpherJob#0" expanded="false" />
+            <element signature="method#update#0;class#TerramorpherJob#0" expanded="false" />
             <element signature="class#Orientation#0;class#TerramorpherJob#0" expanded="false" />
             <element signature="method#Orientation#0;class#Orientation#0;class#TerramorpherJob#0" expanded="false" />
             <element signature="method#fromBlockFace#0;class#Orientation#0;class#TerramorpherJob#0" expanded="false" />
@@ -1399,33 +1431,32 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/lootcrate_config.yml">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="528">
-          <caret line="16" column="9" selection-start-line="16" selection-start-column="9" selection-end-line="16" selection-end-column="9" />
+        <state relative-caret-position="594">
+          <caret line="18" column="10" selection-start-line="18" selection-start-column="10" selection-end-line="18" selection-end-column="10" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/com/ncolaprete/lootcrate/LootCrate.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1239">
-          <caret line="2070" column="33" selection-start-line="2070" selection-start-column="33" selection-end-line="2070" selection-end-column="33" />
+        <state relative-caret-position="9900">
+          <caret line="828" column="5" selection-start-line="828" selection-start-column="5" selection-end-line="828" selection-end-column="5" />
           <folding>
-            <element signature="method#onEnable#0;class#LootCrate#0" expanded="false" />
             <element signature="method#onDisable#0;class#LootCrate#0" expanded="false" />
             <element signature="method#onCommand#0;class#LootCrate#0" expanded="false" />
             <element signature="method#updateJobs#0;class#LootCrate#0" expanded="false" />
             <element signature="method#checkAllPlayersForSpecialItems#0;class#LootCrate#0" expanded="false" />
             <element signature="method#checkForCreativeTimeUp#0;class#LootCrate#0" expanded="false" />
+            <element signature="method#blockBreak#0;class#LootCrate#0" expanded="false" />
             <element signature="method#blockPlace#0;class#LootCrate#0" expanded="false" />
             <element signature="method#inventoryClick#0;class#LootCrate#0" expanded="false" />
             <element signature="method#playerItemHeld#0;class#LootCrate#0" expanded="false" />
             <element signature="method#projectileLaunch#0;class#LootCrate#0" expanded="false" />
+            <element signature="method#entityDamage#0;class#LootCrate#0" expanded="false" />
             <element signature="method#removeCrate#0;class#LootCrate#0" expanded="false" />
             <element signature="method#removeCrate#1;class#LootCrate#0" expanded="false" />
             <element signature="method#addCrate#0;class#LootCrate#0" expanded="false" />
-            <element signature="method#dropRandomCrate#0;class#LootCrate#0" expanded="false" />
             <element signature="method#checkPlayerForSpecialItem#0;class#LootCrate#0" expanded="false" />
-            <element signature="class#Utility#0" expanded="false" />
             <element signature="method#itemHasLoreLine#0;class#Utility#0" expanded="false" />
             <element signature="method#addLoreLine#0;class#Utility#0" expanded="false" />
             <element signature="method#setName#0;class#Utility#0" expanded="false" />
@@ -1476,9 +1507,14 @@
             <element signature="method#getValidBlocks#0;class#TreefellerJob#0" expanded="false" />
             <element signature="class#ShroomFellerJob#0" expanded="false" />
             <element signature="method#ShroomFellerJob#1;class#ShroomFellerJob#0" expanded="false" />
-            <element signature="e#81959#81991#0" expanded="true" />
+            <element signature="class#TransmogrificationJob#0" expanded="false" />
+            <element signature="method#TransmogrificationJob#0;class#TransmogrificationJob#0" expanded="false" />
+            <element signature="method#update#0;class#TransmogrificationJob#0" expanded="false" />
+            <element signature="method#getNewSet#0;class#TransmogrificationJob#0" expanded="false" />
+            <element signature="method#isDone#0;class#TransmogrificationJob#0" expanded="false" />
             <element signature="class#TerramorpherJob#0" expanded="false" />
             <element signature="method#TerramorpherJob#0;class#TerramorpherJob#0" expanded="false" />
+            <element signature="method#update#0;class#TerramorpherJob#0" expanded="false" />
             <element signature="class#Orientation#0;class#TerramorpherJob#0" expanded="false" />
             <element signature="method#Orientation#0;class#Orientation#0;class#TerramorpherJob#0" expanded="false" />
             <element signature="method#fromBlockFace#0;class#Orientation#0;class#TerramorpherJob#0" expanded="false" />
