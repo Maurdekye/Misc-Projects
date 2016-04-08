@@ -666,6 +666,13 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
             activeJobs.add(new TerramorpherJob(ev.getBlock(), Utility.getBlockFaceIsLookingAt(ev.getPlayer()), GigaDrillBreakerSize));
         }
 
+        // Transmogriphier
+        if (Utility.itemHasLoreLine(ev.getPlayer().getInventory().getItemInMainHand(), Prize.TRANSMOGRIFIER.getLoreTag()) &&
+                ev.getPlayer().getGameMode() == GameMode.CREATIVE)
+        {
+            ev.setCancelled(true);
+        }
+
         // Manage picking up of crates
         if (ev.getBlock().getType() == Material.CHEST)
         {
@@ -1996,7 +2003,7 @@ class TransmogrificationJob implements Job
     {
         this.initialBlock = initialBlock;
         this.initialMaterial = initialBlock.getType();
-        this.initialData = initialBlock.getData();
+        this.initialData = initialBlock.getData(); //TODO Fix weird bug where wrong data value is fetched from block
         this.ply = ply;
         this.modificationsPerAction = modificationsPerAction;
         this.maxModification = maxModification;
@@ -2010,10 +2017,10 @@ class TransmogrificationJob implements Job
     public void update()
     {
         for (int i=0;i<modificationsPerAction;i++) {
-            if (blocksModified >= maxModification)
+            if (isDone())
+            {
                 return;
-            if (outOfBlocks)
-                return;
+            }
             ItemStack offhanditem = ply.getInventory().getItemInOffHand();
             if (offhanditem == null)
                 return;
@@ -2049,8 +2056,13 @@ class TransmogrificationJob implements Job
         {
             for (Block nblock : Utility.getSurroundingBlocks(currentblock, true, true, true))
             {
-                if (!(initialMaterial == nblock.getType() && initialData == nblock.getData()))
+                if (initialMaterial != nblock.getType())
+                {
                     continue;
+                }
+                if (initialData != nblock.getData()) {
+                    continue;
+                }
                 if (nextUpdate.contains(nblock))
                     continue;
                 nextUpdate.add(nblock);
