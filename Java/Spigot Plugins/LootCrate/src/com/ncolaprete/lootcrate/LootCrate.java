@@ -1,8 +1,7 @@
 package com.ncolaprete.lootcrate;
 
 import com.mysql.jdbc.Util;
-import net.minecraft.server.v1_9_R1.ChatComponentScore;
-import net.minecraft.server.v1_9_R1.SystemUtils;
+import com.sun.javafx.tk.quantum.MasterTimer;
 import net.minecraft.server.v1_9_R1.TileEntityChest;
 import org.bukkit.*;
 import org.bukkit.block.Block;
@@ -14,7 +13,6 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.configuration.Configuration;
 import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.craftbukkit.v1_9_R1.block.CraftChest;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.*;
@@ -32,14 +30,13 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.PotionMeta;
+import org.bukkit.material.MaterialData;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.BlockIterator;
 import org.bukkit.util.Vector;
 
-import javax.lang.model.type.ArrayType;
-import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -60,13 +57,23 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
 
     private ConsoleCommandSender csend = getServer().getConsoleSender();
 
+    // config variables
+
+    public int MaxBlocksPerFell;
+    public int TreefellerSpeed;
+    public boolean CanFellTrees;
+    public boolean CanFellMushrooms;
+
+    public int MaxBlocksPerTransmogrophy;
+    public int TransmogiphySpeed;
+
     // Overridden Methods
 
     public void onEnable()
     {
         // register listeners / repeating events
         getServer().getPluginManager().registerEvents(this, this);
-        getServer().getScheduler().scheduleSyncRepeatingTask(this, this::updateJobs, 0, 2);
+        getServer().getScheduler().scheduleSyncRepeatingTask(this, this::updateJobs, 0, 1);
         getServer().getScheduler().scheduleSyncRepeatingTask(this, this::checkAllPlayersForSpecialItems, 0, 20);
         getServer().getScheduler().scheduleSyncRepeatingTask(this, this::checkForCreativeTimeUp, 0, 1200);
 
@@ -231,6 +238,17 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
         {
             tempCreativeTimestamps.put(UUID.fromString(key), tempCreativeTimestampConfig.getConfig().getLong(key));
         }
+
+        // load in config options
+        ConfigurationSection treefellerCfg = optionsConfig.getConfig().getConfigurationSection("treefeller");
+        MaxBlocksPerFell = treefellerCfg.getInt("maxblocks", 256);
+        TreefellerSpeed = treefellerCfg.getInt("speed", 1);
+        CanFellTrees = treefellerCfg.getBoolean("trees", true);
+        CanFellMushrooms = treefellerCfg.getBoolean("mushrooms", true);
+
+        ConfigurationSection transmogrifierCfg = optionsConfig.getConfig().getConfigurationSection("transmogrifier");
+        MaxBlocksPerTransmogrophy = transmogrifierCfg.getInt("maxblocks", 64);
+        TransmogiphySpeed = transmogrifierCfg.getInt("speed", 3);
 
         // startup random crate dropper
         ConfigurationSection cratespawningSection = optionsConfig.getConfig().getConfigurationSection("cratespawning");
@@ -527,9 +545,12 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
     @EventHandler
     public void playerInteract(PlayerInteractEvent ev)
     {
+        // manage opening of crates
         if (ev.getAction() == Action.RIGHT_CLICK_BLOCK && !ev.getPlayer().isSneaking())
         {
             Block block = ev.getClickedBlock();
+            if (block.getType() != Material.CHEST)
+                return;
             Crate crateToOpen = null;
             for (Crate crate : cratePositions)
             {
@@ -563,16 +584,38 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
                 ev.getPlayer().openInventory(crateToOpen.showContents(this, ev.getPlayer()));
             }
         }
+
+        // Transmogrifier
+        if (ev.getAction() == Action.LEFT_CLICK_BLOCK &&
+                Utility.itemHasLoreLine(ev.getPlayer().getInventory().getItemInMainHand(), ChatColor.BLACK + "transmogrifier"))
+        {
+            ItemStack offhandItem = ev.getPlayer().getInventory().getItemInOffHand();
+            if (offhandItem == null)
+                return;
+            if (!offhandItem.getType().isBlock())
+                return;
+            if (!offhandItem.getType().isSolid())
+                return;
+            if (!ev.getClickedBlock().getType().isSolid())
+                return;
+            activeJobs.add(new TransmogrificationJob(ev.getClickedBlock(), ev.getPlayer(), TransmogiphySpeed, MaxBlocksPerTransmogrophy));
+        }
     }
 
     @EventHandler
     public void blockBreak(BlockBreakEvent ev)
     {
         // Treefeller Chainsaw
-        if (TreefellerJob.validBlocks.contains(ev.getBlock().getType()) &&
-                Utility.itemHasLoreLine(ev.getPlayer().getInventory().getItemInMainHand(), ChatColor.BLACK + "treefeller_chainsaw"))
+        if (Utility.itemHasLoreLine(ev.getPlayer().getInventory().getItemInMainHand(), ChatColor.BLACK + "treefeller_chainsaw"))
         {
-            activeJobs.add(new TreefellerJob(ev.getBlock()));
+            if (new TreefellerJob().getValidBlocks().contains(ev.getBlock().getType()) && CanFellTrees)
+            {
+                activeJobs.add(new TreefellerJob(ev.getBlock(), TreefellerSpeed, MaxBlocksPerFell));
+            }
+            else if (new ShroomFellerJob().getValidBlocks().contains(ev.getBlock().getType()) && CanFellMushrooms)
+            {
+                activeJobs.add(new ShroomFellerJob(ev.getBlock(), TreefellerSpeed, MaxBlocksPerFell));
+            }
         }
 
         // Manage picking up of crates
@@ -1175,6 +1218,8 @@ enum Prize
         return Utility.setName(item, ChatColor.UNDERLINE + "" + ChatColor.BOLD + "" + "The Ultimate Reward");
     }),
 
+    // Armor
+
     FROSTSPARK_CLEATS (params -> {
         ItemStack item = new ItemStack(Material.DIAMOND_BOOTS);
         item = Utility.setName(item, ChatColor.YELLOW + "Frostspark Cleats");
@@ -1253,6 +1298,22 @@ enum Prize
         return Utility.setName(item, ChatColor.BLUE + "Hydrodyne Helmet");
     }),
 
+    // Tools
+
+    TRANSMOGRIFIER (params -> {
+        ItemStack item = new ItemStack(Material.DIAMOND_HOE);
+        item = Utility.setName(item, ChatColor.GOLD + "" + ChatColor.BOLD + "Transmogrifier");
+        item = Utility.addLoreLine(item, ChatColor.RESET + "Grants the ability to transmogrify blocks to those in your offhand with a left click");
+        item = Utility.addLoreLine(item, ChatColor.RESET + "...you can also till soil with it.");
+        item = Utility.addLoreLine(item, ChatColor.BLACK + "transmogrifier");
+        item.addEnchantment(Enchantment.DURABILITY, 2);
+        params.rewardee.sendMessage(ChatColor.GOLD + "You got the " + ChatColor.BOLD + "Transmogrifier!");
+        return Collections.singletonList(item);
+    }, params -> {
+        ItemStack item = new ItemStack(Material.DIAMOND_HOE);
+        return Utility.setName(item, ChatColor.GOLD + "" + ChatColor.BOLD + "Transmogrifier");
+    }),
+
     TREEFELLER_CHAINSAW (params -> {
         ItemStack item = new ItemStack(Material.DIAMOND_AXE);
         item = Utility.setName(item, ChatColor.DARK_GREEN + "" + ChatColor.ITALIC + "Treefeller Chainsaw");
@@ -1329,6 +1390,8 @@ enum Prize
         ItemStack item = new ItemStack(Material.DIAMOND_SWORD);
         return Utility.setName(item, ChatColor.YELLOW + "" + ChatColor.BOLD + "Heaven's Blade");
     }),
+
+    // Other rewards
 
     IRON_COMBAT_SET (params -> {
         ArrayList<ItemStack> rewards = new ArrayList<>();
@@ -1693,38 +1756,54 @@ interface Job
     boolean isDone();
 }
 
-class TreefellerJob implements Job
+abstract class TreefellerJobBase implements Job
 {
     Block initialBlock;
-    HashSet<Block> currentSet;
+    ArrayList<Block> currentSet;
+    int progressThroughSet;
     int blocksBroken;
+    int breaksPerAction;
+    int maxDestruction;
 
-    public static final List<Material> validBlocks = Arrays.asList(Material.LOG, Material.LOG_2, Material.LEAVES, Material.LEAVES_2);
-    public static final int maximumdestruction = 256;
+    public TreefellerJobBase() {}
 
-    public TreefellerJob(Block initialBlock)
+    public TreefellerJobBase(Block initialBlock, int breaksPerAction, int maxDestruction)
     {
         this.initialBlock = initialBlock;
-        this.currentSet = new HashSet<>();
+        this.breaksPerAction = breaksPerAction;
+        this.maxDestruction = maxDestruction;
+        this.currentSet = new ArrayList<>();
         this.blocksBroken = 0;
+        this.progressThroughSet = 0;
         currentSet.add(initialBlock);
     }
 
     public void update()
     {
-        for (Block currentblock : currentSet)
-        {
-            if (blocksBroken >= maximumdestruction)
+        for (int i=0;i<breaksPerAction;i++) {
+            if (blocksBroken >= maxDestruction)
                 return;
-            currentblock.breakNaturally(new ItemStack(Material.DIAMOND_AXE));
-            blocksBroken++;
+            if (progressThroughSet >= currentSet.size()) {
+                progressThroughSet = 0;
+                getNewSet();
+            } else {
+                Block cblock = currentSet.get(progressThroughSet);
+                cblock.getWorld().playEffect(cblock.getLocation(), Effect.TILE_BREAK, new MaterialData(cblock.getType()));
+                cblock.breakNaturally(new ItemStack(Material.DIAMOND_AXE));
+                blocksBroken++;
+                progressThroughSet++;
+            }
         }
-        HashSet<Block> nextUpdate = new HashSet<>();
+    }
+
+    public void getNewSet()
+    {
+        ArrayList<Block> nextUpdate = new ArrayList<>();
         for (Block currentblock : currentSet)
         {
             for (Block nblock : Utility.getSurroundingBlocks(currentblock, true, true, true))
             {
-                if (!validBlocks.contains(nblock.getType()))
+                if (!getValidBlocks().contains(nblock.getType()))
                     continue;
                 if (nblock.getY() < initialBlock.getY())
                     continue;
@@ -1738,6 +1817,115 @@ class TreefellerJob implements Job
 
     public boolean isDone()
     {
-        return currentSet.size() == 0 || blocksBroken >= maximumdestruction;
+        return currentSet.size() == 0 || blocksBroken >= maxDestruction;
+    }
+
+    public abstract List<Material> getValidBlocks();
+}
+
+class TreefellerJob extends TreefellerJobBase
+{
+    public TreefellerJob() {}
+
+    public TreefellerJob(Block initialBlock, int breaksPerAction, int maxDestruction)
+    {
+        super(initialBlock, breaksPerAction, maxDestruction);
+    }
+
+    public List<Material> getValidBlocks()
+    {
+        return Arrays.asList(Material.LOG, Material.LOG_2, Material.LEAVES, Material.LEAVES_2);
+    }
+}
+
+class ShroomFellerJob extends TreefellerJob
+{
+    public ShroomFellerJob() {}
+
+    public ShroomFellerJob(Block initialBlock, int breaksPerAction, int maxDestruction)
+    {
+        super(initialBlock, breaksPerAction, maxDestruction);
+    }
+
+    public List<Material> getValidBlocks()
+    {
+        return Arrays.asList(Material.HUGE_MUSHROOM_1, Material.HUGE_MUSHROOM_2);
+    }
+}
+
+class TransmogrificationJob implements Job
+{
+    Block initialBlock;
+    Material initialMaterial;
+    Player ply;
+    ArrayList<Block> currentSet;
+    int progressThroughSet;
+    int blocksModified;
+    int modificationsPerAction;
+    int maxModification;
+
+    public TransmogrificationJob(Block initialBlock, Player ply, int modificationsPerAction, int maxModification)
+    {
+        this.initialBlock = initialBlock;
+        this.initialMaterial = initialBlock.getType();
+        this.ply = ply;
+        this.modificationsPerAction = modificationsPerAction;
+        this.maxModification = maxModification;
+        this.currentSet = new ArrayList<>();
+        this.blocksModified = 0;
+        this.progressThroughSet = 0;
+        currentSet.add(initialBlock);
+    }
+
+    @SuppressWarnings("deprecation")
+    public void update()
+    {
+        for (int i=0;i<modificationsPerAction;i++) {
+            if (blocksModified >= maxModification)
+                return;
+            ItemStack offhanditem = ply.getInventory().getItemInOffHand();
+            if (offhanditem == null)
+                return;
+            if (progressThroughSet >= currentSet.size()) {
+                progressThroughSet = 0;
+                getNewSet();
+            } else {
+                if (offhanditem.getAmount() == 1)
+                    ply.getInventory().setItem(40, null);
+                else
+                    offhanditem.setAmount(offhanditem.getAmount() - 1);
+                Block cblock = currentSet.get(progressThroughSet);
+                cblock.getWorld().playEffect(cblock.getLocation(), Effect.TILE_BREAK, new MaterialData(cblock.getType()));
+                cblock.breakNaturally();
+                cblock.setType(offhanditem.getType());
+                cblock.setData((byte)offhanditem.getDurability());
+                blocksModified++;
+                progressThroughSet++;
+            }
+        }
+    }
+
+    public void getNewSet()
+    {
+        ArrayList<Block> nextUpdate = new ArrayList<>();
+        for (Block currentblock : currentSet)
+        {
+            for (Block nblock : Utility.getSurroundingBlocks(currentblock, true, true, true))
+            {
+                if (initialMaterial != nblock.getType())
+                    continue;
+                if (nextUpdate.contains(nblock))
+                    continue;
+                nextUpdate.add(nblock);
+            }
+        }
+        currentSet = nextUpdate;
+    }
+
+    public boolean isDone()
+    {
+        return currentSet.size() == 0 ||
+                blocksModified >= maxModification ||
+                ply.getInventory().getItemInOffHand() == null;
     }
 }

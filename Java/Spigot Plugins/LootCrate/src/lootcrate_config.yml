@@ -3,3 +3,11 @@ cratespawning:
   interval: 300
   radius: 1000
   broadcastCrates: true
+treefeller:
+  maxblocks: 256
+  speed: 3
+  trees: true
+  mushrooms: true
+transmogrifier:
+  maxblocks: 64
+  speed: 3
