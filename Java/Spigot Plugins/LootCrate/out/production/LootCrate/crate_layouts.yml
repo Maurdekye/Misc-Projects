@@ -1,43 +1,44 @@
 # All crate prizes are hardcoded
-# use /givereward with no arguments to get a list
-
-common_crate:
-  name: ?2Common Crate
-  required_key: common_key
-  rewards:
-    item1:
-      prize: iron_bars
-      amount: 16
-      chance: 30
-    item2:
-      prize: individual_nuggets
-      amount: 8
-      chance: 30
-    item3:
-      prize: money
-      amount: 100
-      chance: 15
-    item4:
-      prize: money
-      amount: 500
-      chance: 5
-    item5:
-      prize: money
-      amount: 2000
-      chance: 5
-    item6:
-      prize: diamonds
-      amount: 1
-      chance: 4
-    item7:
-      prize: diamonds
-      amount: 8
-      chance: 3
-    item8:
-      prize: common_key
-      amount: 1
-      chance: 2
-    item9:
-      prize: mystical_key
-      amount: 1
-      chance: 1
+# use /givereward with no arguments to get a list of available prizes
+# Sample Crate layout;
+# common_crate:
+#  name: ?2Common Crate
+#  spawn_chance: 25.0
+#  required_key: common_key
+#  rewards:
+#    item1:
+#      prize: iron_bars
+#      amount: 16
+#      chance: 30
+#    item2:
+#      prize: individual_nuggets
+#      amount: 8
+#      chance: 30
+#    item3:
+#      prize: money
+#      amount: 100
+#      chance: 15
+#    item4:
+#      prize: money
+#      amount: 500
+#      chance: 5
+#    item5:
+#      prize: money
+#      amount: 2000
+#      chance: 5
+#    item6:
+#      prize: diamonds
+#      amount: 1
+#      chance: 4
+#    item7:
+#      prize: diamonds
+#      amount: 8
+#      chance: 3
+#    item8:
+#      prize: common_key
+#      amount: 1
+#      chance: 2
+#    item9:
+#      prize: mystical_key
+#      amount: 1
+#      chance: 1

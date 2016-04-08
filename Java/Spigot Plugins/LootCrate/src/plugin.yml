@@ -5,14 +5,19 @@ main: com.ncolaprete.lootcrate.LootCrate
 depend: [Essentials]
 
 commands:
+  givekey:
+    description: gives a crate key of the given type to the given player.
+    usage: /givekey <type> [player]
+    permission: lootcrate.givekey
+    permission-message: You do not have permission to give yourself crate keys.
   givecrate:
-    description: gives you a crate of the designated type. Random type if none provided.
-    usage: /givecrate [type] [player]
+    description: gives you or a given player a crate of the given type.
+    usage: /givecrate <type> [player]
     permission: lootcrate.givecrate
     permission-message: You do not have permission to give yourself crates.
   spawncrate:
-    description: spawns a loot crate of the designated type at your cursor. Random type if none provided.
-    usage: /spawncrate [type]
+    description: spawns a loot crate of the designated type at your cursor.
+    usage: /spawncrate <type>
     permission: lootcrate.spawncrate
     permission-message: You do not have permission to spawn crates.
   givereward:
@@ -22,6 +27,8 @@ commands:
     permission-message: You do not have permission to spawn crate rewards.
 
 permissions:
+  lootcrate.givekey:
+    default: op
   lootcrate.givecrate:
     default: op
   lootcrate.spawncrate:
