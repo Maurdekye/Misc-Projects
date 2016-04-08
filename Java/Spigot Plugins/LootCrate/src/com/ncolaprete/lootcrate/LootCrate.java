@@ -279,7 +279,7 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
                 return false;
             }
 
-            // Find crate key to givePrize type;
+            // Find crate key to give
             CrateKey key;
             try {
                 key = CrateKey.valueOf(args[0].toLowerCase());
@@ -288,12 +288,24 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
                 return true;
             }
 
-            // Find player to give key to
-            Player target = ply;
+            // Find amount to give
+            int amount = 1;
             if (args.length >= 2)
             {
+                try {
+                    amount = Integer.parseInt(args[1]);
+                } catch (Exception e) {
+                    sender.sendMessage(ChatColor.RED + "'" + args[1] + "' is not a number.");
+                    return true;
+                }
+            }
+
+            // Find player to give key to
+            Player target = ply;
+            if (args.length >= 3)
+            {
                 String targetname = "";
-                for (int i=1;i<args.length;i++)
+                for (int i=2;i<args.length;i++)
                     targetname += args[i] + " ";
                 targetname = targetname.trim().toLowerCase();
                 Player newtarget = getServer().getPlayer(targetname);
@@ -314,8 +326,11 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
             else
                 target = ply;
 
-            // Give the key
-            target.getInventory().addItem(key.getKey(false));
+            // Give the key(s)
+            ItemStack keyStack = key.getKey(false);
+            keyStack.setAmount(amount);
+            for (ItemStack item : Utility.separateItemStacks(Collections.singletonList(keyStack)))
+                target.getInventory().addItem(item);
         }
 
         // givecrate
@@ -357,12 +372,24 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
                 return true;
             }
 
-            // Find player to give crate to
-            Player target = ply;
+            // Find amount to give
+            int amount = 1;
             if (args.length >= 2)
             {
+                try {
+                    amount = Integer.parseInt(args[1]);
+                } catch (Exception e) {
+                    sender.sendMessage(ChatColor.RED + "'" + args[1] + "' is not a number.");
+                    return true;
+                }
+            }
+
+            // Find player to give crate to
+            Player target = ply;
+            if (args.length >= 3)
+            {
                 String targetname = "";
-                for (int i=1;i<args.length;i++)
+                for (int i=2;i<args.length;i++)
                     targetname += args[i] + " ";
                 targetname = targetname.trim().toLowerCase();
                 Player newtarget = getServer().getPlayer(targetname);
@@ -383,81 +410,16 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
             else
                 target = ply;
 
-            // Give the crate
-            target.getInventory().addItem(getCrateItemstack(layout));
-        }
-
-        // spawncrate
-        else if (command.getName().equalsIgnoreCase("spawncrate"))
-        {
-
-            // Check if there are any crate layouts loaded
-            if (crateLayouts.size() == 0)
-            {
-                sender.sendMessage(ChatColor.RED + "Error: No crate layouts loaded. Add them to crate_layouts.yml and reload the plugin.");
-                return true;
-            }
-
-            // Check if sender is player
-            if (ply == null)
-            {
-                sender.sendMessage(ChatColor.RED + "You must be a player to use this command");
-                return true;
-            }
-
-            // Check if enough arguments were provided
-            if (args.length == 0)
-            {
-                StringBuilder rewardslist = new StringBuilder();
-                rewardslist.append("Available crate layouts are: ");
-                for (CrateLayout l : crateLayouts)
-                    rewardslist.append(l.type.toLowerCase() + ", ");
-                ply.sendMessage(rewardslist.substring(0, rewardslist.length()-2));
-                return false;
-            }
-
-            // Find the crate layout to use
-            String type = args[0];
-            CrateLayout layout = null;
-            for (CrateLayout l : crateLayouts)
-            {
-                if (l.type.equalsIgnoreCase(type))
-                {
-                    layout = l;
-                    break;
-                }
-            }
-            if (layout == null)
-            {
-                sender.sendMessage(ChatColor.RED + "No crate layout of type " + type);
-                return true;
-            }
-
-            // Find block position to use
-            Block location = null;
-            BlockIterator biter = new BlockIterator(ply, 40);
-            while (biter.hasNext())
-            {
-                Block next = biter.next();
-                if (next.getType() != Material.AIR)
-                    break;
-                location = next;
-            }
-            if (location == null)
-            {
-                sender.sendMessage(ChatColor.RED + "Unable to place chest.");
-                return true;
-            }
-
-            // Place the crate
-            addCrate(new Crate(location, layout));
-            sender.sendMessage(layout.printname + ChatColor.AQUA + " Placed");
+            // Give the crate(s)
+            ItemStack crateStack = getCrateItemstack(layout);
+            crateStack.setAmount(amount);
+            for (ItemStack item : Utility.separateItemStacks(Collections.singletonList(crateStack)))
+                target.getInventory().addItem(item);
         }
 
         // givereward
         else if (command.getName().equalsIgnoreCase("givereward"))
         {
-
             // Check if sender is player
             if (ply == null)
             {
@@ -825,12 +787,12 @@ class Utility
         return world.getBlockAt(x, y, z).getLocation();
     }
 
-    public static Location getDefaultSpawn(JavaPlugin plugin)
+    static Location getDefaultSpawn(JavaPlugin plugin)
     {
         return plugin.getServer().getWorlds().get(0).getSpawnLocation();
     }
 
-    public static Block getHighestSolidBlock(World world, int x, int z)
+    static Block getHighestSolidBlock(World world, int x, int z)
     {
         Location start = world.getHighestBlockAt(x, z).getLocation();
         BlockIterator iter = new BlockIterator(world, start.toVector().add(new Vector(0.5, 0.5, 0.5)), new Vector(0, -1, 0), 0, 255);
@@ -845,7 +807,7 @@ class Utility
         return highestSolid;
     }
 
-    public static String formatVector(Vector v)
+    static String formatVector(Vector v)
     {
         StringBuilder b = new StringBuilder();
         b.append("(");
@@ -856,6 +818,23 @@ class Utility
         b.append(v.getBlockZ());
         b.append(")");
         return b.toString();
+    }
+
+    static List<ItemStack> separateItemStacks(List<ItemStack> items)
+    {
+        ArrayList<ItemStack> separatedItems = new ArrayList<>();
+        for (int i=0;i<items.size();i++)
+        {
+            while (items.get(i).getAmount() > items.get(i).getType().getMaxStackSize())
+            {
+                ItemStack newStack = items.get(i).clone();
+                newStack.setAmount(newStack.getType().getMaxStackSize());
+                separatedItems.add(newStack);
+                items.get(i).setAmount(items.get(i).getAmount() - items.get(i).getType().getMaxStackSize());
+            }
+            separatedItems.add(items.get(i));
+        }
+        return separatedItems;
     }
 
 }
@@ -1473,18 +1452,7 @@ enum Prize
         List<ItemStack> rewardItemsRaw = action.enactReward(new RewardActionParameter(plugin, rewardee, amount, chestBlock));
         if (rewardItemsRaw == null)
             rewardItemsRaw = new ArrayList<>();
-        ArrayList<ItemStack> rewardItems = new ArrayList<>();
-        for (int i=0;i<rewardItemsRaw.size();i++)
-        {
-            while (rewardItemsRaw.get(i).getAmount() > rewardItemsRaw.get(i).getType().getMaxStackSize())
-            {
-                ItemStack newStack = rewardItemsRaw.get(i).clone();
-                newStack.setAmount(newStack.getType().getMaxStackSize());
-                rewardItems.add(newStack);
-                rewardItemsRaw.get(i).setAmount(rewardItemsRaw.get(i).getAmount() - rewardItemsRaw.get(i).getType().getMaxStackSize());
-            }
-            rewardItems.add(rewardItemsRaw.get(i));
-        }
+        List<ItemStack> rewardItems = Utility.separateItemStacks(rewardItemsRaw);
         Chest chest = (Chest) chestBlock.getState();
         int offsetdirection = -1;
         for (int i=0;i<rewardItems.size();i++)
