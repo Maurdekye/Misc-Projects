@@ -628,6 +628,8 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
                 return;
             if (!ev.getClickedBlock().getType().isSolid())
                 return;
+            if (ev.getClickedBlock().getType() == offhandItem.getType() && ev.getClickedBlock().getData() == offhandItem.getDurability())
+                return;
             activeJobs.add(new TransmogrificationJob(ev.getClickedBlock(), ev.getPlayer(), TransmogiphySpeed, MaxBlocksPerTransmogrophy));
         }
     }
@@ -1987,6 +1989,7 @@ class TransmogrificationJob implements Job
     int blocksModified;
     int modificationsPerAction;
     int maxModification;
+    boolean outOfBlocks = false;
 
     public TransmogrificationJob(Block initialBlock, Player ply, int modificationsPerAction, int maxModification)
     {
@@ -2007,6 +2010,8 @@ class TransmogrificationJob implements Job
         for (int i=0;i<modificationsPerAction;i++) {
             if (blocksModified >= maxModification)
                 return;
+            if (outOfBlocks)
+                return;
             ItemStack offhanditem = ply.getInventory().getItemInOffHand();
             if (offhanditem == null)
                 return;
@@ -2015,7 +2020,10 @@ class TransmogrificationJob implements Job
                 getNewSet();
             } else {
                 if (offhanditem.getAmount() == 1)
+                {
                     ply.getInventory().setItem(40, null);
+                    outOfBlocks = true;
+                }
                 else
                     offhanditem.setAmount(offhanditem.getAmount() - 1);
                 Block cblock = currentSet.get(progressThroughSet);
@@ -2050,7 +2058,7 @@ class TransmogrificationJob implements Job
     {
         return currentSet.size() == 0 ||
                 blocksModified >= maxModification ||
-                ply.getInventory().getItemInOffHand() == null;
+                outOfBlocks;
     }
 }
 
