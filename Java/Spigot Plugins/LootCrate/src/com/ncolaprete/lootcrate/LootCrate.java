@@ -2003,8 +2003,10 @@ class TransmogrificationJob implements Job
     {
         this.initialBlock = initialBlock;
         this.initialMaterial = initialBlock.getType();
-        this.initialData = initialBlock.getData(); //TODO Fix weird bug where wrong data value is fetched from block
-        this.ply = ply;
+        this.initialData = initialBlock.getData();  //TODO Fix weird bug where wrong data value is fetched from block sometimes
+        if (initialMaterial == Material.LEAVES || initialMaterial == Material.LEAVES_2)
+            initialData = (byte) (initialData % 4);
+        this.ply = ply;                             // occurs on leaves mostly
         this.modificationsPerAction = modificationsPerAction;
         this.maxModification = maxModification;
         this.currentSet = new ArrayList<>();
@@ -2057,11 +2059,16 @@ class TransmogrificationJob implements Job
             for (Block nblock : Utility.getSurroundingBlocks(currentblock, true, true, true))
             {
                 if (initialMaterial != nblock.getType())
+                    continue;
+                if (initialMaterial == Material.LEAVES || initialMaterial == Material.LEAVES_2)
                 {
-                    continue;
+                    if (initialData != nblock.getData() % 4)
+                        continue;
                 }
-                if (initialData != nblock.getData()) {
-                    continue;
+                else
+                {
+                    if (initialData != nblock.getData())
+                        continue;
                 }
                 if (nextUpdate.contains(nblock))
                     continue;

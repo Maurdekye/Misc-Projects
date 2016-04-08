@@ -25,8 +25,8 @@
       <file leaf-file-name="LootCrate.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/com/ncolaprete/lootcrate/LootCrate.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="579">
-              <caret line="2007" column="61" selection-start-line="2007" selection-start-column="61" selection-end-line="2007" selection-end-column="61" />
+            <state relative-caret-position="1239">
+              <caret line="2070" column="33" selection-start-line="2070" selection-start-column="33" selection-end-line="2070" selection-end-column="33" />
               <folding>
                 <element signature="method#onEnable#0;class#LootCrate#0" expanded="false" />
                 <element signature="method#onDisable#0;class#LootCrate#0" expanded="false" />
@@ -34,7 +34,6 @@
                 <element signature="method#updateJobs#0;class#LootCrate#0" expanded="false" />
                 <element signature="method#checkAllPlayersForSpecialItems#0;class#LootCrate#0" expanded="false" />
                 <element signature="method#checkForCreativeTimeUp#0;class#LootCrate#0" expanded="false" />
-                <element signature="method#playerInteract#0;class#LootCrate#0" expanded="false" />
                 <element signature="method#blockPlace#0;class#LootCrate#0" expanded="false" />
                 <element signature="method#inventoryClick#0;class#LootCrate#0" expanded="false" />
                 <element signature="method#playerItemHeld#0;class#LootCrate#0" expanded="false" />
@@ -95,7 +94,7 @@
                 <element signature="method#getValidBlocks#0;class#TreefellerJob#0" expanded="false" />
                 <element signature="class#ShroomFellerJob#0" expanded="false" />
                 <element signature="method#ShroomFellerJob#1;class#ShroomFellerJob#0" expanded="false" />
-                <element signature="e#81753#81785#0" expanded="true" />
+                <element signature="e#81959#81991#0" expanded="true" />
                 <element signature="class#TerramorpherJob#0" expanded="false" />
                 <element signature="method#TerramorpherJob#0;class#TerramorpherJob#0" expanded="false" />
                 <element signature="class#Orientation#0;class#TerramorpherJob#0" expanded="false" />
@@ -563,7 +562,7 @@
     <layout>
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
-      <window_info id="Messages" active="false" anchor="left" auto_hide="false" internal_type="SLIDING" type="SLIDING" visible="false" show_stripe_button="true" weight="0.13619791" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" x="-10" y="671" width="3860" height="692" />
+      <window_info id="Messages" active="true" anchor="left" auto_hide="false" internal_type="SLIDING" type="SLIDING" visible="true" show_stripe_button="true" weight="0.13619791" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" x="-10" y="671" width="3860" height="692" />
       <window_info id="Palette&#9;" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Capture Analysis" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3298264" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
@@ -620,7 +619,6 @@
             <element signature="method#updateJobs#0;class#LootCrate#0" expanded="false" />
             <element signature="method#checkAllPlayersForSpecialItems#0;class#LootCrate#0" expanded="false" />
             <element signature="method#checkForCreativeTimeUp#0;class#LootCrate#0" expanded="false" />
-            <element signature="method#playerInteract#0;class#LootCrate#0" expanded="false" />
             <element signature="method#blockPlace#0;class#LootCrate#0" expanded="false" />
             <element signature="method#inventoryClick#0;class#LootCrate#0" expanded="false" />
             <element signature="method#playerItemHeld#0;class#LootCrate#0" expanded="false" />
@@ -681,7 +679,7 @@
             <element signature="method#getValidBlocks#0;class#TreefellerJob#0" expanded="false" />
             <element signature="class#ShroomFellerJob#0" expanded="false" />
             <element signature="method#ShroomFellerJob#1;class#ShroomFellerJob#0" expanded="false" />
-            <element signature="e#81753#81785#0" expanded="true" />
+            <element signature="e#81959#81991#0" expanded="true" />
             <element signature="class#TerramorpherJob#0" expanded="false" />
             <element signature="method#TerramorpherJob#0;class#TerramorpherJob#0" expanded="false" />
             <element signature="class#Orientation#0;class#TerramorpherJob#0" expanded="false" />
@@ -734,7 +732,6 @@
             <element signature="method#updateJobs#0;class#LootCrate#0" expanded="false" />
             <element signature="method#checkAllPlayersForSpecialItems#0;class#LootCrate#0" expanded="false" />
             <element signature="method#checkForCreativeTimeUp#0;class#LootCrate#0" expanded="false" />
-            <element signature="method#playerInteract#0;class#LootCrate#0" expanded="false" />
             <element signature="method#blockPlace#0;class#LootCrate#0" expanded="false" />
             <element signature="method#inventoryClick#0;class#LootCrate#0" expanded="false" />
             <element signature="method#playerItemHeld#0;class#LootCrate#0" expanded="false" />
@@ -795,7 +792,7 @@
             <element signature="method#getValidBlocks#0;class#TreefellerJob#0" expanded="false" />
             <element signature="class#ShroomFellerJob#0" expanded="false" />
             <element signature="method#ShroomFellerJob#1;class#ShroomFellerJob#0" expanded="false" />
-            <element signature="e#81753#81785#0" expanded="true" />
+            <element signature="e#81959#81991#0" expanded="true" />
             <element signature="class#TerramorpherJob#0" expanded="false" />
             <element signature="method#TerramorpherJob#0;class#TerramorpherJob#0" expanded="false" />
             <element signature="class#Orientation#0;class#TerramorpherJob#0" expanded="false" />
@@ -840,7 +837,6 @@
             <element signature="method#updateJobs#0;class#LootCrate#0" expanded="false" />
             <element signature="method#checkAllPlayersForSpecialItems#0;class#LootCrate#0" expanded="false" />
             <element signature="method#checkForCreativeTimeUp#0;class#LootCrate#0" expanded="false" />
-            <element signature="method#playerInteract#0;class#LootCrate#0" expanded="false" />
             <element signature="method#blockPlace#0;class#LootCrate#0" expanded="false" />
             <element signature="method#inventoryClick#0;class#LootCrate#0" expanded="false" />
             <element signature="method#playerItemHeld#0;class#LootCrate#0" expanded="false" />
@@ -901,7 +897,7 @@
             <element signature="method#getValidBlocks#0;class#TreefellerJob#0" expanded="false" />
             <element signature="class#ShroomFellerJob#0" expanded="false" />
             <element signature="method#ShroomFellerJob#1;class#ShroomFellerJob#0" expanded="false" />
-            <element signature="e#81753#81785#0" expanded="true" />
+            <element signature="e#81959#81991#0" expanded="true" />
             <element signature="class#TerramorpherJob#0" expanded="false" />
             <element signature="method#TerramorpherJob#0;class#TerramorpherJob#0" expanded="false" />
             <element signature="class#Orientation#0;class#TerramorpherJob#0" expanded="false" />
@@ -946,7 +942,6 @@
             <element signature="method#updateJobs#0;class#LootCrate#0" expanded="false" />
             <element signature="method#checkAllPlayersForSpecialItems#0;class#LootCrate#0" expanded="false" />
             <element signature="method#checkForCreativeTimeUp#0;class#LootCrate#0" expanded="false" />
-            <element signature="method#playerInteract#0;class#LootCrate#0" expanded="false" />
             <element signature="method#blockPlace#0;class#LootCrate#0" expanded="false" />
             <element signature="method#inventoryClick#0;class#LootCrate#0" expanded="false" />
             <element signature="method#playerItemHeld#0;class#LootCrate#0" expanded="false" />
@@ -1007,7 +1002,7 @@
             <element signature="method#getValidBlocks#0;class#TreefellerJob#0" expanded="false" />
             <element signature="class#ShroomFellerJob#0" expanded="false" />
             <element signature="method#ShroomFellerJob#1;class#ShroomFellerJob#0" expanded="false" />
-            <element signature="e#81753#81785#0" expanded="true" />
+            <element signature="e#81959#81991#0" expanded="true" />
             <element signature="class#TerramorpherJob#0" expanded="false" />
             <element signature="method#TerramorpherJob#0;class#TerramorpherJob#0" expanded="false" />
             <element signature="class#Orientation#0;class#TerramorpherJob#0" expanded="false" />
@@ -1052,7 +1047,6 @@
             <element signature="method#updateJobs#0;class#LootCrate#0" expanded="false" />
             <element signature="method#checkAllPlayersForSpecialItems#0;class#LootCrate#0" expanded="false" />
             <element signature="method#checkForCreativeTimeUp#0;class#LootCrate#0" expanded="false" />
-            <element signature="method#playerInteract#0;class#LootCrate#0" expanded="false" />
             <element signature="method#blockPlace#0;class#LootCrate#0" expanded="false" />
             <element signature="method#inventoryClick#0;class#LootCrate#0" expanded="false" />
             <element signature="method#playerItemHeld#0;class#LootCrate#0" expanded="false" />
@@ -1113,7 +1107,7 @@
             <element signature="method#getValidBlocks#0;class#TreefellerJob#0" expanded="false" />
             <element signature="class#ShroomFellerJob#0" expanded="false" />
             <element signature="method#ShroomFellerJob#1;class#ShroomFellerJob#0" expanded="false" />
-            <element signature="e#81753#81785#0" expanded="true" />
+            <element signature="e#81959#81991#0" expanded="true" />
             <element signature="class#TerramorpherJob#0" expanded="false" />
             <element signature="method#TerramorpherJob#0;class#TerramorpherJob#0" expanded="false" />
             <element signature="class#Orientation#0;class#TerramorpherJob#0" expanded="false" />
@@ -1158,7 +1152,6 @@
             <element signature="method#updateJobs#0;class#LootCrate#0" expanded="false" />
             <element signature="method#checkAllPlayersForSpecialItems#0;class#LootCrate#0" expanded="false" />
             <element signature="method#checkForCreativeTimeUp#0;class#LootCrate#0" expanded="false" />
-            <element signature="method#playerInteract#0;class#LootCrate#0" expanded="false" />
             <element signature="method#blockPlace#0;class#LootCrate#0" expanded="false" />
             <element signature="method#inventoryClick#0;class#LootCrate#0" expanded="false" />
             <element signature="method#playerItemHeld#0;class#LootCrate#0" expanded="false" />
@@ -1219,7 +1212,7 @@
             <element signature="method#getValidBlocks#0;class#TreefellerJob#0" expanded="false" />
             <element signature="class#ShroomFellerJob#0" expanded="false" />
             <element signature="method#ShroomFellerJob#1;class#ShroomFellerJob#0" expanded="false" />
-            <element signature="e#81753#81785#0" expanded="true" />
+            <element signature="e#81959#81991#0" expanded="true" />
             <element signature="class#TerramorpherJob#0" expanded="false" />
             <element signature="method#TerramorpherJob#0;class#TerramorpherJob#0" expanded="false" />
             <element signature="class#Orientation#0;class#TerramorpherJob#0" expanded="false" />
@@ -1264,7 +1257,6 @@
             <element signature="method#updateJobs#0;class#LootCrate#0" expanded="false" />
             <element signature="method#checkAllPlayersForSpecialItems#0;class#LootCrate#0" expanded="false" />
             <element signature="method#checkForCreativeTimeUp#0;class#LootCrate#0" expanded="false" />
-            <element signature="method#playerInteract#0;class#LootCrate#0" expanded="false" />
             <element signature="method#blockPlace#0;class#LootCrate#0" expanded="false" />
             <element signature="method#inventoryClick#0;class#LootCrate#0" expanded="false" />
             <element signature="method#playerItemHeld#0;class#LootCrate#0" expanded="false" />
@@ -1325,7 +1317,7 @@
             <element signature="method#getValidBlocks#0;class#TreefellerJob#0" expanded="false" />
             <element signature="class#ShroomFellerJob#0" expanded="false" />
             <element signature="method#ShroomFellerJob#1;class#ShroomFellerJob#0" expanded="false" />
-            <element signature="e#81753#81785#0" expanded="true" />
+            <element signature="e#81959#81991#0" expanded="true" />
             <element signature="class#TerramorpherJob#0" expanded="false" />
             <element signature="method#TerramorpherJob#0;class#TerramorpherJob#0" expanded="false" />
             <element signature="class#Orientation#0;class#TerramorpherJob#0" expanded="false" />
@@ -1415,8 +1407,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/com/ncolaprete/lootcrate/LootCrate.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="579">
-          <caret line="2007" column="61" selection-start-line="2007" selection-start-column="61" selection-end-line="2007" selection-end-column="61" />
+        <state relative-caret-position="1239">
+          <caret line="2070" column="33" selection-start-line="2070" selection-start-column="33" selection-end-line="2070" selection-end-column="33" />
           <folding>
             <element signature="method#onEnable#0;class#LootCrate#0" expanded="false" />
             <element signature="method#onDisable#0;class#LootCrate#0" expanded="false" />
@@ -1424,7 +1416,6 @@
             <element signature="method#updateJobs#0;class#LootCrate#0" expanded="false" />
             <element signature="method#checkAllPlayersForSpecialItems#0;class#LootCrate#0" expanded="false" />
             <element signature="method#checkForCreativeTimeUp#0;class#LootCrate#0" expanded="false" />
-            <element signature="method#playerInteract#0;class#LootCrate#0" expanded="false" />
             <element signature="method#blockPlace#0;class#LootCrate#0" expanded="false" />
             <element signature="method#inventoryClick#0;class#LootCrate#0" expanded="false" />
             <element signature="method#playerItemHeld#0;class#LootCrate#0" expanded="false" />
@@ -1485,7 +1476,7 @@
             <element signature="method#getValidBlocks#0;class#TreefellerJob#0" expanded="false" />
             <element signature="class#ShroomFellerJob#0" expanded="false" />
             <element signature="method#ShroomFellerJob#1;class#ShroomFellerJob#0" expanded="false" />
-            <element signature="e#81753#81785#0" expanded="true" />
+            <element signature="e#81959#81991#0" expanded="true" />
             <element signature="class#TerramorpherJob#0" expanded="false" />
             <element signature="method#TerramorpherJob#0;class#TerramorpherJob#0" expanded="false" />
             <element signature="class#Orientation#0;class#TerramorpherJob#0" expanded="false" />
