@@ -25,14 +25,17 @@
       <file leaf-file-name="LootCrate.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/com/ncolaprete/lootcrate/LootCrate.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="734">
-              <caret line="599" column="23" selection-start-line="599" selection-start-column="23" selection-end-line="599" selection-end-column="23" />
+            <state relative-caret-position="657">
+              <caret line="1588" column="18" selection-start-line="1588" selection-start-column="18" selection-end-line="1588" selection-end-column="18" />
               <folding>
+                <element signature="class#LootCrate#0" expanded="false" />
+                <element signature="method#onEnable#0;class#LootCrate#0" expanded="false" />
                 <element signature="method#onDisable#0;class#LootCrate#0" expanded="false" />
                 <element signature="method#onCommand#0;class#LootCrate#0" expanded="false" />
                 <element signature="method#updateJobs#0;class#LootCrate#0" expanded="false" />
                 <element signature="method#checkAllPlayersForSpecialItems#0;class#LootCrate#0" expanded="false" />
                 <element signature="method#checkForCreativeTimeUp#0;class#LootCrate#0" expanded="false" />
+                <element signature="method#playerInteract#0;class#LootCrate#0" expanded="false" />
                 <element signature="method#blockBreak#0;class#LootCrate#0" expanded="false" />
                 <element signature="method#blockPlace#0;class#LootCrate#0" expanded="false" />
                 <element signature="method#inventoryClick#0;class#LootCrate#0" expanded="false" />
@@ -42,7 +45,9 @@
                 <element signature="method#removeCrate#0;class#LootCrate#0" expanded="false" />
                 <element signature="method#removeCrate#1;class#LootCrate#0" expanded="false" />
                 <element signature="method#addCrate#0;class#LootCrate#0" expanded="false" />
+                <element signature="method#dropRandomCrate#0;class#LootCrate#0" expanded="false" />
                 <element signature="method#checkPlayerForSpecialItem#0;class#LootCrate#0" expanded="false" />
+                <element signature="class#Utility#0" expanded="false" />
                 <element signature="method#itemHasLoreLine#0;class#Utility#0" expanded="false" />
                 <element signature="method#addLoreLine#0;class#Utility#0" expanded="false" />
                 <element signature="method#setName#0;class#Utility#0" expanded="false" />
@@ -60,9 +65,11 @@
                 <element signature="method#isCorrectTool#0;class#Utility#0" expanded="false" />
                 <element signature="method#blockInBoundsInclusive#0;class#Utility#0" expanded="false" />
                 <element signature="method#getBlockFaceIsLookingAt#0;class#Utility#0" expanded="false" />
+                <element signature="method#reduceDurability#0;class#Utility#0" expanded="false" />
                 <element signature="class#Crate#0" expanded="false" />
                 <element signature="method#Crate#0;class#Crate#0" expanded="false" />
                 <element signature="method#unlockAndGivePrize#0;class#Crate#0" expanded="false" />
+                <element signature="class#CrateLayout#0" expanded="false" />
                 <element signature="method#CrateLayout#0;class#CrateLayout#0" expanded="false" />
                 <element signature="method#givePrize#0;class#CrateLayout#0" expanded="false" />
                 <element signature="method#showContents#0;class#CrateLayout#0" expanded="false" />
@@ -74,7 +81,6 @@
                 <element signature="method#getKey#0;class#CrateKey#0" expanded="false" />
                 <element signature="class#Reward#0" expanded="false" />
                 <element signature="method#Reward#0;class#Reward#0" expanded="false" />
-                <element signature="class#Prize#0" expanded="false" />
                 <element signature="method#Prize#0;class#Prize#0" expanded="false" />
                 <element signature="method#giveReward#0;class#Prize#0" expanded="false" />
                 <element signature="method#getVisualisation#0;class#Prize#0" expanded="false" />
@@ -103,6 +109,7 @@
                 <element signature="class#Orientation#0;class#TerramorpherJob#0" expanded="false" />
                 <element signature="method#Orientation#0;class#Orientation#0;class#TerramorpherJob#0" expanded="false" />
                 <element signature="method#fromBlockFace#0;class#Orientation#0;class#TerramorpherJob#0" expanded="false" />
+                <element signature="method#BoomTimeJob#0;class#BoomTimeJob#0" expanded="false" />
               </folding>
             </state>
           </provider>
@@ -617,11 +624,14 @@
         <state relative-caret-position="0">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
+            <element signature="class#LootCrate#0" expanded="false" />
+            <element signature="method#onEnable#0;class#LootCrate#0" expanded="false" />
             <element signature="method#onDisable#0;class#LootCrate#0" expanded="false" />
             <element signature="method#onCommand#0;class#LootCrate#0" expanded="false" />
             <element signature="method#updateJobs#0;class#LootCrate#0" expanded="false" />
             <element signature="method#checkAllPlayersForSpecialItems#0;class#LootCrate#0" expanded="false" />
             <element signature="method#checkForCreativeTimeUp#0;class#LootCrate#0" expanded="false" />
+            <element signature="method#playerInteract#0;class#LootCrate#0" expanded="false" />
             <element signature="method#blockBreak#0;class#LootCrate#0" expanded="false" />
             <element signature="method#blockPlace#0;class#LootCrate#0" expanded="false" />
             <element signature="method#inventoryClick#0;class#LootCrate#0" expanded="false" />
@@ -631,7 +641,9 @@
             <element signature="method#removeCrate#0;class#LootCrate#0" expanded="false" />
             <element signature="method#removeCrate#1;class#LootCrate#0" expanded="false" />
             <element signature="method#addCrate#0;class#LootCrate#0" expanded="false" />
+            <element signature="method#dropRandomCrate#0;class#LootCrate#0" expanded="false" />
             <element signature="method#checkPlayerForSpecialItem#0;class#LootCrate#0" expanded="false" />
+            <element signature="class#Utility#0" expanded="false" />
             <element signature="method#itemHasLoreLine#0;class#Utility#0" expanded="false" />
             <element signature="method#addLoreLine#0;class#Utility#0" expanded="false" />
             <element signature="method#setName#0;class#Utility#0" expanded="false" />
@@ -649,9 +661,11 @@
             <element signature="method#isCorrectTool#0;class#Utility#0" expanded="false" />
             <element signature="method#blockInBoundsInclusive#0;class#Utility#0" expanded="false" />
             <element signature="method#getBlockFaceIsLookingAt#0;class#Utility#0" expanded="false" />
+            <element signature="method#reduceDurability#0;class#Utility#0" expanded="false" />
             <element signature="class#Crate#0" expanded="false" />
             <element signature="method#Crate#0;class#Crate#0" expanded="false" />
             <element signature="method#unlockAndGivePrize#0;class#Crate#0" expanded="false" />
+            <element signature="class#CrateLayout#0" expanded="false" />
             <element signature="method#CrateLayout#0;class#CrateLayout#0" expanded="false" />
             <element signature="method#givePrize#0;class#CrateLayout#0" expanded="false" />
             <element signature="method#showContents#0;class#CrateLayout#0" expanded="false" />
@@ -663,7 +677,6 @@
             <element signature="method#getKey#0;class#CrateKey#0" expanded="false" />
             <element signature="class#Reward#0" expanded="false" />
             <element signature="method#Reward#0;class#Reward#0" expanded="false" />
-            <element signature="class#Prize#0" expanded="false" />
             <element signature="method#Prize#0;class#Prize#0" expanded="false" />
             <element signature="method#giveReward#0;class#Prize#0" expanded="false" />
             <element signature="method#getVisualisation#0;class#Prize#0" expanded="false" />
@@ -692,6 +705,7 @@
             <element signature="class#Orientation#0;class#TerramorpherJob#0" expanded="false" />
             <element signature="method#Orientation#0;class#Orientation#0;class#TerramorpherJob#0" expanded="false" />
             <element signature="method#fromBlockFace#0;class#Orientation#0;class#TerramorpherJob#0" expanded="false" />
+            <element signature="method#BoomTimeJob#0;class#BoomTimeJob#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -733,11 +747,14 @@
         <state relative-caret-position="0">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
+            <element signature="class#LootCrate#0" expanded="false" />
+            <element signature="method#onEnable#0;class#LootCrate#0" expanded="false" />
             <element signature="method#onDisable#0;class#LootCrate#0" expanded="false" />
             <element signature="method#onCommand#0;class#LootCrate#0" expanded="false" />
             <element signature="method#updateJobs#0;class#LootCrate#0" expanded="false" />
             <element signature="method#checkAllPlayersForSpecialItems#0;class#LootCrate#0" expanded="false" />
             <element signature="method#checkForCreativeTimeUp#0;class#LootCrate#0" expanded="false" />
+            <element signature="method#playerInteract#0;class#LootCrate#0" expanded="false" />
             <element signature="method#blockBreak#0;class#LootCrate#0" expanded="false" />
             <element signature="method#blockPlace#0;class#LootCrate#0" expanded="false" />
             <element signature="method#inventoryClick#0;class#LootCrate#0" expanded="false" />
@@ -747,7 +764,9 @@
             <element signature="method#removeCrate#0;class#LootCrate#0" expanded="false" />
             <element signature="method#removeCrate#1;class#LootCrate#0" expanded="false" />
             <element signature="method#addCrate#0;class#LootCrate#0" expanded="false" />
+            <element signature="method#dropRandomCrate#0;class#LootCrate#0" expanded="false" />
             <element signature="method#checkPlayerForSpecialItem#0;class#LootCrate#0" expanded="false" />
+            <element signature="class#Utility#0" expanded="false" />
             <element signature="method#itemHasLoreLine#0;class#Utility#0" expanded="false" />
             <element signature="method#addLoreLine#0;class#Utility#0" expanded="false" />
             <element signature="method#setName#0;class#Utility#0" expanded="false" />
@@ -765,9 +784,11 @@
             <element signature="method#isCorrectTool#0;class#Utility#0" expanded="false" />
             <element signature="method#blockInBoundsInclusive#0;class#Utility#0" expanded="false" />
             <element signature="method#getBlockFaceIsLookingAt#0;class#Utility#0" expanded="false" />
+            <element signature="method#reduceDurability#0;class#Utility#0" expanded="false" />
             <element signature="class#Crate#0" expanded="false" />
             <element signature="method#Crate#0;class#Crate#0" expanded="false" />
             <element signature="method#unlockAndGivePrize#0;class#Crate#0" expanded="false" />
+            <element signature="class#CrateLayout#0" expanded="false" />
             <element signature="method#CrateLayout#0;class#CrateLayout#0" expanded="false" />
             <element signature="method#givePrize#0;class#CrateLayout#0" expanded="false" />
             <element signature="method#showContents#0;class#CrateLayout#0" expanded="false" />
@@ -779,7 +800,6 @@
             <element signature="method#getKey#0;class#CrateKey#0" expanded="false" />
             <element signature="class#Reward#0" expanded="false" />
             <element signature="method#Reward#0;class#Reward#0" expanded="false" />
-            <element signature="class#Prize#0" expanded="false" />
             <element signature="method#Prize#0;class#Prize#0" expanded="false" />
             <element signature="method#giveReward#0;class#Prize#0" expanded="false" />
             <element signature="method#getVisualisation#0;class#Prize#0" expanded="false" />
@@ -808,6 +828,7 @@
             <element signature="class#Orientation#0;class#TerramorpherJob#0" expanded="false" />
             <element signature="method#Orientation#0;class#Orientation#0;class#TerramorpherJob#0" expanded="false" />
             <element signature="method#fromBlockFace#0;class#Orientation#0;class#TerramorpherJob#0" expanded="false" />
+            <element signature="method#BoomTimeJob#0;class#BoomTimeJob#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -841,11 +862,14 @@
         <state relative-caret-position="0">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
+            <element signature="class#LootCrate#0" expanded="false" />
+            <element signature="method#onEnable#0;class#LootCrate#0" expanded="false" />
             <element signature="method#onDisable#0;class#LootCrate#0" expanded="false" />
             <element signature="method#onCommand#0;class#LootCrate#0" expanded="false" />
             <element signature="method#updateJobs#0;class#LootCrate#0" expanded="false" />
             <element signature="method#checkAllPlayersForSpecialItems#0;class#LootCrate#0" expanded="false" />
             <element signature="method#checkForCreativeTimeUp#0;class#LootCrate#0" expanded="false" />
+            <element signature="method#playerInteract#0;class#LootCrate#0" expanded="false" />
             <element signature="method#blockBreak#0;class#LootCrate#0" expanded="false" />
             <element signature="method#blockPlace#0;class#LootCrate#0" expanded="false" />
             <element signature="method#inventoryClick#0;class#LootCrate#0" expanded="false" />
@@ -855,7 +879,9 @@
             <element signature="method#removeCrate#0;class#LootCrate#0" expanded="false" />
             <element signature="method#removeCrate#1;class#LootCrate#0" expanded="false" />
             <element signature="method#addCrate#0;class#LootCrate#0" expanded="false" />
+            <element signature="method#dropRandomCrate#0;class#LootCrate#0" expanded="false" />
             <element signature="method#checkPlayerForSpecialItem#0;class#LootCrate#0" expanded="false" />
+            <element signature="class#Utility#0" expanded="false" />
             <element signature="method#itemHasLoreLine#0;class#Utility#0" expanded="false" />
             <element signature="method#addLoreLine#0;class#Utility#0" expanded="false" />
             <element signature="method#setName#0;class#Utility#0" expanded="false" />
@@ -873,9 +899,11 @@
             <element signature="method#isCorrectTool#0;class#Utility#0" expanded="false" />
             <element signature="method#blockInBoundsInclusive#0;class#Utility#0" expanded="false" />
             <element signature="method#getBlockFaceIsLookingAt#0;class#Utility#0" expanded="false" />
+            <element signature="method#reduceDurability#0;class#Utility#0" expanded="false" />
             <element signature="class#Crate#0" expanded="false" />
             <element signature="method#Crate#0;class#Crate#0" expanded="false" />
             <element signature="method#unlockAndGivePrize#0;class#Crate#0" expanded="false" />
+            <element signature="class#CrateLayout#0" expanded="false" />
             <element signature="method#CrateLayout#0;class#CrateLayout#0" expanded="false" />
             <element signature="method#givePrize#0;class#CrateLayout#0" expanded="false" />
             <element signature="method#showContents#0;class#CrateLayout#0" expanded="false" />
@@ -887,7 +915,6 @@
             <element signature="method#getKey#0;class#CrateKey#0" expanded="false" />
             <element signature="class#Reward#0" expanded="false" />
             <element signature="method#Reward#0;class#Reward#0" expanded="false" />
-            <element signature="class#Prize#0" expanded="false" />
             <element signature="method#Prize#0;class#Prize#0" expanded="false" />
             <element signature="method#giveReward#0;class#Prize#0" expanded="false" />
             <element signature="method#getVisualisation#0;class#Prize#0" expanded="false" />
@@ -916,6 +943,7 @@
             <element signature="class#Orientation#0;class#TerramorpherJob#0" expanded="false" />
             <element signature="method#Orientation#0;class#Orientation#0;class#TerramorpherJob#0" expanded="false" />
             <element signature="method#fromBlockFace#0;class#Orientation#0;class#TerramorpherJob#0" expanded="false" />
+            <element signature="method#BoomTimeJob#0;class#BoomTimeJob#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -949,11 +977,14 @@
         <state relative-caret-position="0">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
+            <element signature="class#LootCrate#0" expanded="false" />
+            <element signature="method#onEnable#0;class#LootCrate#0" expanded="false" />
             <element signature="method#onDisable#0;class#LootCrate#0" expanded="false" />
             <element signature="method#onCommand#0;class#LootCrate#0" expanded="false" />
             <element signature="method#updateJobs#0;class#LootCrate#0" expanded="false" />
             <element signature="method#checkAllPlayersForSpecialItems#0;class#LootCrate#0" expanded="false" />
             <element signature="method#checkForCreativeTimeUp#0;class#LootCrate#0" expanded="false" />
+            <element signature="method#playerInteract#0;class#LootCrate#0" expanded="false" />
             <element signature="method#blockBreak#0;class#LootCrate#0" expanded="false" />
             <element signature="method#blockPlace#0;class#LootCrate#0" expanded="false" />
             <element signature="method#inventoryClick#0;class#LootCrate#0" expanded="false" />
@@ -963,7 +994,9 @@
             <element signature="method#removeCrate#0;class#LootCrate#0" expanded="false" />
             <element signature="method#removeCrate#1;class#LootCrate#0" expanded="false" />
             <element signature="method#addCrate#0;class#LootCrate#0" expanded="false" />
+            <element signature="method#dropRandomCrate#0;class#LootCrate#0" expanded="false" />
             <element signature="method#checkPlayerForSpecialItem#0;class#LootCrate#0" expanded="false" />
+            <element signature="class#Utility#0" expanded="false" />
             <element signature="method#itemHasLoreLine#0;class#Utility#0" expanded="false" />
             <element signature="method#addLoreLine#0;class#Utility#0" expanded="false" />
             <element signature="method#setName#0;class#Utility#0" expanded="false" />
@@ -981,9 +1014,11 @@
             <element signature="method#isCorrectTool#0;class#Utility#0" expanded="false" />
             <element signature="method#blockInBoundsInclusive#0;class#Utility#0" expanded="false" />
             <element signature="method#getBlockFaceIsLookingAt#0;class#Utility#0" expanded="false" />
+            <element signature="method#reduceDurability#0;class#Utility#0" expanded="false" />
             <element signature="class#Crate#0" expanded="false" />
             <element signature="method#Crate#0;class#Crate#0" expanded="false" />
             <element signature="method#unlockAndGivePrize#0;class#Crate#0" expanded="false" />
+            <element signature="class#CrateLayout#0" expanded="false" />
             <element signature="method#CrateLayout#0;class#CrateLayout#0" expanded="false" />
             <element signature="method#givePrize#0;class#CrateLayout#0" expanded="false" />
             <element signature="method#showContents#0;class#CrateLayout#0" expanded="false" />
@@ -995,7 +1030,6 @@
             <element signature="method#getKey#0;class#CrateKey#0" expanded="false" />
             <element signature="class#Reward#0" expanded="false" />
             <element signature="method#Reward#0;class#Reward#0" expanded="false" />
-            <element signature="class#Prize#0" expanded="false" />
             <element signature="method#Prize#0;class#Prize#0" expanded="false" />
             <element signature="method#giveReward#0;class#Prize#0" expanded="false" />
             <element signature="method#getVisualisation#0;class#Prize#0" expanded="false" />
@@ -1024,6 +1058,7 @@
             <element signature="class#Orientation#0;class#TerramorpherJob#0" expanded="false" />
             <element signature="method#Orientation#0;class#Orientation#0;class#TerramorpherJob#0" expanded="false" />
             <element signature="method#fromBlockFace#0;class#Orientation#0;class#TerramorpherJob#0" expanded="false" />
+            <element signature="method#BoomTimeJob#0;class#BoomTimeJob#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -1057,11 +1092,14 @@
         <state relative-caret-position="0">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
+            <element signature="class#LootCrate#0" expanded="false" />
+            <element signature="method#onEnable#0;class#LootCrate#0" expanded="false" />
             <element signature="method#onDisable#0;class#LootCrate#0" expanded="false" />
             <element signature="method#onCommand#0;class#LootCrate#0" expanded="false" />
             <element signature="method#updateJobs#0;class#LootCrate#0" expanded="false" />
             <element signature="method#checkAllPlayersForSpecialItems#0;class#LootCrate#0" expanded="false" />
             <element signature="method#checkForCreativeTimeUp#0;class#LootCrate#0" expanded="false" />
+            <element signature="method#playerInteract#0;class#LootCrate#0" expanded="false" />
             <element signature="method#blockBreak#0;class#LootCrate#0" expanded="false" />
             <element signature="method#blockPlace#0;class#LootCrate#0" expanded="false" />
             <element signature="method#inventoryClick#0;class#LootCrate#0" expanded="false" />
@@ -1071,7 +1109,9 @@
             <element signature="method#removeCrate#0;class#LootCrate#0" expanded="false" />
             <element signature="method#removeCrate#1;class#LootCrate#0" expanded="false" />
             <element signature="method#addCrate#0;class#LootCrate#0" expanded="false" />
+            <element signature="method#dropRandomCrate#0;class#LootCrate#0" expanded="false" />
             <element signature="method#checkPlayerForSpecialItem#0;class#LootCrate#0" expanded="false" />
+            <element signature="class#Utility#0" expanded="false" />
             <element signature="method#itemHasLoreLine#0;class#Utility#0" expanded="false" />
             <element signature="method#addLoreLine#0;class#Utility#0" expanded="false" />
             <element signature="method#setName#0;class#Utility#0" expanded="false" />
@@ -1089,9 +1129,11 @@
             <element signature="method#isCorrectTool#0;class#Utility#0" expanded="false" />
             <element signature="method#blockInBoundsInclusive#0;class#Utility#0" expanded="false" />
             <element signature="method#getBlockFaceIsLookingAt#0;class#Utility#0" expanded="false" />
+            <element signature="method#reduceDurability#0;class#Utility#0" expanded="false" />
             <element signature="class#Crate#0" expanded="false" />
             <element signature="method#Crate#0;class#Crate#0" expanded="false" />
             <element signature="method#unlockAndGivePrize#0;class#Crate#0" expanded="false" />
+            <element signature="class#CrateLayout#0" expanded="false" />
             <element signature="method#CrateLayout#0;class#CrateLayout#0" expanded="false" />
             <element signature="method#givePrize#0;class#CrateLayout#0" expanded="false" />
             <element signature="method#showContents#0;class#CrateLayout#0" expanded="false" />
@@ -1103,7 +1145,6 @@
             <element signature="method#getKey#0;class#CrateKey#0" expanded="false" />
             <element signature="class#Reward#0" expanded="false" />
             <element signature="method#Reward#0;class#Reward#0" expanded="false" />
-            <element signature="class#Prize#0" expanded="false" />
             <element signature="method#Prize#0;class#Prize#0" expanded="false" />
             <element signature="method#giveReward#0;class#Prize#0" expanded="false" />
             <element signature="method#getVisualisation#0;class#Prize#0" expanded="false" />
@@ -1132,6 +1173,7 @@
             <element signature="class#Orientation#0;class#TerramorpherJob#0" expanded="false" />
             <element signature="method#Orientation#0;class#Orientation#0;class#TerramorpherJob#0" expanded="false" />
             <element signature="method#fromBlockFace#0;class#Orientation#0;class#TerramorpherJob#0" expanded="false" />
+            <element signature="method#BoomTimeJob#0;class#BoomTimeJob#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -1165,11 +1207,14 @@
         <state relative-caret-position="2277">
           <caret line="69" column="72" selection-start-line="69" selection-start-column="72" selection-end-line="69" selection-end-column="72" />
           <folding>
+            <element signature="class#LootCrate#0" expanded="false" />
+            <element signature="method#onEnable#0;class#LootCrate#0" expanded="false" />
             <element signature="method#onDisable#0;class#LootCrate#0" expanded="false" />
             <element signature="method#onCommand#0;class#LootCrate#0" expanded="false" />
             <element signature="method#updateJobs#0;class#LootCrate#0" expanded="false" />
             <element signature="method#checkAllPlayersForSpecialItems#0;class#LootCrate#0" expanded="false" />
             <element signature="method#checkForCreativeTimeUp#0;class#LootCrate#0" expanded="false" />
+            <element signature="method#playerInteract#0;class#LootCrate#0" expanded="false" />
             <element signature="method#blockBreak#0;class#LootCrate#0" expanded="false" />
             <element signature="method#blockPlace#0;class#LootCrate#0" expanded="false" />
             <element signature="method#inventoryClick#0;class#LootCrate#0" expanded="false" />
@@ -1179,7 +1224,9 @@
             <element signature="method#removeCrate#0;class#LootCrate#0" expanded="false" />
             <element signature="method#removeCrate#1;class#LootCrate#0" expanded="false" />
             <element signature="method#addCrate#0;class#LootCrate#0" expanded="false" />
+            <element signature="method#dropRandomCrate#0;class#LootCrate#0" expanded="false" />
             <element signature="method#checkPlayerForSpecialItem#0;class#LootCrate#0" expanded="false" />
+            <element signature="class#Utility#0" expanded="false" />
             <element signature="method#itemHasLoreLine#0;class#Utility#0" expanded="false" />
             <element signature="method#addLoreLine#0;class#Utility#0" expanded="false" />
             <element signature="method#setName#0;class#Utility#0" expanded="false" />
@@ -1197,9 +1244,11 @@
             <element signature="method#isCorrectTool#0;class#Utility#0" expanded="false" />
             <element signature="method#blockInBoundsInclusive#0;class#Utility#0" expanded="false" />
             <element signature="method#getBlockFaceIsLookingAt#0;class#Utility#0" expanded="false" />
+            <element signature="method#reduceDurability#0;class#Utility#0" expanded="false" />
             <element signature="class#Crate#0" expanded="false" />
             <element signature="method#Crate#0;class#Crate#0" expanded="false" />
             <element signature="method#unlockAndGivePrize#0;class#Crate#0" expanded="false" />
+            <element signature="class#CrateLayout#0" expanded="false" />
             <element signature="method#CrateLayout#0;class#CrateLayout#0" expanded="false" />
             <element signature="method#givePrize#0;class#CrateLayout#0" expanded="false" />
             <element signature="method#showContents#0;class#CrateLayout#0" expanded="false" />
@@ -1211,7 +1260,6 @@
             <element signature="method#getKey#0;class#CrateKey#0" expanded="false" />
             <element signature="class#Reward#0" expanded="false" />
             <element signature="method#Reward#0;class#Reward#0" expanded="false" />
-            <element signature="class#Prize#0" expanded="false" />
             <element signature="method#Prize#0;class#Prize#0" expanded="false" />
             <element signature="method#giveReward#0;class#Prize#0" expanded="false" />
             <element signature="method#getVisualisation#0;class#Prize#0" expanded="false" />
@@ -1240,6 +1288,7 @@
             <element signature="class#Orientation#0;class#TerramorpherJob#0" expanded="false" />
             <element signature="method#Orientation#0;class#Orientation#0;class#TerramorpherJob#0" expanded="false" />
             <element signature="method#fromBlockFace#0;class#Orientation#0;class#TerramorpherJob#0" expanded="false" />
+            <element signature="method#BoomTimeJob#0;class#BoomTimeJob#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -1273,11 +1322,14 @@
         <state relative-caret-position="0">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
+            <element signature="class#LootCrate#0" expanded="false" />
+            <element signature="method#onEnable#0;class#LootCrate#0" expanded="false" />
             <element signature="method#onDisable#0;class#LootCrate#0" expanded="false" />
             <element signature="method#onCommand#0;class#LootCrate#0" expanded="false" />
             <element signature="method#updateJobs#0;class#LootCrate#0" expanded="false" />
             <element signature="method#checkAllPlayersForSpecialItems#0;class#LootCrate#0" expanded="false" />
             <element signature="method#checkForCreativeTimeUp#0;class#LootCrate#0" expanded="false" />
+            <element signature="method#playerInteract#0;class#LootCrate#0" expanded="false" />
             <element signature="method#blockBreak#0;class#LootCrate#0" expanded="false" />
             <element signature="method#blockPlace#0;class#LootCrate#0" expanded="false" />
             <element signature="method#inventoryClick#0;class#LootCrate#0" expanded="false" />
@@ -1287,7 +1339,9 @@
             <element signature="method#removeCrate#0;class#LootCrate#0" expanded="false" />
             <element signature="method#removeCrate#1;class#LootCrate#0" expanded="false" />
             <element signature="method#addCrate#0;class#LootCrate#0" expanded="false" />
+            <element signature="method#dropRandomCrate#0;class#LootCrate#0" expanded="false" />
             <element signature="method#checkPlayerForSpecialItem#0;class#LootCrate#0" expanded="false" />
+            <element signature="class#Utility#0" expanded="false" />
             <element signature="method#itemHasLoreLine#0;class#Utility#0" expanded="false" />
             <element signature="method#addLoreLine#0;class#Utility#0" expanded="false" />
             <element signature="method#setName#0;class#Utility#0" expanded="false" />
@@ -1305,9 +1359,11 @@
             <element signature="method#isCorrectTool#0;class#Utility#0" expanded="false" />
             <element signature="method#blockInBoundsInclusive#0;class#Utility#0" expanded="false" />
             <element signature="method#getBlockFaceIsLookingAt#0;class#Utility#0" expanded="false" />
+            <element signature="method#reduceDurability#0;class#Utility#0" expanded="false" />
             <element signature="class#Crate#0" expanded="false" />
             <element signature="method#Crate#0;class#Crate#0" expanded="false" />
             <element signature="method#unlockAndGivePrize#0;class#Crate#0" expanded="false" />
+            <element signature="class#CrateLayout#0" expanded="false" />
             <element signature="method#CrateLayout#0;class#CrateLayout#0" expanded="false" />
             <element signature="method#givePrize#0;class#CrateLayout#0" expanded="false" />
             <element signature="method#showContents#0;class#CrateLayout#0" expanded="false" />
@@ -1319,7 +1375,6 @@
             <element signature="method#getKey#0;class#CrateKey#0" expanded="false" />
             <element signature="class#Reward#0" expanded="false" />
             <element signature="method#Reward#0;class#Reward#0" expanded="false" />
-            <element signature="class#Prize#0" expanded="false" />
             <element signature="method#Prize#0;class#Prize#0" expanded="false" />
             <element signature="method#giveReward#0;class#Prize#0" expanded="false" />
             <element signature="method#getVisualisation#0;class#Prize#0" expanded="false" />
@@ -1348,6 +1403,7 @@
             <element signature="class#Orientation#0;class#TerramorpherJob#0" expanded="false" />
             <element signature="method#Orientation#0;class#Orientation#0;class#TerramorpherJob#0" expanded="false" />
             <element signature="method#fromBlockFace#0;class#Orientation#0;class#TerramorpherJob#0" expanded="false" />
+            <element signature="method#BoomTimeJob#0;class#BoomTimeJob#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -1432,14 +1488,17 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/com/ncolaprete/lootcrate/LootCrate.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="734">
-          <caret line="599" column="23" selection-start-line="599" selection-start-column="23" selection-end-line="599" selection-end-column="23" />
+        <state relative-caret-position="657">
+          <caret line="1588" column="18" selection-start-line="1588" selection-start-column="18" selection-end-line="1588" selection-end-column="18" />
           <folding>
+            <element signature="class#LootCrate#0" expanded="false" />
+            <element signature="method#onEnable#0;class#LootCrate#0" expanded="false" />
             <element signature="method#onDisable#0;class#LootCrate#0" expanded="false" />
             <element signature="method#onCommand#0;class#LootCrate#0" expanded="false" />
             <element signature="method#updateJobs#0;class#LootCrate#0" expanded="false" />
             <element signature="method#checkAllPlayersForSpecialItems#0;class#LootCrate#0" expanded="false" />
             <element signature="method#checkForCreativeTimeUp#0;class#LootCrate#0" expanded="false" />
+            <element signature="method#playerInteract#0;class#LootCrate#0" expanded="false" />
             <element signature="method#blockBreak#0;class#LootCrate#0" expanded="false" />
             <element signature="method#blockPlace#0;class#LootCrate#0" expanded="false" />
             <element signature="method#inventoryClick#0;class#LootCrate#0" expanded="false" />
@@ -1449,7 +1508,9 @@
             <element signature="method#removeCrate#0;class#LootCrate#0" expanded="false" />
             <element signature="method#removeCrate#1;class#LootCrate#0" expanded="false" />
             <element signature="method#addCrate#0;class#LootCrate#0" expanded="false" />
+            <element signature="method#dropRandomCrate#0;class#LootCrate#0" expanded="false" />
             <element signature="method#checkPlayerForSpecialItem#0;class#LootCrate#0" expanded="false" />
+            <element signature="class#Utility#0" expanded="false" />
             <element signature="method#itemHasLoreLine#0;class#Utility#0" expanded="false" />
             <element signature="method#addLoreLine#0;class#Utility#0" expanded="false" />
             <element signature="method#setName#0;class#Utility#0" expanded="false" />
@@ -1467,9 +1528,11 @@
             <element signature="method#isCorrectTool#0;class#Utility#0" expanded="false" />
             <element signature="method#blockInBoundsInclusive#0;class#Utility#0" expanded="false" />
             <element signature="method#getBlockFaceIsLookingAt#0;class#Utility#0" expanded="false" />
+            <element signature="method#reduceDurability#0;class#Utility#0" expanded="false" />
             <element signature="class#Crate#0" expanded="false" />
             <element signature="method#Crate#0;class#Crate#0" expanded="false" />
             <element signature="method#unlockAndGivePrize#0;class#Crate#0" expanded="false" />
+            <element signature="class#CrateLayout#0" expanded="false" />
             <element signature="method#CrateLayout#0;class#CrateLayout#0" expanded="false" />
             <element signature="method#givePrize#0;class#CrateLayout#0" expanded="false" />
             <element signature="method#showContents#0;class#CrateLayout#0" expanded="false" />
@@ -1481,7 +1544,6 @@
             <element signature="method#getKey#0;class#CrateKey#0" expanded="false" />
             <element signature="class#Reward#0" expanded="false" />
             <element signature="method#Reward#0;class#Reward#0" expanded="false" />
-            <element signature="class#Prize#0" expanded="false" />
             <element signature="method#Prize#0;class#Prize#0" expanded="false" />
             <element signature="method#giveReward#0;class#Prize#0" expanded="false" />
             <element signature="method#getVisualisation#0;class#Prize#0" expanded="false" />
@@ -1510,6 +1572,7 @@
             <element signature="class#Orientation#0;class#TerramorpherJob#0" expanded="false" />
             <element signature="method#Orientation#0;class#Orientation#0;class#TerramorpherJob#0" expanded="false" />
             <element signature="method#fromBlockFace#0;class#Orientation#0;class#TerramorpherJob#0" expanded="false" />
+            <element signature="method#BoomTimeJob#0;class#BoomTimeJob#0" expanded="false" />
           </folding>
         </state>
       </provider>

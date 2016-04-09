@@ -46,16 +46,16 @@ import java.util.stream.Collectors;
 public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
 
     public ArrayList<CrateKey> crateKeys;
-    private ArrayList<CrateLayout> crateLayouts;
-    private ArrayList<Crate> cratePositions;
+    public ArrayList<CrateLayout> crateLayouts;
+    public ArrayList<Crate> cratePositions;
     public HashMap<UUID, Long> tempCreativeTimestamps;
-    private ArrayList<Job> activeJobs;
+    public ArrayList<Job> activeJobs;
 
-    private CustomConfig crateKeyConfig;
-    private CustomConfig crateLayoutConfig;
-    private CustomConfig cratePositionConfig;
+    public CustomConfig crateKeyConfig;
+    public CustomConfig crateLayoutConfig;
+    public CustomConfig cratePositionConfig;
     public CustomConfig tempCreativeTimestampConfig;
-    private CustomConfig optionsConfig;
+    public CustomConfig optionsConfig;
 
     private ConsoleCommandSender csend = getServer().getConsoleSender();
 
@@ -781,7 +781,7 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
         if (ev.getEntity() instanceof Arrow && ev.getEntity().getShooter() instanceof Player)
         {
             Player ply = (Player) ev.getEntity().getShooter();
-            if (Utility.itemHasLoreLine(ply.getInventory().getItemInMainHand(), Prize.VEILSTRIKE_BOW.getLoreTag()))
+            if (Utility.itemHasLoreLine(ply.getInventory().getItemInMainHand(), Prize.HYPERSHOT_LONGBOW.getLoreTag()))
             {
                 ev.getEntity().setVelocity(ev.getEntity().getVelocity().multiply(4));
             }
@@ -902,8 +902,8 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
             ply.addPotionEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE, 40, 0), true);
         }
 
-        // Veilstrike Bow
-        if (Utility.itemHasLoreLine(ply.getInventory().getItemInMainHand(), Prize.VEILSTRIKE_BOW.getLoreTag()))
+        // Veilstrike Shortbow
+        if (Utility.itemHasLoreLine(ply.getInventory().getItemInMainHand(), Prize.VEILSTRIKE_SHORTBOW.getLoreTag()))
         {
             ply.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, 25, 0), true);
         }
@@ -1575,20 +1575,35 @@ enum Prize
         return Utility.setName(item, ChatColor.YELLOW + "Unyielding Battersea");
     }),
 
-    VEILSTRIKE_BOW (params -> {
+    HYPERSHOT_LONGBOW (params -> {
         ItemStack item = new ItemStack(Material.BOW);
-        Utility.setName(item, ChatColor.YELLOW + "" + ChatColor.ITALIC + "Veilstrike Bow");
-        Utility.addLoreLine(item, "An ancient, powerful bow used by an extremely skilled marksman");
-        Utility.addLoreLine(item, ChatColor.RESET + "The bow grants invisibility and immense arrow speed");
+        Utility.setName(item, ChatColor.YELLOW + "" + ChatColor.ITALIC + "Hypershot Longbow");
+        Utility.addLoreLine(item, "An ancient, powerful bow used by a skilled marksman");
+        Utility.addLoreLine(item, ChatColor.RESET + "The bow grants immense arrow speed and power");
         item.addEnchantment(Enchantment.ARROW_DAMAGE, 5);
         item.addEnchantment(Enchantment.ARROW_KNOCKBACK, 2);
         item.addEnchantment(Enchantment.DURABILITY, 2);
         item.addEnchantment(Enchantment.MENDING, 1);
-        params.rewardee.sendMessage(ChatColor.YELLOW + "" + ChatColor.ITALIC + "You got the Veilstrike Bow!");
+        params.rewardee.sendMessage(ChatColor.YELLOW + "" + ChatColor.ITALIC + "You got the Hypershot Longbow!");
         return Arrays.asList(item, new ItemStack(Material.ARROW, params.amountToGive));
     }, params -> {
         ItemStack item = new ItemStack(Material.BOW);
-        return Utility.setName(item, ChatColor.YELLOW + "" + ChatColor.ITALIC + "Veilstrike Bow");
+        return Utility.setName(item, ChatColor.YELLOW + "" + ChatColor.ITALIC + "Hypershot Longbow");
+    }),
+
+    VEILSTRIKE_SHORTBOW (params -> {
+        ItemStack item = new ItemStack(Material.BOW);
+        Utility.setName(item, ChatColor.BLUE + "" + ChatColor.ITALIC + "Veilstrike Shortbow");
+        Utility.addLoreLine(item, "An ancient, mystical bow used by an unseen asassin");
+        Utility.addLoreLine(item, ChatColor.RESET + "The bow grants invisibility while held");
+        item.addEnchantment(Enchantment.ARROW_DAMAGE, 3);
+        item.addEnchantment(Enchantment.DURABILITY, 2);
+        item.addEnchantment(Enchantment.MENDING, 1);
+        params.rewardee.sendMessage(ChatColor.BLUE + "" + ChatColor.ITALIC + "You got the Veilstrike Shortbow!");
+        return Arrays.asList(item, new ItemStack(Material.ARROW, params.amountToGive));
+    }, params -> {
+        ItemStack item = new ItemStack(Material.BOW);
+        return Utility.setName(item, ChatColor.BLUE + "" + ChatColor.ITALIC + "Veilstrike Shortbow");
     }),
 
     HEAVENS_BLADE (params -> {
@@ -1870,6 +1885,8 @@ enum Prize
         return item;
     }),
 
+    // bad prizes
+
     FIREWORKS_SHOW (params -> {
         for (int i=0;i<params.amountToGive;i++)
         {
@@ -1890,8 +1907,19 @@ enum Prize
         return null;
     }, params -> {
         ItemStack item = new ItemStack(Material.FIREWORK);
-        Utility.setName(item, ChatColor.GOLD + "A Fireworks Show");
-        return item;
+        return Utility.setName(item, ChatColor.GOLD + "A Fireworks Show");
+    }),
+
+    BOOM_TIME (params -> {
+        Chest chest = (Chest) params.chestBlock.getState();
+        for (int i=0;i<chest.getInventory().getSize();i++)
+            chest.getInventory().setItem(i, Utility.setName(new ItemStack(Material.TNT), ChatColor.RED + "BOOM TIME!"));
+        params.rewardee.sendMessage(ChatColor.RED + "Boom Time!");
+        params.plugin.activeJobs.add(new BoomTimeJob(params.chestBlock, 8, 6, 5));
+        return null;
+    }, params -> {
+        ItemStack item = new ItemStack(Material.TNT);
+        return Utility.setName(item, ChatColor.RED + "Boom Time!");
     }),
 
     NOTHING (params -> {
@@ -2262,5 +2290,44 @@ class TerramorpherJob implements Job
                 return UP_DOWN;
             return null;
         }
+    }
+}
+
+class BoomTimeJob implements Job
+{
+    private Block chest;
+    private int clicks;
+    private int clickdelay;
+    private int explosivePower;
+
+    private int counter;
+
+    public BoomTimeJob(Block chest, int clicks, int clickdelay, int explosivePower)
+    {
+        this.chest = chest;
+        this.clicks = clicks;
+        this.clickdelay = clickdelay;
+        this.explosivePower = explosivePower;
+    }
+
+    public void update()
+    {
+        counter++;
+        if (chest.getType() != Material.CHEST)
+            counter = clickdelay * clicks + 1;
+        if (counter % clickdelay == 0)
+        {
+            chest.getWorld().playSound(chest.getLocation(), Sound.BLOCK_LEVER_CLICK, 10, 1);
+        }
+        if (counter == clicks * clickdelay)
+        {
+            chest.setType(Material.AIR);
+            chest.getWorld().createExplosion(chest.getLocation(), explosivePower);
+        }
+    }
+
+    public boolean isDone()
+    {
+        return counter > clicks * clickdelay;
     }
 }
