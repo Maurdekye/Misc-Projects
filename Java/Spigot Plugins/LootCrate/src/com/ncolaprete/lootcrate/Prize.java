@@ -571,7 +571,7 @@ enum Prize
         for (int i=0;i<chest.getInventory().getSize();i++)
             chest.getInventory().setItem(i, Utility.setName(new ItemStack(Material.TNT), ChatColor.RED + "BOOM TIME!"));
         params.rewardee.sendMessage(ChatColor.RED + "Boom Time!");
-        params.plugin.activeJobs.add(new BoomTimeJob(params.chestBlock, 8, 6, 5));
+        params.plugin.activeJobs.add(new BoomTimeJob(params.chestBlock, 8, 6, params.amountToGive));
         return null;
     }, params -> {
         ItemStack item = new ItemStack(Material.TNT);

@@ -287,13 +287,13 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
         TransmogiphySpeed = transmogrifierCfg.getInt("speed", 3);
 
         ConfigurationSection terramorpherCfg = optionsConfig.getConfig().getConfigurationSection("terramorpher");
-        TerramorpherSize = terramorpherCfg.getInt("size");
+        TerramorpherSize = terramorpherCfg.getInt("size", 2);
 
         ConfigurationSection gigadrillbreakerCfg = optionsConfig.getConfig().getConfigurationSection("giga_drill_breaker");
-        GigaDrillBreakerSize = gigadrillbreakerCfg.getInt("size");
+        GigaDrillBreakerSize = gigadrillbreakerCfg.getInt("size", 1);
 
         ConfigurationSection wandofleapingCfg = optionsConfig.getConfig().getConfigurationSection("wand_of_leaping");
-        WandOfLeapingPower = wandofleapingCfg.getInt("power");
+        WandOfLeapingPower = wandofleapingCfg.getInt("power", 4);
 
         // startup random crate dropper
         ConfigurationSection cratespawningSection = optionsConfig.getConfig().getConfigurationSection("cratespawning");

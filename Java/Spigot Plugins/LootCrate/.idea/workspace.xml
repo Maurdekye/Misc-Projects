@@ -22,11 +22,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="600">
-      <file leaf-file-name="LootCrate.java" pinned="false" current-in-tab="true">
+      <file leaf-file-name="LootCrate.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/com/ncolaprete/lootcrate/LootCrate.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1058">
-              <caret line="270" column="0" selection-start-line="270" selection-start-column="0" selection-end-line="270" selection-end-column="0" />
+            <state relative-caret-position="-948">
+              <caret line="295" column="63" selection-start-line="295" selection-start-column="63" selection-end-line="295" selection-end-column="63" />
               <folding>
                 <element signature="method#onDisable#0;class#LootCrate#0" expanded="false" />
                 <element signature="method#onCommand#0;class#LootCrate#0" expanded="false" />
@@ -34,8 +34,8 @@
                 <element signature="method#checkAllPlayersForSpecialItems#0;class#LootCrate#0" expanded="false" />
                 <element signature="method#checkForCreativeTimeUp#0;class#LootCrate#0" expanded="false" />
                 <element signature="method#checkForInvalidCrateLocations#0;class#LootCrate#0" expanded="false" />
-                <element signature="e#26693#26725#0" expanded="false" />
-                <element signature="e#26693#26725#0" expanded="false" />
+                <element signature="e#26702#26734#0" expanded="false" />
+                <element signature="e#26702#26734#0" expanded="false" />
                 <element signature="method#playerInteract#0;class#LootCrate#0" expanded="false" />
                 <element signature="method#blockBreak#0;class#LootCrate#0" expanded="false" />
                 <element signature="method#blockPlace#0;class#LootCrate#0" expanded="false" />
@@ -127,17 +127,17 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Prize.java" pinned="false" current-in-tab="false">
+      <file leaf-file-name="Prize.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/com/ncolaprete/lootcrate/Prize.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="957">
-              <caret line="45" column="7" selection-start-line="45" selection-start-column="7" selection-end-line="45" selection-end-column="7" />
+            <state relative-caret-position="1206">
+              <caret line="577" column="67" selection-start-line="577" selection-start-column="67" selection-end-line="577" selection-end-column="67" />
               <folding>
                 <element signature="method#Prize#0;class#Prize#0" expanded="false" />
                 <element signature="method#giveReward#0;class#Prize#0" expanded="false" />
                 <element signature="method#getVisualisation#0;class#Prize#0" expanded="false" />
                 <element signature="method#itemIsPrize#0;class#Prize#0" expanded="false" />
-                <element signature="e#32714#32804#0" expanded="false" />
+                <element signature="e#32732#32822#0" expanded="false" />
                 <element signature="class#RewardActionParameter#0;class#Prize#0" expanded="false" />
                 <element signature="method#RewardActionParameter#0;class#RewardActionParameter#0;class#Prize#0" expanded="false" />
                 <element signature="class#PrizeVisual#0;class#Prize#0" expanded="false" />
@@ -219,9 +219,9 @@
         <option value="$PROJECT_DIR$/src/crate_keys_sample_file.yml" />
         <option value="$PROJECT_DIR$/src/com/ncolaprete/lootcrate/Utility.java" />
         <option value="$PROJECT_DIR$/src/crate_keys.yml" />
-        <option value="$PROJECT_DIR$/src/com/ncolaprete/lootcrate/Prize.java" />
         <option value="$PROJECT_DIR$/src/com/ncolaprete/lootcrate/Crate.java" />
         <option value="$PROJECT_DIR$/src/com/ncolaprete/lootcrate/LootCrate.java" />
+        <option value="$PROJECT_DIR$/src/com/ncolaprete/lootcrate/Prize.java" />
       </list>
     </option>
   </component>
@@ -596,7 +596,7 @@
     <layout>
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
-      <window_info id="Messages" active="false" anchor="left" auto_hide="false" internal_type="SLIDING" type="SLIDING" visible="false" show_stripe_button="true" weight="0.13619791" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" x="-10" y="671" width="3860" height="692" />
+      <window_info id="Messages" active="true" anchor="left" auto_hide="false" internal_type="SLIDING" type="SLIDING" visible="true" show_stripe_button="true" weight="0.13619791" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" x="-10" y="671" width="3860" height="692" />
       <window_info id="Palette&#9;" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Capture Analysis" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3298264" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
@@ -653,8 +653,8 @@
             <element signature="method#checkAllPlayersForSpecialItems#0;class#LootCrate#0" expanded="false" />
             <element signature="method#checkForCreativeTimeUp#0;class#LootCrate#0" expanded="false" />
             <element signature="method#checkForInvalidCrateLocations#0;class#LootCrate#0" expanded="false" />
-            <element signature="e#26693#26725#0" expanded="false" />
-            <element signature="e#26693#26725#0" expanded="false" />
+            <element signature="e#26702#26734#0" expanded="false" />
+            <element signature="e#26702#26734#0" expanded="false" />
             <element signature="method#playerInteract#0;class#LootCrate#0" expanded="false" />
             <element signature="method#blockBreak#0;class#LootCrate#0" expanded="false" />
             <element signature="method#blockPlace#0;class#LootCrate#0" expanded="false" />
@@ -714,8 +714,8 @@
             <element signature="method#checkAllPlayersForSpecialItems#0;class#LootCrate#0" expanded="false" />
             <element signature="method#checkForCreativeTimeUp#0;class#LootCrate#0" expanded="false" />
             <element signature="method#checkForInvalidCrateLocations#0;class#LootCrate#0" expanded="false" />
-            <element signature="e#26693#26725#0" expanded="false" />
-            <element signature="e#26693#26725#0" expanded="false" />
+            <element signature="e#26702#26734#0" expanded="false" />
+            <element signature="e#26702#26734#0" expanded="false" />
             <element signature="method#playerInteract#0;class#LootCrate#0" expanded="false" />
             <element signature="method#blockBreak#0;class#LootCrate#0" expanded="false" />
             <element signature="method#blockPlace#0;class#LootCrate#0" expanded="false" />
@@ -767,8 +767,8 @@
             <element signature="method#checkAllPlayersForSpecialItems#0;class#LootCrate#0" expanded="false" />
             <element signature="method#checkForCreativeTimeUp#0;class#LootCrate#0" expanded="false" />
             <element signature="method#checkForInvalidCrateLocations#0;class#LootCrate#0" expanded="false" />
-            <element signature="e#26693#26725#0" expanded="false" />
-            <element signature="e#26693#26725#0" expanded="false" />
+            <element signature="e#26702#26734#0" expanded="false" />
+            <element signature="e#26702#26734#0" expanded="false" />
             <element signature="method#playerInteract#0;class#LootCrate#0" expanded="false" />
             <element signature="method#blockBreak#0;class#LootCrate#0" expanded="false" />
             <element signature="method#blockPlace#0;class#LootCrate#0" expanded="false" />
@@ -820,8 +820,8 @@
             <element signature="method#checkAllPlayersForSpecialItems#0;class#LootCrate#0" expanded="false" />
             <element signature="method#checkForCreativeTimeUp#0;class#LootCrate#0" expanded="false" />
             <element signature="method#checkForInvalidCrateLocations#0;class#LootCrate#0" expanded="false" />
-            <element signature="e#26693#26725#0" expanded="false" />
-            <element signature="e#26693#26725#0" expanded="false" />
+            <element signature="e#26702#26734#0" expanded="false" />
+            <element signature="e#26702#26734#0" expanded="false" />
             <element signature="method#playerInteract#0;class#LootCrate#0" expanded="false" />
             <element signature="method#blockBreak#0;class#LootCrate#0" expanded="false" />
             <element signature="method#blockPlace#0;class#LootCrate#0" expanded="false" />
@@ -873,8 +873,8 @@
             <element signature="method#checkAllPlayersForSpecialItems#0;class#LootCrate#0" expanded="false" />
             <element signature="method#checkForCreativeTimeUp#0;class#LootCrate#0" expanded="false" />
             <element signature="method#checkForInvalidCrateLocations#0;class#LootCrate#0" expanded="false" />
-            <element signature="e#26693#26725#0" expanded="false" />
-            <element signature="e#26693#26725#0" expanded="false" />
+            <element signature="e#26702#26734#0" expanded="false" />
+            <element signature="e#26702#26734#0" expanded="false" />
             <element signature="method#playerInteract#0;class#LootCrate#0" expanded="false" />
             <element signature="method#blockBreak#0;class#LootCrate#0" expanded="false" />
             <element signature="method#blockPlace#0;class#LootCrate#0" expanded="false" />
@@ -926,8 +926,8 @@
             <element signature="method#checkAllPlayersForSpecialItems#0;class#LootCrate#0" expanded="false" />
             <element signature="method#checkForCreativeTimeUp#0;class#LootCrate#0" expanded="false" />
             <element signature="method#checkForInvalidCrateLocations#0;class#LootCrate#0" expanded="false" />
-            <element signature="e#26693#26725#0" expanded="false" />
-            <element signature="e#26693#26725#0" expanded="false" />
+            <element signature="e#26702#26734#0" expanded="false" />
+            <element signature="e#26702#26734#0" expanded="false" />
             <element signature="method#playerInteract#0;class#LootCrate#0" expanded="false" />
             <element signature="method#blockBreak#0;class#LootCrate#0" expanded="false" />
             <element signature="method#blockPlace#0;class#LootCrate#0" expanded="false" />
@@ -979,8 +979,8 @@
             <element signature="method#checkAllPlayersForSpecialItems#0;class#LootCrate#0" expanded="false" />
             <element signature="method#checkForCreativeTimeUp#0;class#LootCrate#0" expanded="false" />
             <element signature="method#checkForInvalidCrateLocations#0;class#LootCrate#0" expanded="false" />
-            <element signature="e#26693#26725#0" expanded="false" />
-            <element signature="e#26693#26725#0" expanded="false" />
+            <element signature="e#26702#26734#0" expanded="false" />
+            <element signature="e#26702#26734#0" expanded="false" />
             <element signature="method#playerInteract#0;class#LootCrate#0" expanded="false" />
             <element signature="method#blockBreak#0;class#LootCrate#0" expanded="false" />
             <element signature="method#blockPlace#0;class#LootCrate#0" expanded="false" />
@@ -1121,24 +1121,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/com/ncolaprete/lootcrate/Prize.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="957">
-          <caret line="45" column="7" selection-start-line="45" selection-start-column="7" selection-end-line="45" selection-end-column="7" />
-          <folding>
-            <element signature="method#Prize#0;class#Prize#0" expanded="false" />
-            <element signature="method#giveReward#0;class#Prize#0" expanded="false" />
-            <element signature="method#getVisualisation#0;class#Prize#0" expanded="false" />
-            <element signature="method#itemIsPrize#0;class#Prize#0" expanded="false" />
-            <element signature="e#32714#32804#0" expanded="false" />
-            <element signature="class#RewardActionParameter#0;class#Prize#0" expanded="false" />
-            <element signature="method#RewardActionParameter#0;class#RewardActionParameter#0;class#Prize#0" expanded="false" />
-            <element signature="class#PrizeVisual#0;class#Prize#0" expanded="false" />
-            <element signature="class#PrizeAction#0;class#Prize#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/com/ncolaprete/lootcrate/Crate.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="612">
@@ -1176,8 +1158,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/com/ncolaprete/lootcrate/LootCrate.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1058">
-          <caret line="270" column="0" selection-start-line="270" selection-start-column="0" selection-end-line="270" selection-end-column="0" />
+        <state relative-caret-position="-948">
+          <caret line="295" column="63" selection-start-line="295" selection-start-column="63" selection-end-line="295" selection-end-column="63" />
           <folding>
             <element signature="method#onDisable#0;class#LootCrate#0" expanded="false" />
             <element signature="method#onCommand#0;class#LootCrate#0" expanded="false" />
@@ -1185,8 +1167,8 @@
             <element signature="method#checkAllPlayersForSpecialItems#0;class#LootCrate#0" expanded="false" />
             <element signature="method#checkForCreativeTimeUp#0;class#LootCrate#0" expanded="false" />
             <element signature="method#checkForInvalidCrateLocations#0;class#LootCrate#0" expanded="false" />
-            <element signature="e#26693#26725#0" expanded="false" />
-            <element signature="e#26693#26725#0" expanded="false" />
+            <element signature="e#26702#26734#0" expanded="false" />
+            <element signature="e#26702#26734#0" expanded="false" />
             <element signature="method#playerInteract#0;class#LootCrate#0" expanded="false" />
             <element signature="method#blockBreak#0;class#LootCrate#0" expanded="false" />
             <element signature="method#blockPlace#0;class#LootCrate#0" expanded="false" />
@@ -1199,6 +1181,24 @@
             <element signature="method#addCrate#0;class#LootCrate#0" expanded="false" />
             <element signature="method#dropRandomCrate#0;class#LootCrate#0" expanded="false" />
             <element signature="method#checkPlayerForSpecialItem#0;class#LootCrate#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/com/ncolaprete/lootcrate/Prize.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1206">
+          <caret line="577" column="67" selection-start-line="577" selection-start-column="67" selection-end-line="577" selection-end-column="67" />
+          <folding>
+            <element signature="method#Prize#0;class#Prize#0" expanded="false" />
+            <element signature="method#giveReward#0;class#Prize#0" expanded="false" />
+            <element signature="method#getVisualisation#0;class#Prize#0" expanded="false" />
+            <element signature="method#itemIsPrize#0;class#Prize#0" expanded="false" />
+            <element signature="e#32732#32822#0" expanded="false" />
+            <element signature="class#RewardActionParameter#0;class#Prize#0" expanded="false" />
+            <element signature="method#RewardActionParameter#0;class#RewardActionParameter#0;class#Prize#0" expanded="false" />
+            <element signature="class#PrizeVisual#0;class#Prize#0" expanded="false" />
+            <element signature="class#PrizeAction#0;class#Prize#0" expanded="false" />
           </folding>
         </state>
       </provider>
