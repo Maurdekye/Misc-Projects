@@ -1922,6 +1922,26 @@ enum Prize
         return Utility.setName(item, ChatColor.RED + "Boom Time!");
     }),
 
+    PANDORAS_BOX (params -> {
+        Location spawnPos = params.chestBlock.getLocation().add(0, 1, 0);
+        for (int i=0;i<params.amountToGive*2;i++)
+            spawnPos.getWorld().spawnEntity(spawnPos.add(Utility.randomInsideUnitCircle()), EntityType.ZOMBIE);
+        for (int i=0;i<params.amountToGive;i++)
+            spawnPos.getWorld().spawnEntity(spawnPos.add(Utility.randomInsideUnitCircle()), EntityType.SKELETON);
+        for (int i=0;i<params.amountToGive;i++)
+            spawnPos.getWorld().spawnEntity(spawnPos.add(Utility.randomInsideUnitCircle()), EntityType.SPIDER);
+        for (int i=0;i<params.amountToGive;i++)
+            spawnPos.getWorld().spawnEntity(spawnPos.add(Utility.randomInsideUnitCircle()), EntityType.CAVE_SPIDER);
+        for (int i=0;i<params.amountToGive*4;i++)
+            spawnPos.getWorld().spawnEntity(spawnPos.add(Utility.randomInsideUnitCircle()), EntityType.BAT);
+        spawnPos.getWorld().spawnEntity(spawnPos.add(0, 5, 0), EntityType.LIGHTNING);
+        params.rewardee.sendMessage(ChatColor.DARK_PURPLE + "You opened pandora's box!");
+        return null;
+    }, params -> {
+        ItemStack item = new ItemStack(Material.ENDER_CHEST);
+        return Utility.setName(item, ChatColor.DARK_PURPLE + "Pandora's Box");
+    }),
+
     NOTHING (params -> {
         params.rewardee.sendMessage(ChatColor.DARK_GRAY + "You got nothing.");
         return null;

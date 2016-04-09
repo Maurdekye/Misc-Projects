@@ -211,7 +211,7 @@ ancient_crate_1:
       amount: 0
       chance: 2
     3:
-      prize: veilstrike_bow
+      prize: veilstrike_shortbow
       amount: 128
       chance: 1
 ancient_crate_2:
