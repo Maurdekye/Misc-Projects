@@ -1,5 +1,6 @@
 package com.ncolaprete.lootcrate;
 
+import net.ess3.api.Economy;
 import net.minecraft.server.v1_9_R1.*;
 import org.bukkit.*;
 import org.bukkit.Material;
@@ -40,6 +41,7 @@ import org.bukkit.util.BlockIterator;
 import org.bukkit.util.Vector;
 
 import java.lang.reflect.Field;
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -84,6 +86,7 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
         getServer().getScheduler().scheduleSyncRepeatingTask(this, this::updateJobs, 0, 1);
         getServer().getScheduler().scheduleSyncRepeatingTask(this, this::checkAllPlayersForSpecialItems, 0, 20);
         getServer().getScheduler().scheduleSyncRepeatingTask(this, this::checkForCreativeTimeUp, 0, 1200);
+        getServer().getScheduler().scheduleSyncRepeatingTask(this, this::checkForInvalidCrateLocations, 0, 36000);
 
         // initialize arrays
         crateKeys = new ArrayList<>();
@@ -141,10 +144,17 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
             }
             String name = keysection.getString("name", ChatColor.RED + "Undefined Key");
             name = ChatColor.translateAlternateColorCodes('?', name);
+            double buyprice;
+            try {
+                buyprice = Double.parseDouble(keysection.getString("price", "0"));
+            } catch (Exception e) {
+                csend.sendMessage(ChatColor.RED + "Error! '" + keysection.getString("price") + "' is not a number!");
+                continue;
+            }
             String lorestring = keysection.getString("description", "");
             lorestring = ChatColor.translateAlternateColorCodes('?', lorestring);
             List<String> lore = Arrays.asList(lorestring.split("\\\\n"));
-            crateKeys.add(new CrateKey(type, material, name, lore));
+            crateKeys.add(new CrateKey(type, material, name, buyprice, lore));
         }
 
         if (crateKeys.size() == 0)
@@ -304,8 +314,82 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
     {
         Player ply = sender instanceof Player ? (Player) sender : null;
 
+        if (command.getName().equalsIgnoreCase("buykey"))
+        {
+            String genericErrorMessage = ChatColor.RED + "Cannot buy any keys at this time.";
+
+            // Check if sender is a player
+            if (ply == null)
+            {
+                sender.sendMessage(ChatColor.RED + "You must be a player to use this command.");
+                return true;
+            }
+
+            // Check if there are any buyable crate keys available
+            if (crateKeys.stream().filter(k -> k.buyprice > 0).collect(Collectors.toList()).size() == 0)
+            {
+                sender.sendMessage(genericErrorMessage);
+                return true;
+            }
+
+            // Check if enough arguments were provided
+            if (args.length == 0)
+            {
+                ply.sendMessage("Keys available for purchase: ");
+                for (CrateKey k : crateKeys.stream().filter(kf -> kf.buyprice > 0).collect(Collectors.toList()))
+                    ply.sendMessage("|    " + k.type.toLowerCase() + ": $" + k.buyprice);
+                return false;
+            }
+
+            // Find key to buy
+            Optional<CrateKey> maybeKey = crateKeys.stream().filter(k -> k.type.equalsIgnoreCase(args[0]) && k.buyprice >= 0).findFirst();
+            if (!maybeKey.isPresent())
+            {
+                ply.sendMessage(ChatColor.RED + "No crate key '" + args[0] + "'.");
+                return true;
+            }
+            CrateKey key = maybeKey.get();
+
+            // Find amount of keys to buy
+            int amount = 1;
+            if (args.length >= 2)
+            {
+                try {
+                    amount = Integer.parseInt(args[1]);
+                } catch (Exception e) {
+                    sender.sendMessage(ChatColor.RED + "'" + args[1] + "' is not a number.");
+                    return true;
+                }
+            }
+
+            // Check if key is buyable
+            if (key.buyprice == 0)
+            {
+                ply.sendMessage(ChatColor.RED + "Key '" + key.type + "' Is not available for purchase.");
+                return true;
+            }
+
+            // Check if player has enough money
+            if (Utility.getBalance(ply).compareTo(new BigDecimal(key.buyprice)) == -1)
+            {
+                if (amount == 1)
+                    ply.sendMessage(ChatColor.RED + "You do not have enough money; this key costs $" + key.buyprice + ".");
+                else
+                    ply.sendMessage(ChatColor.RED + "You do not have enough money; these keys cost $" + (key.buyprice*amount) + " total.");
+                return true;
+            }
+
+            // Subtract balance and give key
+            if (amount == 1)
+                ply.sendMessage("You bought a " + key.displayname + ChatColor.RESET + "!");
+            else
+                ply.sendMessage("You bought " + amount + " " + key.displayname + "s" + ChatColor.RESET + "!");
+            Utility.modifyBalance(ply, new BigDecimal(key.buyprice).negate());
+            getServer().dispatchCommand(csend, "givekey " + key.type + " " + amount + " " + ply.getName());
+        }
+
         // givekey
-        if (command.getName().equalsIgnoreCase("givekey"))
+        else if (command.getName().equalsIgnoreCase("givekey"))
         {
 
             // Check if there are any crate keys loaded
@@ -378,8 +462,6 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
                 sender.sendMessage(ChatColor.RED + "You must be a player to use this command on yourself");
                 return true;
             }
-            else
-                target = ply;
 
             // Give the key(s)
             ItemStack keyStack = key.getKey(false);
@@ -462,8 +544,6 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
                 sender.sendMessage(ChatColor.RED + "You must be a player to use this command on yourself");
                 return true;
             }
-            else
-                target = ply;
 
             // Give the crate(s)
             ItemStack crateStack = layout.getItemstack();
@@ -574,8 +654,18 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
         }
     }
 
+    private void checkForInvalidCrateLocations()
+    {
+        ArrayList<Integer> toRemove = new ArrayList<>();
+        for (int i=0;i<cratePositions.size();i++)
+            if (cratePositions.get(i).location.getType() != Material.CHEST)
+                toRemove.add(i);
+        toRemove.stream().forEach(this::removeCrate);
+    }
+
     // Event Handlers
 
+    @SuppressWarnings("deprecation")
     @EventHandler
     public void playerInteract(PlayerInteractEvent ev)
     {
@@ -600,6 +690,7 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
                 return;
             if (!ply.hasPermission("lootcrate.opencrate"))
             {
+                ply.sendMessage(ChatColor.RED + "You do not have permission to open crates.");
                 ev.setCancelled(true);
                 return;
             }
@@ -625,7 +716,7 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
 
         // Transmogrifier
         if (ev.getAction() == Action.LEFT_CLICK_BLOCK &&
-                Utility.itemHasLoreLine(ply.getInventory().getItemInMainHand(), Prize.TRANSMOGRIFIER.getLoreTag()))
+                Prize.itemIsPrize(ply.getInventory().getItemInMainHand(), Prize.TRANSMOGRIFIER))
         {
             ItemStack offhandItem = ply.getInventory().getItemInOffHand();
             if (offhandItem == null)
@@ -643,7 +734,7 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
 
         // Wand of Leaping
         if ((ev.getAction() == Action.LEFT_CLICK_BLOCK || ev.getAction() == Action.LEFT_CLICK_AIR) &&
-                Utility.itemHasLoreLine(ply.getInventory().getItemInMainHand(), Prize.WAND_OF_LEAPING.getLoreTag()))
+                Prize.itemIsPrize(ply.getInventory().getItemInMainHand(), Prize.WAND_OF_LEAPING))
         {
             if (!Utility.isOnGround(ply))
                 return;
@@ -660,7 +751,7 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
     public void blockBreak(BlockBreakEvent ev)
     {
         // Treefeller Chainsaw
-        if (Utility.itemHasLoreLine(ev.getPlayer().getInventory().getItemInMainHand(), Prize.TREEFELLER_CHAINSAW.getLoreTag()))
+        if (Prize.itemIsPrize(ev.getPlayer().getInventory().getItemInMainHand(), Prize.TREEFELLER_CHAINSAW))
         {
             if (new TreefellerJob().getValidBlocks().contains(ev.getBlock().getType()) && CanFellTrees)
             {
@@ -673,7 +764,7 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
         }
 
         // Terramorpher
-        if (Utility.itemHasLoreLine(ev.getPlayer().getInventory().getItemInMainHand(), Prize.TERRAMORPHER.getLoreTag()))
+        if (Prize.itemIsPrize(ev.getPlayer().getInventory().getItemInMainHand(), Prize.TERRAMORPHER))
         {
             if (!Utility.isCorrectTool(Material.DIAMOND_SPADE, ev.getBlock().getType()))
                 return;
@@ -681,7 +772,7 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
         }
 
         // Giga Drill Breaker
-        if (Utility.itemHasLoreLine(ev.getPlayer().getInventory().getItemInMainHand(), Prize.GIGA_DRILL_BREAKER.getLoreTag()))
+        if (Prize.itemIsPrize(ev.getPlayer().getInventory().getItemInMainHand(), Prize.GIGA_DRILL_BREAKER))
         {
             if (!Utility.isCorrectTool(Material.DIAMOND_PICKAXE, ev.getBlock().getType()))
                 return;
@@ -689,7 +780,7 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
         }
 
         // Transmogriphier
-        if (Utility.itemHasLoreLine(ev.getPlayer().getInventory().getItemInMainHand(), Prize.TRANSMOGRIFIER.getLoreTag()) &&
+        if (Prize.itemIsPrize(ev.getPlayer().getInventory().getItemInMainHand(), Prize.TRANSMOGRIFIER) &&
                 ev.getPlayer().getGameMode() == GameMode.CREATIVE)
         {
             ev.setCancelled(true);
@@ -781,7 +872,7 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
         if (ev.getEntity() instanceof Arrow && ev.getEntity().getShooter() instanceof Player)
         {
             Player ply = (Player) ev.getEntity().getShooter();
-            if (Utility.itemHasLoreLine(ply.getInventory().getItemInMainHand(), Prize.HYPERSHOT_LONGBOW.getLoreTag()))
+            if (Prize.itemIsPrize(ply.getInventory().getItemInMainHand(), Prize.HYPERSHOT_LONGBOW))
             {
                 ev.getEntity().setVelocity(ev.getEntity().getVelocity().multiply(4));
             }
@@ -797,7 +888,7 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
 
         // Wand of Leaping
         if (ev.getCause() == EntityDamageEvent.DamageCause.FALL &&
-                Utility.itemHasLoreLine(ply.getInventory().getItemInMainHand(), Prize.WAND_OF_LEAPING.getLoreTag()))
+                Prize.itemIsPrize(ply.getInventory().getItemInMainHand(), Prize.WAND_OF_LEAPING))
         {
             ev.setCancelled(true);
         }
@@ -861,41 +952,44 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
 
     private void checkPlayerForSpecialItem(Player ply)
     {
+        ItemStack mainHandItem = ply.getInventory().getItemInMainHand();
+        ItemStack offHandItem = ply.getInventory().getItemInOffHand();
+
         // Frostspark Cleats
-        if (Utility.itemHasLoreLine(ply.getInventory().getBoots(), Prize.FROSTSPARK_CLEATS.getLoreTag()))
+        if (Prize.itemIsPrize(ply.getInventory().getBoots(), Prize.FROSTSPARK_CLEATS))
         {
             ply.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 40, 2), true);
             ply.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 40, 1), true);
         }
 
         // Lucky Trousers
-        if (Utility.itemHasLoreLine(ply.getInventory().getLeggings(), Prize.LUCKY_TROUSERS.getLoreTag()))
+        if (Prize.itemIsPrize(ply.getInventory().getLeggings(), Prize.LUCKY_TROUSERS))
         {
             ply.addPotionEffect(new PotionEffect(PotionEffectType.LUCK, 40, 2), true);
         }
 
         // Knackerbreaker Chesterplate
-        if (Utility.itemHasLoreLine(ply.getInventory().getChestplate(), Prize.KNACKERBREAKER_CHESTERPLATE.getLoreTag()))
+        if (Prize.itemIsPrize(ply.getInventory().getChestplate(), Prize.KNACKERBREAKER_CHESTERPLATE))
         {
             ply.addPotionEffect(new PotionEffect(PotionEffectType.ABSORPTION, 40, 0), true);
         }
 
         // Hydrodyne Helmet
-        if (Utility.itemHasLoreLine(ply.getInventory().getHelmet(), Prize.HYDRODYNE_HELMET.getLoreTag()))
+        if (Prize.itemIsPrize(ply.getInventory().getHelmet(), Prize.HYDRODYNE_HELMET))
         {
             ply.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION, 250, 0), true);
             ply.addPotionEffect(new PotionEffect(PotionEffectType.WATER_BREATHING, 40, 0), true);
         }
 
         // Giga Drill Breaker
-        if (Utility.itemHasLoreLine(ply.getInventory().getItemInMainHand(), Prize.GIGA_DRILL_BREAKER.getLoreTag()))
+        if (Prize.itemIsPrize(mainHandItem, Prize.GIGA_DRILL_BREAKER))
         {
             ply.addPotionEffect(new PotionEffect(PotionEffectType.FAST_DIGGING, 25, 3), true);
         }
 
         // Unyielding Battersea
-        if ((Utility.itemHasLoreLine(ply.getInventory().getItemInOffHand(), Prize.UNYIELDING_BATTERSEA.getLoreTag()) ||
-                Utility.itemHasLoreLine(ply.getInventory().getItemInMainHand(), Prize.UNYIELDING_BATTERSEA.getLoreTag())) &&
+        if ((Prize.itemIsPrize(offHandItem, Prize.UNYIELDING_BATTERSEA) ||
+                Prize.itemIsPrize(mainHandItem, Prize.UNYIELDING_BATTERSEA)) &&
                 ply.isBlocking())
         {
             ply.addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 40, 0), true);
@@ -903,1451 +997,15 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
         }
 
         // Veilstrike Shortbow
-        if (Utility.itemHasLoreLine(ply.getInventory().getItemInMainHand(), Prize.VEILSTRIKE_SHORTBOW.getLoreTag()))
+        if (Prize.itemIsPrize(mainHandItem, Prize.VEILSTRIKE_SHORTBOW))
         {
             ply.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, 25, 0), true);
         }
 
         // Heaven's Blade
-        if (Utility.itemHasLoreLine(ply.getInventory().getItemInMainHand(), Prize.HEAVENS_BLADE.getLoreTag()))
+        if (Prize.itemIsPrize(mainHandItem, Prize.HEAVENS_BLADE))
         {
             ply.addPotionEffect(new PotionEffect(PotionEffectType.INCREASE_DAMAGE, 25, 4), true);
         }
-    }
-
-
-}
-
-class Utility
-{
-    static boolean itemHasLoreLine(ItemStack item, String line)
-    {
-        if (item == null)
-            return false;
-        ItemMeta meta = item.getItemMeta();
-        if (meta == null)
-            return false;
-        List<String> lore = meta.getLore();
-        if (lore == null)
-            return false;
-        return lore.contains(line);
-    }
-    static ItemStack addLoreLine(ItemStack item, String line)
-    {
-        ItemMeta meta = item.getItemMeta();
-        if (meta == null)
-        {
-            meta.setLore(Arrays.asList(line));
-        }
-        else
-        {
-            List<String> lore = meta.getLore();
-            if (lore == null)
-                lore = new ArrayList<>();
-            lore.add(line);
-            meta.setLore(lore);
-        }
-        item.setItemMeta(meta);
-        return item;
-    }
-
-    static ItemStack setName(ItemStack item, String name)
-    {
-        ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName(name);
-        item.setItemMeta(meta);
-        return item;
-    }
-
-    public static String getName(ItemStack item)
-    {
-        ItemMeta meta = item.getItemMeta();
-        if (meta == null)
-            return "";
-        if (meta.getDisplayName() == null)
-            return "";
-        return meta.getDisplayName();
-    }
-
-    static int randomInt(int start, int end)
-    {
-        return (int)(Math.random() * (end - start)) + start;
-    }
-
-    static Vector randomInsideUnitCircle()
-    {
-        double x, y;
-        do {
-            x = Math.random() * 2 - 1;
-            y = Math.random() * 2 - 1;
-        } while (x*x + y*y > 1);
-        return new Vector(x, 0, y);
-    }
-
-    static int randomWeightedIndex(List<Double> weights)
-    {
-        double sum = 0;
-        for (double f : weights)
-            sum += f;
-        if (sum == 0)
-            return -1;
-        double rand = Math.random() * sum;
-        for (int i=0;i<weights.size();i++)
-        {
-            if (rand < weights.get(i))
-                return i;
-            rand -= weights.get(i);
-        }
-        return weights.size() - 1;
-    }
-
-    static void setChestInventoryName(Block chestblock, String name)
-    {
-        CraftChest chest = (CraftChest) chestblock.getState();
-        try
-        {
-            Field inventoryField = chest.getClass().getDeclaredField("chest");
-            inventoryField.setAccessible(true);
-            TileEntityChest teChest = (TileEntityChest) inventoryField.get(chest);
-            teChest.a(name);
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
-    }
-
-    static String serializeLocation(Location loc)
-    {
-        StringBuilder sb = new StringBuilder();
-        sb.append(loc.getWorld().getName());
-        sb.append("?");
-        sb.append(loc.getBlockX());
-        sb.append("?");
-        sb.append(loc.getBlockY());
-        sb.append("?");
-        sb.append(loc.getBlockZ());
-        return sb.toString();
-    }
-
-    static Location deserializeLocation(Server server, String serial)
-    {
-        String[] parts = serial.split("\\?");
-        World world = server.getWorld(parts[0]);
-        int x = Integer.parseInt(parts[1]);
-        int y = Integer.parseInt(parts[2]);
-        int z = Integer.parseInt(parts[3]);
-        return world.getBlockAt(x, y, z).getLocation();
-    }
-
-    static Location getDefaultSpawn(JavaPlugin plugin)
-    {
-        return plugin.getServer().getWorlds().get(0).getSpawnLocation();
-    }
-
-    static Block getHighestSolidBlock(World world, int x, int z)
-    {
-        Location start = world.getHighestBlockAt(x, z).getLocation();
-        BlockIterator iter = new BlockIterator(world, start.toVector().add(new Vector(0.5, 0.5, 0.5)), new Vector(0, -1, 0), 0, 255);
-        Block highestSolid;
-        do {
-            highestSolid = iter.next();
-        } while (!highestSolid.getType().isSolid() && !highestSolid.isLiquid() && iter.hasNext());
-        if (highestSolid.getY() >= world.getMaxHeight())
-            return null;
-        if (!iter.hasNext())
-            return null;
-        return highestSolid;
-    }
-
-    static String formatVector(Vector v)
-    {
-        StringBuilder b = new StringBuilder();
-        b.append("(");
-        b.append(v.getBlockX());
-        b.append(", ");
-        b.append(v.getBlockY());
-        b.append(", ");
-        b.append(v.getBlockZ());
-        b.append(")");
-        return b.toString();
-    }
-
-    static List<ItemStack> separateItemStacks(List<ItemStack> items)
-    {
-        ArrayList<ItemStack> separatedItems = new ArrayList<>();
-        for (int i=0;i<items.size();i++)
-        {
-            while (items.get(i).getAmount() > items.get(i).getType().getMaxStackSize())
-            {
-                ItemStack newStack = items.get(i).clone();
-                newStack.setAmount(newStack.getType().getMaxStackSize());
-                separatedItems.add(newStack);
-                items.get(i).setAmount(items.get(i).getAmount() - items.get(i).getType().getMaxStackSize());
-            }
-            separatedItems.add(items.get(i));
-        }
-        return separatedItems;
-    }
-
-    static List<Block> getSurroundingBlocks(Block block, boolean sides, boolean diagonals, boolean corners)
-    {
-        ArrayList<Block> surrounds = new ArrayList<>();
-        List<BlockFace> cardinalFaces = Arrays.asList(BlockFace.NORTH, BlockFace.SOUTH, BlockFace.EAST, BlockFace.WEST, BlockFace.UP, BlockFace.DOWN);
-        if (sides)
-        {
-            surrounds.addAll(cardinalFaces.stream().map(block::getRelative).collect(Collectors.toList()));
-            surrounds.add(block.getRelative(BlockFace.UP));
-            surrounds.add(block.getRelative(BlockFace.DOWN));
-        }
-        if (diagonals)
-        {
-            List<BlockFace> diagonalFaces = Arrays.asList(BlockFace.NORTH_EAST, BlockFace.NORTH_WEST, BlockFace.SOUTH_EAST, BlockFace.SOUTH_WEST);
-            for (BlockFace face : cardinalFaces)
-            {
-                surrounds.add(block.getRelative(face).getRelative(BlockFace.UP));
-                surrounds.add(block.getRelative(face).getRelative(BlockFace.DOWN));
-            }
-            surrounds.addAll(diagonalFaces.stream().map(block::getRelative).collect(Collectors.toList()));
-        }
-        if (corners)
-        {
-            for (BlockFace fa : Arrays.asList(BlockFace.NORTH, BlockFace.SOUTH))
-            {
-                for (BlockFace fb : Arrays.asList(BlockFace.EAST, BlockFace.WEST))
-                {
-                    surrounds.addAll(Arrays.asList(BlockFace.UP, BlockFace.DOWN).stream().map(fc -> block.getRelative(fa).getRelative(fb).getRelative(fc)).collect(Collectors.toList()));
-                }
-            }
-        }
-        return surrounds;
-    }
-
-    static boolean isCorrectTool(Material tool, Material block)
-    {
-        List<Material> Pickaxes = Arrays.asList(Material.WOOD_PICKAXE, Material.STONE_PICKAXE, Material.IRON_PICKAXE, Material.DIAMOND_PICKAXE);
-        List<Material> Axes = Arrays.asList(Material.WOOD_AXE, Material.STONE_AXE, Material.IRON_AXE, Material.DIAMOND_AXE);
-        List<Material> Shovels = Arrays.asList(Material.WOOD_SPADE, Material.STONE_SPADE, Material.IRON_SPADE, Material.DIAMOND_SPADE);
-        List<Material> validAxeBlocks = Arrays.asList(
-                Material.WOOD_DOOR, Material.ACACIA_DOOR, Material.BIRCH_DOOR,
-                Material.DARK_OAK_DOOR, Material.JUNGLE_DOOR, Material.SPRUCE_DOOR,
-                Material.TRAP_DOOR, Material.CHEST, Material.WORKBENCH,
-                Material.FENCE, Material.FENCE_GATE, Material.JUKEBOX,
-                Material.WOOD, Material.LOG, Material.LOG_2, Material.BOOKSHELF,
-                Material.JACK_O_LANTERN, Material.PUMPKIN, Material.SIGN_POST,
-                Material.WALL_SIGN, Material.NOTE_BLOCK, Material.WOOD_PLATE,
-                Material.DAYLIGHT_DETECTOR, Material.DAYLIGHT_DETECTOR_INVERTED,
-                Material.HUGE_MUSHROOM_1, Material.HUGE_MUSHROOM_2, Material.VINE);
-        List<Material> validShovelBlocks = Arrays.asList(
-                Material.CLAY, Material.SOIL, Material.GRASS, Material.GRASS_PATH,
-                Material.GRAVEL, Material.MYCEL, Material.DIRT, Material.SAND,
-                Material.SOUL_SAND, Material.SNOW_BLOCK);
-        if (Pickaxes.contains(tool))
-        {
-            return !validAxeBlocks.contains(block) && !validShovelBlocks.contains(block);
-        }
-        else if (Axes.contains(tool))
-        {
-            return validAxeBlocks.contains(block);
-        }
-        else if (Shovels.contains(tool))
-        {
-            return validShovelBlocks.contains(block);
-        }
-        return false;
-    }
-
-    static boolean blockInBoundsInclusive(Block minBounds, Block maxBounds, Block check)
-    {
-        if (!(check.getX() >= minBounds.getX() && check.getX() <= maxBounds.getX()))
-            return false;
-        if (!(check.getY() >= minBounds.getY() && check.getY() <= maxBounds.getY()))
-            return false;
-        if (!(check.getZ() >= minBounds.getZ() && check.getZ() <= maxBounds.getZ()))
-            return false;
-        return true;
-    }
-
-    static BlockFace getBlockFaceIsLookingAt(Player ply)
-    {
-        BlockIterator iter = new BlockIterator(ply);
-        Block lastBlock = null;
-        do {
-            Block nextBlock = iter.next();
-            if (lastBlock != null && nextBlock.getType() != Material.AIR)
-                return lastBlock.getFace(nextBlock);
-            lastBlock = nextBlock;
-        } while (iter.hasNext());
-        return BlockFace.SELF;
-    }
-
-    static boolean isOnGround(Player ply)
-    {
-        return ((Entity) ply).isOnGround();
-    }
-
-    static boolean reduceDurability(Player ply, ItemStack tool, int amount)
-    {
-        tool.setDurability((short) (tool.getDurability() + amount));
-        if (tool.getDurability() >= tool.getType().getMaxDurability())
-        {
-            ply.playSound(ply.getLocation(), Sound.ENTITY_ITEM_BREAK, 1, 1);
-            ply.spawnParticle(Particle.ITEM_CRACK, ply.getLocation(), 20);
-            ply.getInventory().remove(tool);
-            return true;
-        }
-        return false;
-    }
-}
-
-class Crate
-{
-    public Block location;
-    public CrateLayout layout;
-
-    public Crate(Block location, CrateLayout layout)
-    {
-        this.location = location;
-        this.layout = layout;
-
-        if (this.location.getType() != Material.CHEST)
-            this.location.setType(Material.CHEST);
-    }
-
-    public void unlockAndGivePrize(LootCrate plugin, Player rewardee)
-    {
-        layout.givePrize(plugin, rewardee, location);
-        Utility.setChestInventoryName(location, layout.getPrintname(false));
-    }
-
-    public Inventory showContents(LootCrate plugin, Player ply)
-    {
-        return layout.showContents(plugin, ply, location);
-    }
-
-    public boolean isKeyValid(ItemStack key)
-    {
-        return layout.isKeyValid(key);
-    }
-}
-
-class CrateLayout
-{
-    private static final String LockedTag = ChatColor.RED + " [Locked]";
-    private static final String UnlockedTag = ChatColor.YELLOW + " [Unlocked]";
-
-    String printname;
-    String type;
-    double spawnChance;
-    CrateKey keyRequired;
-    public boolean shouldBroadcast;
-    ArrayList<Reward> contents;
-
-    public CrateLayout(String printname, String type, double spawnChance, CrateKey keyRequired, boolean shouldBroadcast, ArrayList<Reward> contents)
-    {
-        this.printname = printname;
-        this.type = type;
-        this.spawnChance = spawnChance;
-        this.keyRequired = keyRequired;
-        this.shouldBroadcast = shouldBroadcast;
-        this.contents = contents;
-    }
-
-    public void givePrize(LootCrate plugin, Player rewardee, Block location)
-    {
-        double sum = 0;
-        for (Reward r : contents)
-            sum += r.rewardChance;
-        double rand = Math.random() * sum;
-        int prizeIndex = contents.size() - 1;
-        for (int i=0;i<contents.size();i++)
-        {
-            if (rand < contents.get(i).rewardChance)
-            {
-                prizeIndex = i;
-                break;
-            }
-            rand -= contents.get(i).rewardChance;
-        }
-        Reward chosen = contents.get(prizeIndex);
-        chosen.item.giveReward(plugin, rewardee, chosen.amount, location);
-        if (chosen.item == Prize.NOTHING)
-            rewardee.playSound(rewardee.getLocation(), Sound.BLOCK_NOTE_SNARE, 1, 1);
-        else
-            rewardee.playSound(rewardee.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1, 1);
-    }
-
-    public Inventory showContents(LootCrate plugin, Player ply, Block chestblock)
-    {
-        Inventory display = Bukkit.createInventory(null, (int)Math.floor((contents.size()-1)/9.0 + 1)*9 /*lock the size to multiples of 9*/, getPrintname(true));
-        double totalProbability = 0;
-        for (Reward r : contents)
-            totalProbability += r.rewardChance;
-        for (Reward r : contents)
-        {
-            double chance = (r.rewardChance / totalProbability) * 10000;
-            chance = Math.round(chance) / 100;
-            ItemStack displayItem =  r.item.getVisualisation(plugin, ply, r.amount, chestblock);
-            displayItem = Utility.addLoreLine(displayItem, ChatColor.WHITE + "%" + chance + " chance");
-            display.addItem(displayItem);
-        }
-        return display;
-    }
-
-    public boolean isKeyValid(ItemStack key)
-    {
-        if (keyRequired == null)
-            return true;
-        return Utility.itemHasLoreLine(key, keyRequired.getLoreTag());
-    }
-
-    public String getPrintname(boolean isLocked)
-    {
-        if (isLocked)
-            return printname + LockedTag;
-        return printname + UnlockedTag;
-    }
-
-    public String getLoreTag()
-    {
-        return ChatColor.BLACK + type;
-    }
-
-    public ItemStack getItemstack()
-    {
-        ItemStack crateDrop = Utility.setName(new ItemStack(Material.CHEST), getPrintname(true));
-        if (keyRequired != null)
-            Utility.addLoreLine(crateDrop, ChatColor.RESET + "" + ChatColor.GRAY + "Requires a " + keyRequired.displayname + ChatColor.RESET + ChatColor.GRAY + " to unlock");
-        else
-            Utility.addLoreLine(crateDrop, ChatColor.RESET + "" + ChatColor.GRAY + "Does not require a key");
-        Utility.addLoreLine(crateDrop, getLoreTag());
-        return crateDrop;
-    }
-
-    public boolean isFree()
-    {
-        return keyRequired == null;
-    }
-}
-
-class CrateKey
-{
-    public String type;
-    public Material material;
-    public String displayname;
-    public List<String> lore;
-
-    public CrateKey(String type, Material material, String displayname, List<String> lore)
-    {
-        this.type = type;
-        this.material = material;
-        this.displayname = displayname;
-        this.lore = lore;
-    }
-
-    public ItemStack getKey(boolean isDisplayKey)
-    {
-        ItemStack key = new ItemStack(material);
-        key = Utility.setName(key, displayname);
-        if (isDisplayKey)
-            return key;
-        for (String line : lore)
-            key = Utility.addLoreLine(key, line);
-        key = Utility.addLoreLine(key, getLoreTag());
-        return key;
-    }
-
-    public String getLoreTag()
-    {
-        return ChatColor.BLACK + type;
-    }
-}
-
-class Reward
-{
-    Prize item;
-    int amount;
-    double rewardChance;
-
-    Reward(Prize item, int amount, double rewardChance)
-    {
-        this.item = item;
-        this.amount = amount;
-        this.rewardChance = rewardChance;
-    }
-}
-
-enum Prize
-{
-    _CRATE_KEY (params -> {
-        if (params.plugin.crateKeys.size() == 0)
-            return null;
-        int amount = params.amountToGive / params.plugin.crateKeys.size() + 1;
-        int keyindex = params.amountToGive % params.plugin.crateKeys.size();
-        CrateKey key = params.plugin.crateKeys.get(keyindex);
-        ItemStack keyItem = key.getKey(false);
-        keyItem.setAmount(amount);
-        if (amount == 1)
-            params.rewardee.sendMessage(ChatColor.GRAY + "You got a " + key.displayname + ChatColor.RESET + ChatColor.GRAY + "!");
-        else
-            params.rewardee.sendMessage(ChatColor.GRAY + "You got " + amount + " " + key.displayname + "s" + ChatColor.RESET + ChatColor.GRAY + "!");
-        return Collections.singletonList(keyItem);
-    }, params -> {
-        if (params.plugin.crateKeys.size() == 0)
-            return new ItemStack(Material.TRIPWIRE_HOOK);
-        int amount = params.amountToGive / params.plugin.crateKeys.size() + 1;
-        int keyindex = params.amountToGive % params.plugin.crateKeys.size();
-        CrateKey key = params.plugin.crateKeys.get(keyindex);
-        ItemStack keyItem = key.getKey(true);
-        if (amount == 1)
-            return keyItem;
-        return Utility.setName(keyItem, amount + " " + key.displayname + "s");
-    }),
-
-    ULTIMATE_REWARD (params -> {
-        params.rewardee.setGameMode(GameMode.CREATIVE);
-        params.plugin.tempCreativeTimestampConfig.getConfig().set(params.rewardee.getUniqueId().toString(), System.currentTimeMillis() + params.amountToGive * 3600000);
-        params.plugin.tempCreativeTimestamps.put(params.rewardee.getUniqueId(), System.currentTimeMillis() + params.amountToGive * 3600000);
-        params.plugin.tempCreativeTimestampConfig.saveConfig();
-        if (params.amountToGive == 1)
-            params.rewardee.sendMessage("You have received the ultimate reward: " + ChatColor.BOLD + "you may be in creative for 1 hour.");
-        else
-            params.rewardee.sendMessage("You have received the ultimate reward: " + ChatColor.BOLD + "you may be in creative for " + params.amountToGive + " hours.");
-        return null;
-    }, params -> {
-        ItemStack item = new ItemStack(Material.COMMAND);
-        return Utility.setName(item, ChatColor.UNDERLINE + "" + ChatColor.BOLD + "" + "The Ultimate Reward");
-    }),
-
-    // Armor
-
-    FROSTSPARK_CLEATS (params -> {
-        ItemStack item = new ItemStack(Material.DIAMOND_BOOTS);
-        item = Utility.setName(item, ChatColor.YELLOW + "Frostspark Cleats");
-        item = Utility.addLoreLine(item, ChatColor.RESET + "The cleats grant improved mobility");
-        item.addEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 1);
-        item.addEnchantment(Enchantment.DURABILITY, 2);
-        item.addEnchantment(Enchantment.FROST_WALKER, 2);
-        item.addEnchantment(Enchantment.PROTECTION_FALL, 4);
-        params.rewardee.sendMessage(ChatColor.YELLOW + "You got the Frostspark Cleats!");
-        return Collections.singletonList(item);
-    }, params -> {
-        ItemStack item = new ItemStack(Material.DIAMOND_BOOTS);
-        return Utility.setName(item, ChatColor.YELLOW + "Frostspark Cleats");
-    }),
-
-    WATERGLIDE_BOOTS (params -> {
-        ItemStack item = new ItemStack(Material.DIAMOND_BOOTS);
-        item = Utility.setName(item, ChatColor.AQUA + "Waterglide Boots");
-        item.addEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 1);
-        item.addEnchantment(Enchantment.DURABILITY, 2);
-        item.addEnchantment(Enchantment.DEPTH_STRIDER, 3);
-        params.rewardee.sendMessage(ChatColor.AQUA + "You got the Waterglide Boots!");
-        return Collections.singletonList(item);
-    }, params -> {
-        ItemStack item = new ItemStack(Material.DIAMOND_BOOTS);
-        return Utility.setName(item, ChatColor.AQUA + "Waterglide Boots");
-    }),
-
-    LUCKY_TROUSERS (params -> {
-        ItemStack item = new ItemStack(Material.DIAMOND_LEGGINGS);
-        item = Utility.setName(item, ChatColor.GREEN + "Lucky Trousers");
-        item = Utility.addLoreLine(item, ChatColor.RESET + "The trousers grant increased luck");
-        item.addEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 1);
-        item.addEnchantment(Enchantment.DURABILITY, 1);
-        params.rewardee.sendMessage(ChatColor.GREEN + "You got the Lucky Trousers!");
-        return Collections.singletonList(item);
-    }, params -> {
-        ItemStack item = new ItemStack(Material.DIAMOND_LEGGINGS);
-        return Utility.setName(item, ChatColor.GREEN + "Lucky Trousers");
-    }),
-
-    KNACKERBREAKER_CHESTERPLATE (params -> {
-        ItemStack item = new ItemStack(Material.DIAMOND_CHESTPLATE);
-        item = Utility.setName(item, ChatColor.GOLD + "Knackerbreaker Chesterplate");
-        item = Utility.addLoreLine(item, ChatColor.RESET + "The chestplate grants increased health absorption");
-        item.addEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 2);
-        item.addEnchantment(Enchantment.PROTECTION_EXPLOSIONS, 1);
-        item.addEnchantment(Enchantment.PROTECTION_FIRE, 1);
-        item.addEnchantment(Enchantment.PROTECTION_PROJECTILE, 1);
-        item.addEnchantment(Enchantment.THORNS, 3);
-        item.addEnchantment(Enchantment.DURABILITY, 1);
-        item.addEnchantment(Enchantment.MENDING, 1);
-        params.rewardee.sendMessage(ChatColor.YELLOW + "You got the Knackerbreaker Chesterplate!");
-        return Collections.singletonList(item);
-    }, params -> {
-        ItemStack item = new ItemStack(Material.DIAMOND_CHESTPLATE);
-        return Utility.setName(item, ChatColor.GOLD + "Knackerbreaker Chesterplate");
-    }),
-
-    HYDRODYNE_HELMET (params -> {
-        ItemStack item = new ItemStack(Material.DIAMOND_HELMET);
-        item = Utility.setName(item, ChatColor.BLUE + "Hydrodyne Helmet");
-        item = Utility.addLoreLine(item, ChatColor.RESET + "The helmet grants improved underwater and visual acuity");
-        item.addEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 1);
-        item.addEnchantment(Enchantment.DURABILITY, 2);
-        item.addEnchantment(Enchantment.OXYGEN, 3);
-        item.addEnchantment(Enchantment.WATER_WORKER, 1);
-        params.rewardee.sendMessage(ChatColor.BLUE + "You got the Hydrodyne Helmet!");
-        return Collections.singletonList(item);
-    }, params -> {
-        ItemStack item = new ItemStack(Material.DIAMOND_HELMET);
-        return Utility.setName(item, ChatColor.BLUE + "Hydrodyne Helmet");
-    }),
-
-    // Tools
-
-    WAND_OF_LEAPING (params -> {
-        ItemStack item = new ItemStack(Material.GOLD_HOE);
-        Utility.setName(item, ChatColor.LIGHT_PURPLE + "" + ChatColor.ITALIC + "Wand of Leaping");
-        Utility.addLoreLine(item, ChatColor.RESET + "Allows the user to leap great distances and avoid fall damage");
-        item.addEnchantment(Enchantment.DURABILITY, 1);
-        params.rewardee.sendMessage(ChatColor.LIGHT_PURPLE + "You got the " + ChatColor.ITALIC + "Wand of Leaping!");
-        return Collections.singletonList(item);
-    }, params -> {
-        ItemStack item = new ItemStack(Material.GOLD_HOE);
-        return Utility.setName(item, ChatColor.LIGHT_PURPLE + "" + ChatColor.ITALIC + "Wand of Leaping");
-    }),
-
-    TERRAMORPHER (params -> {
-        ItemStack item = new ItemStack(Material.DIAMOND_SPADE);
-        Utility.setName(item, ChatColor.GREEN + "" + ChatColor.BOLD + "Terramorpher");
-        Utility.addLoreLine(item, ChatColor.RESET + "The terramorpher digs multiple blocks at once");
-        item.addEnchantment(Enchantment.DURABILITY, 2);
-        item.addEnchantment(Enchantment.DIG_SPEED, 3);
-        params.rewardee.sendMessage(ChatColor.GREEN + "You got the " + ChatColor.BOLD + "Terramorpher!");
-        return Collections.singletonList(item);
-    }, params -> {
-        ItemStack item = new ItemStack(Material.DIAMOND_SPADE);
-        return Utility.setName(item, ChatColor.GREEN + "" + ChatColor.BOLD + "Terramorpher");
-    }),
-
-    TRANSMOGRIFIER (params -> {
-        ItemStack item = new ItemStack(Material.DIAMOND_HOE);
-        Utility.setName(item, ChatColor.GOLD + "" + ChatColor.BOLD + "Transmogrifier");
-        Utility.addLoreLine(item, ChatColor.RESET + "The transmogrifier will swap blocks with those in your offhand with a left click");
-        Utility.addLoreLine(item, ChatColor.RESET + "...you can also till soil with it.");
-        item.addEnchantment(Enchantment.DURABILITY, 2);
-        params.rewardee.sendMessage(ChatColor.GOLD + "You got the " + ChatColor.BOLD + "Transmogrifier!");
-        return Collections.singletonList(item);
-    }, params -> {
-        ItemStack item = new ItemStack(Material.DIAMOND_HOE);
-        return Utility.setName(item, ChatColor.GOLD + "" + ChatColor.BOLD + "Transmogrifier");
-    }),
-
-    TREEFELLER_CHAINSAW (params -> {
-        ItemStack item = new ItemStack(Material.DIAMOND_AXE);
-        Utility.setName(item, ChatColor.DARK_GREEN + "" + ChatColor.ITALIC + "Treefeller Chainsaw");
-        Utility.addLoreLine(item, "Let gravity do the work for you!");
-        Utility.addLoreLine(item, ChatColor.RESET + "The chainsaw fells entire trees with a single blow");
-        item.addEnchantment(Enchantment.DURABILITY, 2);
-        params.rewardee.sendMessage(ChatColor.DARK_GREEN + "You got the Treefeller Chainsaw!");
-        return Collections.singletonList(item);
-    }, params -> {
-        ItemStack item = new ItemStack(Material.DIAMOND_AXE);
-        return Utility.setName(item, ChatColor.DARK_GREEN + "" + ChatColor.ITALIC + "Treefeller Chainsaw");
-    }),
-
-    GIGA_DRILL_BREAKER (params -> {
-        ItemStack item = new ItemStack(Material.DIAMOND_PICKAXE);
-        Utility.setName(item, ChatColor.AQUA + "" + ChatColor.BOLD + "Giga Drill Breaker");
-        Utility.addLoreLine(item, ChatColor.AQUA + "Bust through the heavens with your Drill!");
-        item.addEnchantment(Enchantment.DIG_SPEED, 5);
-        item.addEnchantment(Enchantment.DURABILITY, 3);
-        params.rewardee.sendMessage(ChatColor.AQUA + "You got the Giga Drill Breaker; thrust through the heavens with your spirit!");
-        return Collections.singletonList(item);
-    }, params -> {
-        ItemStack item = new ItemStack(Material.DIAMOND_PICKAXE);
-        return Utility.setName(item, ChatColor.AQUA + "" + ChatColor.BOLD + "Giga Drill Breaker");
-    }),
-
-    UNYIELDING_BATTERSEA (params -> {
-        ItemStack item = new ItemStack(Material.SHIELD);
-        Utility.setName(item, ChatColor.YELLOW + "Unyielding Battersea");
-        Utility.addLoreLine(item, "An olden shield used by unending legions");
-        Utility.addLoreLine(item, ChatColor.RESET + "The battersea grants increase resistances while equipped");
-        item.addEnchantment(Enchantment.DURABILITY, 3);
-        item.addEnchantment(Enchantment.MENDING, 1);
-        params.rewardee.sendMessage(ChatColor.YELLOW + "You got the Unyielding Battersea!");
-        return Collections.singletonList(item);
-    }, params -> {
-        ItemStack item = new ItemStack(Material.SHIELD);
-        return Utility.setName(item, ChatColor.YELLOW + "Unyielding Battersea");
-    }),
-
-    HYPERSHOT_LONGBOW (params -> {
-        ItemStack item = new ItemStack(Material.BOW);
-        Utility.setName(item, ChatColor.YELLOW + "" + ChatColor.ITALIC + "Hypershot Longbow");
-        Utility.addLoreLine(item, "An ancient, powerful bow used by a skilled marksman");
-        Utility.addLoreLine(item, ChatColor.RESET + "The bow grants immense arrow speed and power");
-        item.addEnchantment(Enchantment.ARROW_DAMAGE, 5);
-        item.addEnchantment(Enchantment.ARROW_KNOCKBACK, 2);
-        item.addEnchantment(Enchantment.DURABILITY, 2);
-        item.addEnchantment(Enchantment.MENDING, 1);
-        params.rewardee.sendMessage(ChatColor.YELLOW + "" + ChatColor.ITALIC + "You got the Hypershot Longbow!");
-        return Arrays.asList(item, new ItemStack(Material.ARROW, params.amountToGive));
-    }, params -> {
-        ItemStack item = new ItemStack(Material.BOW);
-        return Utility.setName(item, ChatColor.YELLOW + "" + ChatColor.ITALIC + "Hypershot Longbow");
-    }),
-
-    VEILSTRIKE_SHORTBOW (params -> {
-        ItemStack item = new ItemStack(Material.BOW);
-        Utility.setName(item, ChatColor.BLUE + "" + ChatColor.ITALIC + "Veilstrike Shortbow");
-        Utility.addLoreLine(item, "An ancient, mystical bow used by an unseen asassin");
-        Utility.addLoreLine(item, ChatColor.RESET + "The bow grants invisibility while held");
-        item.addEnchantment(Enchantment.ARROW_DAMAGE, 3);
-        item.addEnchantment(Enchantment.DURABILITY, 2);
-        item.addEnchantment(Enchantment.MENDING, 1);
-        params.rewardee.sendMessage(ChatColor.BLUE + "" + ChatColor.ITALIC + "You got the Veilstrike Shortbow!");
-        return Arrays.asList(item, new ItemStack(Material.ARROW, params.amountToGive));
-    }, params -> {
-        ItemStack item = new ItemStack(Material.BOW);
-        return Utility.setName(item, ChatColor.BLUE + "" + ChatColor.ITALIC + "Veilstrike Shortbow");
-    }),
-
-    HEAVENS_BLADE (params -> {
-        ItemStack item = new ItemStack(Material.DIAMOND_SWORD);
-        Utility.setName(item, ChatColor.YELLOW + "" + ChatColor.BOLD + "Heaven's Blade");
-        Utility.addLoreLine(item, "A godly blade that weilds incredible desctructive power");
-        item.addEnchantment(Enchantment.DAMAGE_ALL, 5);
-        item.addEnchantment(Enchantment.KNOCKBACK, 2);
-        item.addEnchantment(Enchantment.FIRE_ASPECT, 2);
-        item.addEnchantment(Enchantment.DURABILITY, 3);
-        item.addEnchantment(Enchantment.MENDING, 1);
-        params.rewardee.sendMessage(ChatColor.YELLOW + "" + ChatColor.BOLD + "You got Heaven's Blade!");
-        return Collections.singletonList(item);
-    }, params -> {
-        ItemStack item = new ItemStack(Material.DIAMOND_SWORD);
-        return Utility.setName(item, ChatColor.YELLOW + "" + ChatColor.BOLD + "Heaven's Blade");
-    }),
-
-    // Other rewards
-
-    IRON_COMBAT_SET (params -> {
-        ArrayList<ItemStack> rewards = new ArrayList<>();
-        rewards.add(new ItemStack(Material.IRON_SWORD));
-        rewards.add(new ItemStack(Material.IRON_AXE));
-        rewards.add(new ItemStack(Material.SHIELD));
-        rewards.add(new ItemStack(Material.BOW));
-        rewards.add(new ItemStack(Material.ARROW, params.amountToGive));
-        rewards.add(new ItemStack(Material.IRON_HELMET));
-        rewards.add(new ItemStack(Material.IRON_CHESTPLATE));
-        rewards.add(new ItemStack(Material.IRON_LEGGINGS));
-        rewards.add(new ItemStack(Material.IRON_BOOTS));
-        params.rewardee.sendMessage("You got full iron combat gear!");
-        return rewards;
-    }, params -> {
-        ItemStack item = new ItemStack(Material.IRON_CHESTPLATE);
-        return Utility.setName(item, ChatColor.AQUA + "Full Iron Combat Gear");
-    }),
-
-    IRON_TOOLSET (params -> {
-        ArrayList<ItemStack> rewards = new ArrayList<>();
-        rewards.add(new ItemStack(Material.IRON_PICKAXE));
-        rewards.add(new ItemStack(Material.IRON_AXE));
-        rewards.add(new ItemStack(Material.IRON_SWORD));
-        rewards.add(new ItemStack(Material.IRON_SPADE));
-        rewards.add(new ItemStack(Material.IRON_HOE));
-        params.rewardee.sendMessage("You got a full iron toolset!");
-        return rewards;
-    }, params -> {
-        ItemStack item = new ItemStack(Material.IRON_PICKAXE);
-        return Utility.setName(item, ChatColor.AQUA + "Full Iron Toolset");
-    }),
-
-    DIAMONDS (params -> {
-        if (params.amountToGive > 1)
-            params.rewardee.sendMessage("You got " + params.amountToGive + " Diamonds!");
-        else
-            params.rewardee.sendMessage("You got a Diamond!");
-        return Collections.singletonList(new ItemStack(Material.DIAMOND, params.amountToGive));
-    }, params -> {
-        ItemStack item = new ItemStack(Material.DIAMOND, 1);
-        if (params.amountToGive > 1)
-            Utility.setName(item, ChatColor.DARK_AQUA + "" + params.amountToGive + " Diamonds");
-        else
-            Utility.setName(item, ChatColor.DARK_AQUA + "1 Diamond");
-        return item;
-    }),
-
-    IRON_BARS (params -> {
-        if (params.amountToGive > 1)
-            params.rewardee.sendMessage("You got " + params.amountToGive + " iron ingots!");
-        else
-            params.rewardee.sendMessage("You got an iron ingot!");
-        return Collections.singletonList(new ItemStack(Material.IRON_INGOT, params.amountToGive));
-    }, params -> {
-        ItemStack item = new ItemStack(Material.IRON_INGOT, 1);
-        if (params.amountToGive > 1)
-            Utility.setName(item, ChatColor.DARK_AQUA + "" + params.amountToGive + " Iron Ingots");
-        else
-            Utility.setName(item, ChatColor.DARK_AQUA + "1 Iron Ingot");
-        return item;
-    }),
-
-    GOLD_BARS (params -> {
-        if (params.amountToGive > 1)
-            params.rewardee.sendMessage("You got " + params.amountToGive + " gold ingots!");
-        else
-            params.rewardee.sendMessage("You got a gold ingot!");
-        return Collections.singletonList(new ItemStack(Material.GOLD_INGOT, params.amountToGive));
-    }, params -> {
-        ItemStack item = new ItemStack(Material.IRON_INGOT, 1);
-        if (params.amountToGive > 1)
-            Utility.setName(item, ChatColor.DARK_AQUA + "" + params.amountToGive + " Gold Ingots");
-        else
-            Utility.setName(item, ChatColor.DARK_AQUA + "1 Gold Ingot");
-        return item;
-    }),
-
-    RAW_ORE_BLOCKS (params -> {
-        ArrayList<ItemStack> rewards = new ArrayList<>();
-        HashMap<Material, Integer> multipliers = new HashMap<>();
-        multipliers.put(Material.COAL_ORE, 6);
-        multipliers.put(Material.IRON_ORE, 4);
-        multipliers.put(Material.GOLD_ORE, 3);
-        multipliers.put(Material.REDSTONE_ORE, 5);
-        multipliers.put(Material.LAPIS_ORE, 5);
-        multipliers.put(Material.DIAMOND_ORE, 1);
-        multipliers.put(Material.EMERALD_ORE, 1);
-        for (Material key : multipliers.keySet())
-        {
-            int basecount = params.amountToGive * multipliers.get(key);
-            ItemStack item = new ItemStack(key, Utility.randomInt(basecount, basecount*2));
-            rewards.add(item);
-        }
-        params.rewardee.sendMessage(ChatColor.AQUA + "You got various raw ore blocks!");
-        return rewards;
-    }, params -> {
-        ItemStack item = new ItemStack(Material.REDSTONE_ORE);
-        return Utility.setName(item, ChatColor.AQUA + "" + params.amountToGive + "xAssorted Raw Ore Blocks");
-    }),
-
-    ASSORTED_ORES (params -> {
-        ArrayList<ItemStack> rewards = new ArrayList<>();
-        HashMap<Material, Integer> multipliers = new HashMap<>();
-        multipliers.put(Material.COBBLESTONE, 24);
-        multipliers.put(Material.COAL, 12);
-        multipliers.put(Material.IRON_INGOT, 8);
-        multipliers.put(Material.GOLD_INGOT, 6);
-        multipliers.put(Material.REDSTONE, 18);
-        multipliers.put(Material.INK_SACK, 15);
-        multipliers.put(Material.DIAMOND, 2);
-        multipliers.put(Material.EMERALD, 3);
-        for (Material key : multipliers.keySet())
-        {
-            int basecount = params.amountToGive * multipliers.get(key);
-            ItemStack item = new ItemStack(key, Utility.randomInt(basecount, basecount*2));
-            if (key == Material.INK_SACK)
-                item.setDurability((short)4);
-            rewards.add(item);
-        }
-        params.rewardee.sendMessage(ChatColor.AQUA + "You got an assortment of ores!");
-        return rewards;
-    }, params -> {
-        ItemStack item = new ItemStack(Material.COAL);
-        return Utility.setName(item, ChatColor.AQUA + "" + params.amountToGive + "xAssorted Ores");
-    }),
-
-    ASSORTMENT (params -> {
-        ArrayList<ItemStack> rewards = new ArrayList<>();
-        HashMap<Material, Integer> multipliers = new HashMap<>();
-        multipliers.put(Material.GOLD_NUGGET, 6);
-        multipliers.put(Material.REDSTONE, 16);
-        multipliers.put(Material.INK_SACK, 9);
-        multipliers.put(Material.ARROW, 12);
-        multipliers.put(Material.SULPHUR, 8);
-        multipliers.put(Material.BLAZE_POWDER, 6);
-        multipliers.put(Material.APPLE, 3);
-        multipliers.put(Material.LOG, 5);
-        for (Material key : multipliers.keySet())
-        {
-            int basecount = params.amountToGive * multipliers.get(key);
-            ItemStack item = new ItemStack(key, Utility.randomInt(basecount, basecount*2));
-            if (key == Material.INK_SACK)
-                item.setDurability((short)4);
-            rewards.add(item);
-        }
-        params.rewardee.sendMessage(ChatColor.GREEN + "You got a random assortment of items.");
-        return rewards;
-    }, params -> {
-        ItemStack item = new ItemStack(Material.CHEST);
-        Utility.setName(item, ChatColor.GREEN + "" + params.amountToGive + "xAssorted Items");
-        return item;
-    }),
-
-    PLANTS (params -> {
-        ArrayList<ItemStack> rewards = new ArrayList<>();
-        HashMap<Material, Integer> multipliers = new HashMap<>();
-        multipliers.put(Material.LOG, 16);
-        multipliers.put(Material.SAPLING, 6);
-        multipliers.put(Material.APPLE, 12);
-        multipliers.put(Material.YELLOW_FLOWER, 4);
-        multipliers.put(Material.SEEDS, 24);
-        multipliers.put(Material.MELON_SEEDS, 4);
-        multipliers.put(Material.PUMPKIN_SEEDS, 3);
-        multipliers.put(Material.POTATO, 7);
-        multipliers.put(Material.CARROT, 4);
-        for (Material key : multipliers.keySet())
-        {
-            int basecount = params.amountToGive * multipliers.get(key);
-            ItemStack item = new ItemStack(key, Utility.randomInt(basecount, basecount*2));
-            rewards.add(item);
-        }
-        params.rewardee.sendMessage(ChatColor.GREEN + "You got an assorted planter set.");
-        return rewards;
-    }, params -> {
-        ItemStack item = new ItemStack(Material.SAPLING);
-        Utility.setName(item, ChatColor.DARK_GREEN + "" + params.amountToGive + "xAssorted Plants");
-        return item;
-    }),
-
-    MONEY (params -> {
-        params.rewardee.getServer().dispatchCommand(params.rewardee.getServer().getConsoleSender(), "eco give " + params.rewardee.getName() + " " + params.amountToGive);
-        params.rewardee.sendMessage("You got $" + params.amountToGive + "!");
-        return Collections.singletonList(Utility.setName(new ItemStack(Material.PAPER), ChatColor.DARK_AQUA + "$" + params.amountToGive + " invoice"));
-    }, params -> {
-        ItemStack item = new ItemStack(Material.GOLD_INGOT, 1);
-        Utility.setName(item, ChatColor.DARK_AQUA + "$" + params.amountToGive);
-        return item;
-    }),
-
-    INVINCIBILITY (params -> {
-        params.rewardee.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 100, 4));
-        params.rewardee.addPotionEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE, params.amountToGive*20, 5));
-        params.rewardee.addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, params.amountToGive*20, 5));
-        params.rewardee.sendMessage("You got " + params.amountToGive + " Seconds of Invincibility!");
-        return null;
-    }, params -> {
-        ItemStack item = new ItemStack(Material.POTION, 1);
-        ItemMeta meta = item.getItemMeta();
-        meta.setDisplayName(ChatColor.GOLD + "" + params.amountToGive + " Seconds of Invincibility");
-        PotionMeta pmeta = (PotionMeta) meta;
-        pmeta.addCustomEffect(new PotionEffect(PotionEffectType.FIRE_RESISTANCE, 1, 1), true);
-        item.setItemMeta(meta);
-        return item;
-    }),
-
-    MASSIVE_DAMAGE (params -> {
-        params.rewardee.addPotionEffect(new PotionEffect(PotionEffectType.INCREASE_DAMAGE, params.amountToGive*1200, 6));
-        if (params.amountToGive == 1)
-            params.rewardee.sendMessage(ChatColor.DARK_RED + "You got 1 Minute of Massive Damage!");
-        else
-            params.rewardee.sendMessage(ChatColor.DARK_RED + "You got " + params.amountToGive + " Minutes of Massive Damage!");
-        return null;
-    }, params -> {
-        ItemStack item = new ItemStack(Material.POTION, 1);
-        ItemMeta meta = item.getItemMeta();
-        if (params.amountToGive == 1)
-            meta.setDisplayName(ChatColor.DARK_RED + "1 Minute of Massive Damage");
-        else
-            meta.setDisplayName(ChatColor.DARK_RED + "" + params.amountToGive + " Minutes of Massive Damage");
-        PotionMeta pmeta = (PotionMeta) meta;
-        pmeta.addCustomEffect(new PotionEffect(PotionEffectType.INCREASE_DAMAGE, 1, 1), true);
-        item.setItemMeta(meta);
-        return item;
-    }),
-
-    MASSIVE_HEALTH (params -> {
-        params.rewardee.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 160, 8));
-        params.rewardee.addPotionEffect(new PotionEffect(PotionEffectType.HEALTH_BOOST, params.amountToGive*72000, 19));
-        if (params.amountToGive == 1)
-            params.rewardee.sendMessage(ChatColor.RED + "You got 1 Hour of Massive Health!");
-        else
-            params.rewardee.sendMessage(ChatColor.RED + "You got " + params.amountToGive + " Hours of Massive Health!");
-        return null;
-    }, params -> {
-        ItemStack item = new ItemStack(Material.POTION, 1);
-        ItemMeta meta = item.getItemMeta();
-        if (params.amountToGive == 1)
-            params.rewardee.sendMessage(ChatColor.RED + "1 Hour of Massive Health");
-        else
-            meta.setDisplayName(ChatColor.RED + "" + params.amountToGive + " Hours of Massive Health");
-        PotionMeta pmeta = (PotionMeta) meta;
-        pmeta.addCustomEffect(new PotionEffect(PotionEffectType.REGENERATION, 1, 1), true);
-        item.setItemMeta(meta);
-        return item;
-    }),
-
-    INDIVIDUAL_NUGGETS (params -> {
-        ArrayList<ItemStack> nuggets = new ArrayList<>();
-        for (int i=0;i<params.amountToGive;i++)
-            nuggets.add(new ItemStack(Material.GOLD_NUGGET, 1));
-        params.rewardee.sendMessage(ChatColor.DARK_AQUA + "You got " + params.amountToGive + " individually placed gold nuggets!");
-        return nuggets;
-    }, params -> {
-        ItemStack item = new ItemStack(Material.GOLD_NUGGET);
-        if (params.amountToGive > 1)
-            Utility.setName(item, ChatColor.DARK_AQUA + "" + params.amountToGive + " Individually Placed Gold Nuggets");
-        else
-            Utility.setName(item, ChatColor.DARK_AQUA + "1 Gold Nugget");
-        return item;
-    }),
-
-    // bad prizes
-
-    FIREWORKS_SHOW (params -> {
-        for (int i=0;i<params.amountToGive;i++)
-        {
-            Firework firework = (Firework) params.chestBlock.getWorld().spawnEntity(params.chestBlock.getLocation().add(new Vector(Math.random(), 1, Math.random())), EntityType.FIREWORK);
-            FireworkMeta meta = firework.getFireworkMeta();
-            meta.setPower(Utility.randomInt(1, 4));
-            FireworkEffect.Type[] effectTypes = FireworkEffect.Type.values();
-            FireworkEffect effect = FireworkEffect.builder()
-                    .flicker(Math.random() > 0.5)
-                    .trail(Math.random() > 0.5)
-                    .with(effectTypes[Utility.randomInt(0,effectTypes.length)])
-                    .withColor(Color.fromRGB(Utility.randomInt(128,255), Utility.randomInt(128,255), Utility.randomInt(128,255)))
-                    .build();
-            meta.addEffect(effect);
-            firework.setFireworkMeta(meta);
-        }
-        params.rewardee.sendMessage(ChatColor.GOLD + "You got a fireworks show! Yaayyy!!");
-        return null;
-    }, params -> {
-        ItemStack item = new ItemStack(Material.FIREWORK);
-        return Utility.setName(item, ChatColor.GOLD + "A Fireworks Show");
-    }),
-
-    BOOM_TIME (params -> {
-        Chest chest = (Chest) params.chestBlock.getState();
-        for (int i=0;i<chest.getInventory().getSize();i++)
-            chest.getInventory().setItem(i, Utility.setName(new ItemStack(Material.TNT), ChatColor.RED + "BOOM TIME!"));
-        params.rewardee.sendMessage(ChatColor.RED + "Boom Time!");
-        params.plugin.activeJobs.add(new BoomTimeJob(params.chestBlock, 8, 6, 5));
-        return null;
-    }, params -> {
-        ItemStack item = new ItemStack(Material.TNT);
-        return Utility.setName(item, ChatColor.RED + "Boom Time!");
-    }),
-
-    PANDORAS_BOX (params -> {
-        Location spawnPos = params.chestBlock.getLocation().add(0, 1, 0);
-        for (int i=0;i<params.amountToGive*2;i++)
-            spawnPos.getWorld().spawnEntity(spawnPos.add(Utility.randomInsideUnitCircle()), EntityType.ZOMBIE);
-        for (int i=0;i<params.amountToGive;i++)
-            spawnPos.getWorld().spawnEntity(spawnPos.add(Utility.randomInsideUnitCircle()), EntityType.SKELETON);
-        for (int i=0;i<params.amountToGive;i++)
-            spawnPos.getWorld().spawnEntity(spawnPos.add(Utility.randomInsideUnitCircle()), EntityType.SPIDER);
-        for (int i=0;i<params.amountToGive;i++)
-            spawnPos.getWorld().spawnEntity(spawnPos.add(Utility.randomInsideUnitCircle()), EntityType.CAVE_SPIDER);
-        for (int i=0;i<params.amountToGive*4;i++)
-            spawnPos.getWorld().spawnEntity(spawnPos.add(Utility.randomInsideUnitCircle()), EntityType.BAT);
-        spawnPos.getWorld().spawnEntity(spawnPos.add(0, 5, 0), EntityType.LIGHTNING);
-        params.rewardee.sendMessage(ChatColor.DARK_PURPLE + "You opened pandora's box!");
-        return null;
-    }, params -> {
-        ItemStack item = new ItemStack(Material.ENDER_CHEST);
-        return Utility.setName(item, ChatColor.DARK_PURPLE + "Pandora's Box");
-    }),
-
-    NOTHING (params -> {
-        params.rewardee.sendMessage(ChatColor.DARK_GRAY + "You got nothing.");
-        return null;
-    }, params -> {
-        ItemStack item = new ItemStack(Material.THIN_GLASS);
-        Utility.setName(item, ChatColor.DARK_GRAY + "Nothing");
-        return item;
-    });
-
-    private PrizeAction action;
-    private PrizeVisual visualisation;
-    Prize(PrizeAction action, PrizeVisual visualisation)
-    {
-        this.action = action;
-        this.visualisation = visualisation;
-    }
-
-    public void giveReward(LootCrate plugin, Player rewardee, int amount, Block chestBlock)
-    {
-        if (chestBlock.getType() != Material.CHEST)
-            return;
-        List<ItemStack> rewardItemsRaw = action.enactReward(new RewardActionParameter(plugin, rewardee, amount, chestBlock));
-        if (rewardItemsRaw == null)
-            rewardItemsRaw = new ArrayList<>();
-        List<ItemStack> rewardItems = Utility.separateItemStacks(rewardItemsRaw);
-        Chest chest = (Chest) chestBlock.getState();
-        int offsetdirection = -1;
-        for (int i=0;i<rewardItems.size();i++)
-        {
-            int index = chest.getInventory().getSize()/2 + ((int)(i/2.0f + 0.5)*offsetdirection);
-            if (rewardItems.get(i).getAmount() == 1 && rewardItems.get(i).getItemMeta() != null)
-                rewardItems.set(i, Utility.addLoreLine(rewardItems.get(i), getLoreTag()));
-            chest.getInventory().setItem(index, rewardItems.get(i));
-            offsetdirection*=-1;
-        }
-    }
-
-    public ItemStack getVisualisation(LootCrate plugin, Player rewardee, int amount, Block chestBlock)
-    {
-        return visualisation.getVisualisation(new RewardActionParameter(plugin, rewardee, amount, chestBlock));
-    }
-
-    public String getLoreTag()
-    {
-        return ChatColor.BLACK + toString().toLowerCase();
-    }
-
-    public class RewardActionParameter
-    {
-        public LootCrate plugin;
-        public Player rewardee;
-        public int amountToGive;
-        public Block chestBlock;
-
-        public RewardActionParameter(LootCrate plugin, Player rewardee, int amountToGive, Block chestBlock)
-        {
-            this.plugin = plugin;
-            this.rewardee = rewardee;
-            this.amountToGive = amountToGive;
-            this.chestBlock = chestBlock;
-        }
-    }
-
-    interface PrizeVisual
-    {
-        ItemStack getVisualisation(RewardActionParameter parameters);
-    }
-
-    interface PrizeAction
-    {
-        List<ItemStack> enactReward(RewardActionParameter parameters);
-    }
-}
-
-interface Job
-{
-    void update();
-    boolean isDone();
-}
-
-abstract class TreefellerJobBase implements Job
-{
-    Block initialBlock;
-    ArrayList<Block> currentSet;
-    int progressThroughSet;
-    int blocksBroken;
-    int breaksPerAction;
-    int maxDestruction;
-
-    public TreefellerJobBase() {}
-
-    public TreefellerJobBase(Block initialBlock, int breaksPerAction, int maxDestruction)
-    {
-        this.initialBlock = initialBlock;
-        this.breaksPerAction = breaksPerAction;
-        this.maxDestruction = maxDestruction;
-        this.currentSet = new ArrayList<>();
-        this.blocksBroken = 0;
-        this.progressThroughSet = 0;
-        currentSet.add(initialBlock);
-    }
-
-    public void update()
-    {
-        for (int i=0;i<breaksPerAction;i++) {
-            if (blocksBroken >= maxDestruction)
-                return;
-            if (progressThroughSet >= currentSet.size()) {
-                progressThroughSet = 0;
-                getNewSet();
-            } else {
-                Block cblock = currentSet.get(progressThroughSet);
-                cblock.getWorld().playEffect(cblock.getLocation(), Effect.TILE_BREAK, new MaterialData(cblock.getType()));
-                cblock.breakNaturally(new ItemStack(Material.DIAMOND_AXE));
-                blocksBroken++;
-                progressThroughSet++;
-            }
-        }
-    }
-
-    public void getNewSet()
-    {
-        ArrayList<Block> nextUpdate = new ArrayList<>();
-        for (Block currentblock : currentSet)
-        {
-            for (Block nblock : Utility.getSurroundingBlocks(currentblock, true, true, true))
-            {
-                if (!getValidBlocks().contains(nblock.getType()))
-                    continue;
-                if (nblock.getY() < initialBlock.getY())
-                    continue;
-                if (nextUpdate.contains(nblock))
-                    continue;
-                nextUpdate.add(nblock);
-            }
-        }
-        currentSet = nextUpdate;
-    }
-
-    public boolean isDone()
-    {
-        return currentSet.size() == 0 || blocksBroken >= maxDestruction;
-    }
-
-    public abstract List<Material> getValidBlocks();
-}
-
-class TreefellerJob extends TreefellerJobBase
-{
-    public TreefellerJob() {}
-
-    public TreefellerJob(Block initialBlock, int breaksPerAction, int maxDestruction)
-    {
-        super(initialBlock, breaksPerAction, maxDestruction);
-    }
-
-    public List<Material> getValidBlocks()
-    {
-        return Arrays.asList(Material.LOG, Material.LOG_2, Material.LEAVES, Material.LEAVES_2);
-    }
-}
-
-class ShroomFellerJob extends TreefellerJob
-{
-    public ShroomFellerJob() {}
-
-    public ShroomFellerJob(Block initialBlock, int breaksPerAction, int maxDestruction)
-    {
-        super(initialBlock, breaksPerAction, maxDestruction);
-    }
-
-    public List<Material> getValidBlocks()
-    {
-        return Arrays.asList(Material.HUGE_MUSHROOM_1, Material.HUGE_MUSHROOM_2);
-    }
-}
-
-class TransmogrificationJob implements Job
-{
-    Block initialBlock;
-    Material initialMaterial;
-    byte initialData;
-    Player ply;
-    ArrayList<Block> currentSet;
-    int progressThroughSet;
-    int blocksModified;
-    int modificationsPerAction;
-    int maxModification;
-    boolean outOfBlocks = false;
-
-    public TransmogrificationJob(Block initialBlock, Player ply, int modificationsPerAction, int maxModification)
-    {
-        this.initialBlock = initialBlock;
-        this.initialMaterial = initialBlock.getType();
-        this.initialData = initialBlock.getData();  //TODO Fix weird bug where wrong data value is fetched from block sometimes
-        if (initialMaterial == Material.LEAVES || initialMaterial == Material.LEAVES_2)
-            initialData = (byte) (initialData % 4);
-        this.ply = ply;                             // occurs on leaves mostly
-        this.modificationsPerAction = modificationsPerAction;
-        this.maxModification = maxModification;
-        this.currentSet = new ArrayList<>();
-        this.blocksModified = 0;
-        this.progressThroughSet = 0;
-        currentSet.add(initialBlock);
-    }
-
-    @SuppressWarnings("deprecation")
-    public void update()
-    {
-        for (int i=0;i<modificationsPerAction;i++) {
-            if (isDone())
-            {
-                return;
-            }
-            ItemStack offhanditem = ply.getInventory().getItemInOffHand();
-            if (offhanditem == null)
-                return;
-            if (progressThroughSet >= currentSet.size()) {
-                progressThroughSet = 0;
-                getNewSet();
-            } else {
-                if (ply.getGameMode() != GameMode.CREATIVE)
-                {
-                    if (offhanditem.getAmount() == 1)
-                    {
-                        ply.getInventory().setItem(40, null);
-                        outOfBlocks = true;
-                    }
-                    else
-                        offhanditem.setAmount(offhanditem.getAmount() - 1);
-                }
-                Block cblock = currentSet.get(progressThroughSet);
-                cblock.getWorld().playEffect(cblock.getLocation(), Effect.TILE_BREAK, new MaterialData(cblock.getType()));
-                cblock.breakNaturally();
-                cblock.setType(offhanditem.getType());
-                cblock.setData((byte)offhanditem.getDurability());
-                blocksModified++;
-                progressThroughSet++;
-            }
-        }
-    }
-
-    public void getNewSet()
-    {
-        ArrayList<Block> nextUpdate = new ArrayList<>();
-        for (Block currentblock : currentSet)
-        {
-            for (Block nblock : Utility.getSurroundingBlocks(currentblock, true, true, true))
-            {
-                if (initialMaterial != nblock.getType())
-                    continue;
-                if (initialMaterial == Material.LEAVES || initialMaterial == Material.LEAVES_2)
-                {
-                    if (initialData != nblock.getData() % 4)
-                        continue;
-                }
-                else
-                {
-                    if (initialData != nblock.getData())
-                        continue;
-                }
-                if (nextUpdate.contains(nblock))
-                    continue;
-                nextUpdate.add(nblock);
-            }
-        }
-        currentSet = nextUpdate;
-    }
-
-    public boolean isDone()
-    {
-        return currentSet.size() == 0 ||
-                blocksModified >= maxModification ||
-                outOfBlocks;
-    }
-}
-
-class TerramorpherJob implements Job
-{
-    public Block initialBlock;
-    public Material initialMaterial;
-    public Orientation orientation;
-    public int size;
-
-    private ArrayList<Block> currentSet;
-    private Block minimumConstraint;
-    private Block maximumConstraint;
-
-    public TerramorpherJob(Block initialBlock, BlockFace orientFace, int size)
-    {
-        this.initialBlock = initialBlock;
-        this.initialMaterial = initialBlock.getType();
-        this.orientation = Orientation.fromBlockFace(orientFace);
-        this.size = size;
-
-        this.currentSet = new ArrayList<>();
-        currentSet.add(initialBlock);
-        Vector offsetVector = orientation.inverseVector().multiply(size);
-        minimumConstraint = initialBlock.getLocation().subtract(offsetVector).getBlock();
-        maximumConstraint = initialBlock.getLocation().add(offsetVector).getBlock();
-    }
-
-    public void update()
-    {
-        for (Block b : currentSet)
-        {
-            b.breakNaturally(new ItemStack(Material.DIAMOND_SPADE));
-            b.getWorld().playEffect(b.getLocation(), Effect.TILE_BREAK, new MaterialData(b.getType()));
-        }
-        ArrayList<Block> nextUpdate = new ArrayList<>();
-        for (Block currentblock : currentSet)
-        {
-            for (Block nblock : Utility.getSurroundingBlocks(currentblock, true, false, false))
-            {
-                if (initialMaterial != nblock.getType())
-                    continue;
-                if (nextUpdate.contains(nblock))
-                    continue;
-                if (!Utility.blockInBoundsInclusive(minimumConstraint, maximumConstraint, nblock))
-                    continue;
-                nextUpdate.add(nblock);
-            }
-        }
-        currentSet = nextUpdate;
-    }
-
-    public boolean isDone()
-    {
-        return currentSet.size() == 0;
-    }
-
-    enum Orientation
-    {
-        NORTH_SOUTH (0, 0, 1),
-        EAST_WEST (1, 0, 0),
-        UP_DOWN (0, 1, 0);
-
-        double x;
-        double y;
-        double z;
-
-        Orientation(double x, double y, double z)
-        {
-            this.x = x;
-            this.y = y;
-            this.z = z;
-        }
-
-        public Vector getVector()
-        {
-            return new Vector(x, y, z);
-        }
-
-        public Vector inverseVector()
-        {
-            return new Vector(1, 1, 1).subtract(getVector());
-        }
-
-        public static Orientation fromBlockFace(BlockFace face)
-        {
-            if (face == BlockFace.NORTH || face == BlockFace.SOUTH)
-                return NORTH_SOUTH;
-            else if (face == BlockFace.EAST || face == BlockFace.WEST)
-                return EAST_WEST;
-            else if (face == BlockFace.UP || face == BlockFace.DOWN)
-                return UP_DOWN;
-            return null;
-        }
-    }
-}
-
-class BoomTimeJob implements Job
-{
-    private Block chest;
-    private int clicks;
-    private int clickdelay;
-    private int explosivePower;
-
-    private int counter;
-
-    public BoomTimeJob(Block chest, int clicks, int clickdelay, int explosivePower)
-    {
-        this.chest = chest;
-        this.clicks = clicks;
-        this.clickdelay = clickdelay;
-        this.explosivePower = explosivePower;
-    }
-
-    public void update()
-    {
-        counter++;
-        if (chest.getType() != Material.CHEST)
-            counter = clickdelay * clicks + 1;
-        if (counter % clickdelay == 0)
-        {
-            chest.getWorld().playSound(chest.getLocation(), Sound.BLOCK_LEVER_CLICK, 10, 1);
-        }
-        if (counter == clicks * clickdelay)
-        {
-            chest.setType(Material.AIR);
-            chest.getWorld().createExplosion(chest.getLocation(), explosivePower);
-        }
-    }
-
-    public boolean isDone()
-    {
-        return counter > clicks * clickdelay;
     }
 }

@@ -3,14 +3,17 @@
 common_key:
   material: tripwire_hook
   name: ?2Common Key
+  price: 1000
   description: A normal crate key.
 mystical_key:
   material: tripwire_hook
   name: ?d?oMystical Key
+  price: 10000
   description: A mystical key of unknown origin. Surely rare.
 legendary_key:
   material: tripwire_hook
   name: ?e?lLegendary Key
+  price: 50000
   description: A legendary key that unlocks untold riches.
 ancient_key:
   material: tripwire_hook

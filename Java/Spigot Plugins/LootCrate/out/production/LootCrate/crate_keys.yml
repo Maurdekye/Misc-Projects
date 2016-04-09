@@ -1,2 +1,3 @@
 # Default crate key config file
 # Refer to 'crate_keys_sample_file.yml' for examples on how to fill out
+# Tip: set a keys price to 0 or disclude it to prevent it from being bought, but set it to a negative value to hide its existence from the /buykey command entirely

@@ -5,6 +5,11 @@ main: com.ncolaprete.lootcrate.LootCrate
 depend: [Essentials]
 
 commands:
+  buykey:
+    description: buys the given key.
+    usage: /buykey <type> [amount]
+    permission: lootcrate.buykey
+    permission-message: You do not have permission to buy crate keys.
   givekey:
     description: gives a crate key of the given type and amount to the given player.
     usage: /givekey <type> [amount] [player]
@@ -22,6 +27,8 @@ commands:
     permission-message: You do not have permission to spawn crate rewards.
 
 permissions:
+  lootcrate.buykey:
+    default: true
   lootcrate.givekey:
     default: op
   lootcrate.givecrate:
