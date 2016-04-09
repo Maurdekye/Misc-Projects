@@ -11,6 +11,7 @@ import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 class Crate
 {
@@ -71,15 +72,11 @@ class CrateLayout
         for (Reward r : contents)
             sum += r.rewardChance;
         double rand = Math.random() * sum;
-        int prizeIndex = contents.size() - 1;
-        for (int i=0;i<contents.size();i++)
+        int prizeIndex = Utility.randomWeightedIndex(contents.stream().map(c -> c.rewardChance).collect(Collectors.toList()));
+        if (prizeIndex == -1)
         {
-            if (rand < contents.get(i).rewardChance)
-            {
-                prizeIndex = i;
-                break;
-            }
-            rand -= contents.get(i).rewardChance;
+            rewardee.getServer().getLogger().info("Probability Error in chest layout " + type + "!");
+            return;
         }
         Reward chosen = contents.get(prizeIndex);
         chosen.item.giveReward(plugin, rewardee, chosen.amount, location);

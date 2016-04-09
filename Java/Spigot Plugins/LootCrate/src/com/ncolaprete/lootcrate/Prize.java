@@ -443,8 +443,8 @@ enum Prize
         multipliers.put(Material.SEEDS, 24);
         multipliers.put(Material.MELON_SEEDS, 4);
         multipliers.put(Material.PUMPKIN_SEEDS, 3);
-        multipliers.put(Material.POTATO, 7);
-        multipliers.put(Material.CARROT, 4);
+        multipliers.put(Material.POTATO_ITEM, 7);
+        multipliers.put(Material.CARROT_ITEM, 4);
         for (Material key : multipliers.keySet())
         {
             int basecount = params.amountToGive * multipliers.get(key);

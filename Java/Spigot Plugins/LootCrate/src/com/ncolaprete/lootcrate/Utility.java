@@ -18,14 +18,14 @@ import org.bukkit.util.Vector;
 
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 class Utility
 {
+    public static final char SerializationDelimiter = '?';
+
     public static boolean itemHasLoreLine(ItemStack item, String line)
     {
         if (item == null)
@@ -156,18 +156,18 @@ class Utility
     {
         StringBuilder sb = new StringBuilder();
         sb.append(loc.getWorld().getName());
-        sb.append("?");
+        sb.append(SerializationDelimiter);
         sb.append(loc.getBlockX());
-        sb.append("?");
+        sb.append(SerializationDelimiter);
         sb.append(loc.getBlockY());
-        sb.append("?");
+        sb.append(SerializationDelimiter);
         sb.append(loc.getBlockZ());
         return sb.toString();
     }
 
     public static Location deserializeLocation(Server server, String serial)
     {
-        String[] parts = serial.split("\\?");
+        String[] parts = serial.split(Pattern.quote(SerializationDelimiter + ""));
         World world = server.getWorld(parts[0]);
         int x = Integer.parseInt(parts[1]);
         int y = Integer.parseInt(parts[2]);
@@ -208,7 +208,6 @@ class Utility
         return highestSolid;
     }
 
-
     public static List<ItemStack> separateItemStacks(List<ItemStack> items)
     {
         ArrayList<ItemStack> separatedItems = new ArrayList<>();
@@ -229,7 +228,7 @@ class Utility
     public static List<Block> getSurroundingBlocks(Block block, boolean sides, boolean diagonals, boolean corners)
     {
         ArrayList<Block> surrounds = new ArrayList<>();
-        List<BlockFace> cardinalFaces = Arrays.asList(BlockFace.NORTH, BlockFace.SOUTH, BlockFace.EAST, BlockFace.WEST, BlockFace.UP, BlockFace.DOWN);
+        EnumSet<BlockFace> cardinalFaces = EnumSet.of(BlockFace.NORTH, BlockFace.SOUTH, BlockFace.EAST, BlockFace.WEST, BlockFace.UP, BlockFace.DOWN);
         if (sides)
         {
             surrounds.addAll(cardinalFaces.stream().map(block::getRelative).collect(Collectors.toList()));
@@ -238,7 +237,7 @@ class Utility
         }
         if (diagonals)
         {
-            List<BlockFace> diagonalFaces = Arrays.asList(BlockFace.NORTH_EAST, BlockFace.NORTH_WEST, BlockFace.SOUTH_EAST, BlockFace.SOUTH_WEST);
+            EnumSet<BlockFace> diagonalFaces = EnumSet.of(BlockFace.NORTH_EAST, BlockFace.NORTH_WEST, BlockFace.SOUTH_EAST, BlockFace.SOUTH_WEST);
             for (BlockFace face : cardinalFaces)
             {
                 surrounds.add(block.getRelative(face).getRelative(BlockFace.UP));
@@ -248,11 +247,11 @@ class Utility
         }
         if (corners)
         {
-            for (BlockFace fa : Arrays.asList(BlockFace.NORTH, BlockFace.SOUTH))
+            for (BlockFace fa : EnumSet.of(BlockFace.NORTH, BlockFace.SOUTH))
             {
-                for (BlockFace fb : Arrays.asList(BlockFace.EAST, BlockFace.WEST))
+                for (BlockFace fb : EnumSet.of(BlockFace.EAST, BlockFace.WEST))
                 {
-                    surrounds.addAll(Arrays.asList(BlockFace.UP, BlockFace.DOWN).stream().map(fc -> block.getRelative(fa).getRelative(fb).getRelative(fc)).collect(Collectors.toList()));
+                    surrounds.addAll(EnumSet.of(BlockFace.UP, BlockFace.DOWN).stream().map(fc -> block.getRelative(fa).getRelative(fb).getRelative(fc)).collect(Collectors.toList()));
                 }
             }
         }
@@ -261,10 +260,10 @@ class Utility
 
     public static boolean isCorrectTool(Material tool, Material block)
     {
-        List<Material> Pickaxes = Arrays.asList(Material.WOOD_PICKAXE, Material.STONE_PICKAXE, Material.IRON_PICKAXE, Material.DIAMOND_PICKAXE);
-        List<Material> Axes = Arrays.asList(Material.WOOD_AXE, Material.STONE_AXE, Material.IRON_AXE, Material.DIAMOND_AXE);
-        List<Material> Shovels = Arrays.asList(Material.WOOD_SPADE, Material.STONE_SPADE, Material.IRON_SPADE, Material.DIAMOND_SPADE);
-        List<Material> validAxeBlocks = Arrays.asList(
+        EnumSet<Material> Pickaxes = EnumSet.of(Material.WOOD_PICKAXE, Material.STONE_PICKAXE, Material.IRON_PICKAXE, Material.DIAMOND_PICKAXE);
+        EnumSet<Material> Axes = EnumSet.of(Material.WOOD_AXE, Material.STONE_AXE, Material.IRON_AXE, Material.DIAMOND_AXE);
+        EnumSet<Material> Shovels = EnumSet.of(Material.WOOD_SPADE, Material.STONE_SPADE, Material.IRON_SPADE, Material.DIAMOND_SPADE);
+        EnumSet<Material> validAxeBlocks = EnumSet.of(
                 Material.WOOD_DOOR, Material.ACACIA_DOOR, Material.BIRCH_DOOR,
                 Material.DARK_OAK_DOOR, Material.JUNGLE_DOOR, Material.SPRUCE_DOOR,
                 Material.TRAP_DOOR, Material.CHEST, Material.WORKBENCH,
@@ -274,13 +273,22 @@ class Utility
                 Material.WALL_SIGN, Material.NOTE_BLOCK, Material.WOOD_PLATE,
                 Material.DAYLIGHT_DETECTOR, Material.DAYLIGHT_DETECTOR_INVERTED,
                 Material.HUGE_MUSHROOM_1, Material.HUGE_MUSHROOM_2, Material.VINE);
-        List<Material> validShovelBlocks = Arrays.asList(
+        EnumSet<Material> validShovelBlocks = EnumSet.of(
                 Material.CLAY, Material.SOIL, Material.GRASS, Material.GRASS_PATH,
                 Material.GRAVEL, Material.MYCEL, Material.DIRT, Material.SAND,
                 Material.SOUL_SAND, Material.SNOW_BLOCK);
+        EnumSet<Material> noValidToolBlocks = EnumSet.of(
+                Material.LEAVES, Material.LEAVES_2,
+                Material.MELON_STEM, Material.PUMPKIN_STEM,
+                Material.CARROT, Material.POTATO, Material.SUGAR_CANE_BLOCK,
+                Material.NETHER_STALK, Material.LONG_GRASS, Material.WATER_LILY,
+                Material.CHORUS_FLOWER, Material.YELLOW_FLOWER, Material.GLASS,
+                Material.THIN_GLASS, Material.BEDROCK);
+        if (tool == Material.SHEARS && EnumSet.of(Material.LEAVES, Material.LEAVES_2).contains(block))
+            return true;
         if (Pickaxes.contains(tool))
         {
-            return !validAxeBlocks.contains(block) && !validShovelBlocks.contains(block);
+            return !validAxeBlocks.contains(block) && !validShovelBlocks.contains(block) && !noValidToolBlocks.contains(block);
         }
         else if (Axes.contains(tool))
         {
@@ -359,9 +367,4 @@ class Utility
         }
         return true;
     }
-}
-
-interface CollectionFilter
-{
-    <T> boolean shouldDiscard(T item);
 }

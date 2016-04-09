@@ -412,21 +412,13 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
             }
 
             // Find crate key to give
-            CrateKey key = null;
-            for (CrateKey k : crateKeys)
-            {
-                if (k.type.equalsIgnoreCase(args[0]))
-                {
-                    key = k;
-                    break;
-                }
-            }
-
-            if (key == null)
+            Optional<CrateKey> maybeKey = crateKeys.stream().filter(k -> k.type.equalsIgnoreCase(args[0])).findFirst();
+            if (!maybeKey.isPresent())
             {
                 sender.sendMessage(ChatColor.RED + "Could not find crate key '" + args[0] + "'.");
                 return true;
             }
+            CrateKey key = maybeKey.get();
 
             // Find amount to give
             int amount = 1;
@@ -495,20 +487,13 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
 
             // Find crate layout to use
             String type = args[0];
-            CrateLayout layout = null;
-            for (CrateLayout l : crateLayouts)
-            {
-                if (l.type.equalsIgnoreCase(type))
-                {
-                    layout = l;
-                    break;
-                }
-            }
-            if (layout == null)
+            Optional<CrateLayout> maybeLayout = crateLayouts.stream().filter(k -> k.type.equalsIgnoreCase(args[0])).findFirst();
+            if (!maybeLayout.isPresent())
             {
                 sender.sendMessage(ChatColor.RED + "No crate layout of type " + type);
                 return true;
             }
+            CrateLayout layout = maybeLayout.get();
 
             // Find amount to give
             int amount = 1;
@@ -620,17 +605,13 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
 
     private void updateJobs()
     {
-        for (Job job : activeJobs)
-            job.update();
-        activeJobs.removeIf(j -> j.isDone());
+        activeJobs.stream().forEach(Job::update);
+        activeJobs.removeIf(Job::isDone);
     }
 
     private void checkAllPlayersForSpecialItems()
     {
-        for (Player ply : getServer().getOnlinePlayers())
-        {
-            checkPlayerForSpecialItem(ply);
-        }
+        getServer().getOnlinePlayers().stream().forEach(this::checkPlayerForSpecialItem);
     }
 
     private void checkForCreativeTimeUp()
@@ -678,15 +659,7 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
             Block block = ev.getClickedBlock();
             if (block.getType() != Material.CHEST)
                 return;
-            Crate crateToOpen = null;
-            for (Crate crate : cratePositions)
-            {
-                if (crate.location.equals(block))
-                {
-                    crateToOpen = crate;
-                    break;
-                }
-            }
+            Crate crateToOpen = cratePositions.stream().filter(c -> c.location.equals(block)).findFirst().orElse(null);
             if (crateToOpen == null)
                 return;
             if (!ply.hasPermission("lootcrate.opencrate"))
@@ -751,21 +724,19 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
     @EventHandler
     public void blockBreak(BlockBreakEvent ev)
     {
+        ItemStack mainHand = ev.getPlayer().getInventory().getItemInMainHand();
+
         // Treefeller Chainsaw
-        if (Prize.itemIsPrize(ev.getPlayer().getInventory().getItemInMainHand(), Prize.TREEFELLER_CHAINSAW))
+        if (Prize.itemIsPrize(mainHand, Prize.TREEFELLER_CHAINSAW))
         {
             if (new TreefellerJob().getValidBlocks().contains(ev.getBlock().getType()) && CanFellTrees)
-            {
                 activeJobs.add(new TreefellerJob(ev.getBlock(), TreefellerSpeed, MaxBlocksPerFell));
-            }
             else if (new ShroomFellerJob().getValidBlocks().contains(ev.getBlock().getType()) && CanFellMushrooms)
-            {
                 activeJobs.add(new ShroomFellerJob(ev.getBlock(), TreefellerSpeed, MaxBlocksPerFell));
-            }
         }
 
         // Terramorpher
-        if (Prize.itemIsPrize(ev.getPlayer().getInventory().getItemInMainHand(), Prize.TERRAMORPHER))
+        if (Prize.itemIsPrize(mainHand, Prize.TERRAMORPHER))
         {
             if (!Utility.isCorrectTool(Material.DIAMOND_SPADE, ev.getBlock().getType()))
                 return;
@@ -773,7 +744,7 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
         }
 
         // Giga Drill Breaker
-        if (Prize.itemIsPrize(ev.getPlayer().getInventory().getItemInMainHand(), Prize.GIGA_DRILL_BREAKER))
+        if (Prize.itemIsPrize(mainHand, Prize.GIGA_DRILL_BREAKER))
         {
             if (!Utility.isCorrectTool(Material.DIAMOND_PICKAXE, ev.getBlock().getType()))
                 return;
@@ -781,68 +752,30 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
         }
 
         // Transmogriphier
-        if (Prize.itemIsPrize(ev.getPlayer().getInventory().getItemInMainHand(), Prize.TRANSMOGRIFIER) &&
+        if (Prize.itemIsPrize(mainHand, Prize.TRANSMOGRIFIER) &&
                 ev.getPlayer().getGameMode() == GameMode.CREATIVE)
-        {
             ev.setCancelled(true);
-        }
 
         // Manage picking up of crates
-        if (ev.getBlock().getType() == Material.CHEST)
+        if (ev.getBlock().getType() == Material.CHEST && isCrate(ev.getBlock()))
         {
-            for (int i = 0; i < cratePositions.size(); i++) {
-                if (cratePositions.get(i).location.equals(ev.getBlock()))
-                {
-                    ev.setCancelled(true);
-                    ItemStack crateDrop = cratePositions.get(i).layout.getItemstack();
-                    ev.getBlock().setType(Material.AIR);
-                    ev.getBlock().getWorld().dropItemNaturally(ev.getBlock().getLocation().add(0.5, 0.5, 0.5), crateDrop);
-                    removeCrate(i);
-                    break;
-                }
-            }
+            Crate crate = getCrate(ev.getBlock());
+            ev.setCancelled(true);
+            ItemStack crateDrop = crate.layout.getItemstack();
+            ev.getBlock().setType(Material.AIR);
+            ev.getBlock().getWorld().dropItemNaturally(ev.getBlock().getLocation().add(0.5, 0.5, 0.5), crateDrop);
+            removeCrate(crate);
         }
     }
 
     @EventHandler
     public void blockPlace(BlockPlaceEvent ev)
     {
-        CrateLayout newCrate = null;
-        BlockFace[] cardinalDirections = new BlockFace[] {BlockFace.NORTH, BlockFace.SOUTH, BlockFace.EAST, BlockFace.WEST};
-        for (CrateLayout l : crateLayouts)
-        {
-
-            if (Utility.itemHasLoreLine(ev.getItemInHand(), l.getLoreTag()))
-            {
-                newCrate = l;
-                break;
-            }
-        }
-        if (newCrate != null)
-        {
-            for (BlockFace f : cardinalDirections)
-            {
-                if (ev.getBlock().getRelative(f).getType() == Material.CHEST)
-                {
-                    ev.setCancelled(true);
-                    return;
-                }
-            }
-        }
-        else if (ev.getItemInHand().getType() == Material.CHEST)
-        {
-            for (BlockFace f : cardinalDirections)
-            {
-                for (Crate c : cratePositions)
-                {
-                    if (ev.getBlock().getRelative(f).equals(c.location))
-                    {
-                        ev.setCancelled(true);
-                        return;
-                    }
-                }
-            }
-        }
+        EnumSet<BlockFace> cardinalDirections = EnumSet.of(BlockFace.NORTH, BlockFace.SOUTH, BlockFace.EAST, BlockFace.WEST);
+        CrateLayout newCrate = getLayout(ev.getItemInHand());
+        if (newCrate != null && cardinalDirections.stream().anyMatch(f -> ev.getBlock().getRelative(f).getType() == Material.CHEST) ||
+                ev.getItemInHand().getType() == Material.CHEST && cardinalDirections.stream().anyMatch(f -> isCrate(ev.getBlock().getRelative(f))))
+            ev.setCancelled(true);
         if (newCrate == null)
             return;
         addCrate(new Crate(ev.getBlock(), newCrate));
@@ -851,14 +784,8 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
     @EventHandler
     public void inventoryClick(InventoryClickEvent ev)
     {
-        for (CrateLayout l : crateLayouts)
-        {
-            if ((l.getPrintname(true)).equals(ev.getInventory().getName()))
-            {
-                ev.setCancelled(true);
-                break;
-            }
-        }
+        if (crateLayouts.stream().anyMatch(l -> l.getPrintname(true).equals(ev.getInventory().getName())))
+            ev.setCancelled(true);
     }
 
     @EventHandler
@@ -918,19 +845,36 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
         cratePositionConfig.saveConfig();
     }
 
+    public boolean isCrate(Block b)
+    {
+        return cratePositions.stream().filter(c -> c.layout.equals(b)).findFirst().isPresent();
+    }
+
+    public boolean isCrate(ItemStack item)
+    {
+        return crateLayouts.stream().filter(l -> Utility.itemHasLoreLine(item, l.getLoreTag())).findFirst().isPresent();
+    }
+
+    public Crate getCrate(Block b)
+    {
+        return cratePositions.stream().filter(c -> c.layout.equals(b)).findFirst().orElse(null);
+    }
+
+    public CrateLayout getLayout(ItemStack item)
+    {
+        return crateLayouts.stream().filter(l -> Utility.itemHasLoreLine(item, l.getLoreTag())).findFirst().orElse(null);
+    }
+
     private void dropRandomCrate(Location center, double radius)
     {
         // get layout to use
-        ArrayList<Double> weights = new ArrayList<>();
-        for (CrateLayout l : crateLayouts)
-            weights.add(l.spawnChance);
-        int index = Utility.randomWeightedIndex(weights);
+        int index = Utility.randomWeightedIndex(crateLayouts.stream().map(l -> l.spawnChance).collect(Collectors.toList()));
         if (index == -1)
         {
-            csend.sendMessage(ChatColor.RED + "Error: Attempted to place crate when none have any chance to drop. Please disable random crate drops in lootcrate_options.yml if this is intended.");
+            csend.sendMessage(ChatColor.RED + "Error: Attempted to place crate when none have any chance to drop. Please disable random crate drops in lootcrate_config.yml if this is intended.");
             return;
         }
-        CrateLayout layout = crateLayouts.get(Utility.randomWeightedIndex(weights));
+        CrateLayout layout = crateLayouts.get(index);
 
         // get location to use
         Location droplocation;
@@ -942,9 +886,7 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
 
         // broadcast crate position
         if (layout.shouldBroadcast)
-        {
             getServer().broadcastMessage("A " + layout.printname + ChatColor.RESET + " has dropped at " + ChatColor.GOLD + newChest.getX() + ", " + newChest.getZ() + ChatColor.RESET + "!");
-        }
         csend.sendMessage(layout.printname + ChatColor.RESET + " spawned at " + Utility.formatVector(newChest.getLocation().toVector()));
 
         // drop crate
