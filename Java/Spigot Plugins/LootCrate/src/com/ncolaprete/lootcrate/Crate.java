@@ -176,3 +176,17 @@ class CrateKey
         return ChatColor.BLACK + type;
     }
 }
+
+class Reward
+{
+    Prize item;
+    int amount;
+    double rewardChance;
+
+    Reward(Prize item, int amount, double rewardChance)
+    {
+        this.item = item;
+        this.amount = amount;
+        this.rewardChance = rewardChance;
+    }
+}

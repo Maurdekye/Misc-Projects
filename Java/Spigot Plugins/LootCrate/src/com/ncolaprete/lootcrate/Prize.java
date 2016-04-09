@@ -18,20 +18,6 @@ import org.bukkit.util.Vector;
 import java.math.BigDecimal;
 import java.util.*;
 
-class Reward
-{
-    Prize item;
-    int amount;
-    double rewardChance;
-
-    Reward(Prize item, int amount, double rewardChance)
-    {
-        this.item = item;
-        this.amount = amount;
-        this.rewardChance = rewardChance;
-    }
-}
-
 enum Prize
 {
     _CRATE_KEY (params -> {

@@ -267,6 +267,7 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
                 continue;
             addCrate(new Crate(pos.getBlock(), layout));
         }
+        checkForInvalidCrateLocations();
 
         // load in temporary creatives
         for (String key : tempCreativeTimestampConfig.getConfig().getKeys(false))
