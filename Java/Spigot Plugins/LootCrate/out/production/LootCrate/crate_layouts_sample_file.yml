@@ -3,7 +3,7 @@
 free_crate:
   name: ?7Free Crate
   spawn_chance: 50
-  reawards:
+  rewards:
     1:
       prize: common_key
       amount: 1

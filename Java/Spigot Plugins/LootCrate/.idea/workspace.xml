@@ -25,8 +25,8 @@
       <file leaf-file-name="LootCrate.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/com/ncolaprete/lootcrate/LootCrate.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="9900">
-              <caret line="828" column="5" selection-start-line="828" selection-start-column="5" selection-end-line="828" selection-end-column="5" />
+            <state relative-caret-position="734">
+              <caret line="599" column="23" selection-start-line="599" selection-start-column="23" selection-end-line="599" selection-end-column="23" />
               <folding>
                 <element signature="method#onDisable#0;class#LootCrate#0" expanded="false" />
                 <element signature="method#onCommand#0;class#LootCrate#0" expanded="false" />
@@ -63,7 +63,6 @@
                 <element signature="class#Crate#0" expanded="false" />
                 <element signature="method#Crate#0;class#Crate#0" expanded="false" />
                 <element signature="method#unlockAndGivePrize#0;class#Crate#0" expanded="false" />
-                <element signature="class#CrateLayout#0" expanded="false" />
                 <element signature="method#CrateLayout#0;class#CrateLayout#0" expanded="false" />
                 <element signature="method#givePrize#0;class#CrateLayout#0" expanded="false" />
                 <element signature="method#showContents#0;class#CrateLayout#0" expanded="false" />
@@ -122,8 +121,8 @@
       <file leaf-file-name="crate_layouts_sample_file.yml" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/crate_layouts_sample_file.yml">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="33">
-              <caret line="1" column="0" selection-start-line="1" selection-start-column="0" selection-end-line="1" selection-end-column="0" />
+            <state relative-caret-position="165">
+              <caret line="5" column="10" selection-start-line="5" selection-start-column="10" selection-end-line="5" selection-end-column="10" />
               <folding />
             </state>
           </provider>
@@ -194,6 +193,7 @@
         <option value="$PROJECT_DIR$/src/crate_keys.yml" />
         <option value="$PROJECT_DIR$/src/crate_layouts.yml" />
         <option value="$PROJECT_DIR$/src/lootcrate_config.yml" />
+        <option value="$PROJECT_DIR$/src/crate_layouts_sample_file.yml" />
         <option value="$PROJECT_DIR$/src/com/ncolaprete/lootcrate/LootCrate.java" />
       </list>
     </option>
@@ -652,7 +652,6 @@
             <element signature="class#Crate#0" expanded="false" />
             <element signature="method#Crate#0;class#Crate#0" expanded="false" />
             <element signature="method#unlockAndGivePrize#0;class#Crate#0" expanded="false" />
-            <element signature="class#CrateLayout#0" expanded="false" />
             <element signature="method#CrateLayout#0;class#CrateLayout#0" expanded="false" />
             <element signature="method#givePrize#0;class#CrateLayout#0" expanded="false" />
             <element signature="method#showContents#0;class#CrateLayout#0" expanded="false" />
@@ -769,7 +768,6 @@
             <element signature="class#Crate#0" expanded="false" />
             <element signature="method#Crate#0;class#Crate#0" expanded="false" />
             <element signature="method#unlockAndGivePrize#0;class#Crate#0" expanded="false" />
-            <element signature="class#CrateLayout#0" expanded="false" />
             <element signature="method#CrateLayout#0;class#CrateLayout#0" expanded="false" />
             <element signature="method#givePrize#0;class#CrateLayout#0" expanded="false" />
             <element signature="method#showContents#0;class#CrateLayout#0" expanded="false" />
@@ -878,7 +876,6 @@
             <element signature="class#Crate#0" expanded="false" />
             <element signature="method#Crate#0;class#Crate#0" expanded="false" />
             <element signature="method#unlockAndGivePrize#0;class#Crate#0" expanded="false" />
-            <element signature="class#CrateLayout#0" expanded="false" />
             <element signature="method#CrateLayout#0;class#CrateLayout#0" expanded="false" />
             <element signature="method#givePrize#0;class#CrateLayout#0" expanded="false" />
             <element signature="method#showContents#0;class#CrateLayout#0" expanded="false" />
@@ -987,7 +984,6 @@
             <element signature="class#Crate#0" expanded="false" />
             <element signature="method#Crate#0;class#Crate#0" expanded="false" />
             <element signature="method#unlockAndGivePrize#0;class#Crate#0" expanded="false" />
-            <element signature="class#CrateLayout#0" expanded="false" />
             <element signature="method#CrateLayout#0;class#CrateLayout#0" expanded="false" />
             <element signature="method#givePrize#0;class#CrateLayout#0" expanded="false" />
             <element signature="method#showContents#0;class#CrateLayout#0" expanded="false" />
@@ -1096,7 +1092,6 @@
             <element signature="class#Crate#0" expanded="false" />
             <element signature="method#Crate#0;class#Crate#0" expanded="false" />
             <element signature="method#unlockAndGivePrize#0;class#Crate#0" expanded="false" />
-            <element signature="class#CrateLayout#0" expanded="false" />
             <element signature="method#CrateLayout#0;class#CrateLayout#0" expanded="false" />
             <element signature="method#givePrize#0;class#CrateLayout#0" expanded="false" />
             <element signature="method#showContents#0;class#CrateLayout#0" expanded="false" />
@@ -1205,7 +1200,6 @@
             <element signature="class#Crate#0" expanded="false" />
             <element signature="method#Crate#0;class#Crate#0" expanded="false" />
             <element signature="method#unlockAndGivePrize#0;class#Crate#0" expanded="false" />
-            <element signature="class#CrateLayout#0" expanded="false" />
             <element signature="method#CrateLayout#0;class#CrateLayout#0" expanded="false" />
             <element signature="method#givePrize#0;class#CrateLayout#0" expanded="false" />
             <element signature="method#showContents#0;class#CrateLayout#0" expanded="false" />
@@ -1314,7 +1308,6 @@
             <element signature="class#Crate#0" expanded="false" />
             <element signature="method#Crate#0;class#Crate#0" expanded="false" />
             <element signature="method#unlockAndGivePrize#0;class#Crate#0" expanded="false" />
-            <element signature="class#CrateLayout#0" expanded="false" />
             <element signature="method#CrateLayout#0;class#CrateLayout#0" expanded="false" />
             <element signature="method#givePrize#0;class#CrateLayout#0" expanded="false" />
             <element signature="method#showContents#0;class#CrateLayout#0" expanded="false" />
@@ -1397,22 +1390,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/crate_keys_sample_file.yml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="33">
-          <caret line="1" column="0" selection-start-line="1" selection-start-column="0" selection-end-line="1" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/crate_layouts_sample_file.yml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="33">
-          <caret line="1" column="0" selection-start-line="1" selection-start-column="0" selection-end-line="1" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/crate_keys.yml">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="33">
@@ -1437,10 +1414,26 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/src/crate_keys_sample_file.yml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="33">
+          <caret line="1" column="0" selection-start-line="1" selection-start-column="0" selection-end-line="1" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/crate_layouts_sample_file.yml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="165">
+          <caret line="5" column="10" selection-start-line="5" selection-start-column="10" selection-end-line="5" selection-end-column="10" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/com/ncolaprete/lootcrate/LootCrate.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="9900">
-          <caret line="828" column="5" selection-start-line="828" selection-start-column="5" selection-end-line="828" selection-end-column="5" />
+        <state relative-caret-position="734">
+          <caret line="599" column="23" selection-start-line="599" selection-start-column="23" selection-end-line="599" selection-end-column="23" />
           <folding>
             <element signature="method#onDisable#0;class#LootCrate#0" expanded="false" />
             <element signature="method#onCommand#0;class#LootCrate#0" expanded="false" />
@@ -1477,7 +1470,6 @@
             <element signature="class#Crate#0" expanded="false" />
             <element signature="method#Crate#0;class#Crate#0" expanded="false" />
             <element signature="method#unlockAndGivePrize#0;class#Crate#0" expanded="false" />
-            <element signature="class#CrateLayout#0" expanded="false" />
             <element signature="method#CrateLayout#0;class#CrateLayout#0" expanded="false" />
             <element signature="method#givePrize#0;class#CrateLayout#0" expanded="false" />
             <element signature="method#showContents#0;class#CrateLayout#0" expanded="false" />

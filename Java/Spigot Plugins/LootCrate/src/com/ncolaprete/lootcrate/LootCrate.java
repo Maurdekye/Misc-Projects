@@ -600,7 +600,6 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
                 return;
             if (!ply.hasPermission("lootcrate.opencrate"))
             {
-                ply.sendMessage(ChatColor.RED + "You don't have permission to open crates.");
                 ev.setCancelled(true);
                 return;
             }
@@ -613,9 +612,9 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
                         handItem.setAmount(handItem.getAmount() - 1);
                     else
                         ply.getInventory().remove(handItem);
-                    crateToOpen.unlockAndGivePrize(this, ply);
-                    removeCrate(crateToOpen);
                 }
+                crateToOpen.unlockAndGivePrize(this, ply);
+                removeCrate(crateToOpen);
             }
             else
             {
@@ -651,8 +650,9 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
             Vector direction = ply.getLocation().getDirection().normalize();
             direction = direction.multiply(WandOfLeapingPower);
             ply.setVelocity(direction);
-            Utility.reduceDurability(ply, ply.getInventory().getItemInMainHand(), 1);
             ply.playSound(ply.getLocation(), Sound.ENTITY_PLAYER_ATTACK_SWEEP, 1, 1);
+            if (ply.getGameMode() != GameMode.CREATIVE)
+                Utility.reduceDurability(ply, ply.getInventory().getItemInMainHand(), 1);
         }
     }
 
@@ -719,6 +719,7 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
         BlockFace[] cardinalDirections = new BlockFace[] {BlockFace.NORTH, BlockFace.SOUTH, BlockFace.EAST, BlockFace.WEST};
         for (CrateLayout l : crateLayouts)
         {
+
             if (Utility.itemHasLoreLine(ev.getItemInHand(), l.getLoreTag()))
             {
                 newCrate = l;
@@ -1316,8 +1317,10 @@ class CrateLayout
     {
         ItemStack crateDrop = Utility.setName(new ItemStack(Material.CHEST), getPrintname(true));
         if (keyRequired != null)
-            crateDrop = Utility.addLoreLine(crateDrop, ChatColor.RESET + "" + ChatColor.GRAY + "Requires a " + keyRequired.displayname + ChatColor.RESET + ChatColor.GRAY + " to unlock");
-        crateDrop = Utility.addLoreLine(crateDrop, getLoreTag());
+            Utility.addLoreLine(crateDrop, ChatColor.RESET + "" + ChatColor.GRAY + "Requires a " + keyRequired.displayname + ChatColor.RESET + ChatColor.GRAY + " to unlock");
+        else
+            Utility.addLoreLine(crateDrop, ChatColor.RESET + "" + ChatColor.GRAY + "Does not require a key");
+        Utility.addLoreLine(crateDrop, getLoreTag());
         return crateDrop;
     }
 
