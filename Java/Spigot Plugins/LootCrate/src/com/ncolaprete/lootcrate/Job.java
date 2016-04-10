@@ -135,10 +135,10 @@ class TransmogrificationJob implements Job
     {
         this.initialBlock = initialBlock;
         this.initialMaterial = initialBlock.getType();
-        this.initialData = initialBlock.getData();  //TODO Fix weird bug where wrong data value is fetched from block sometimes
+        this.initialData = initialBlock.getData();
         if (initialMaterial == Material.LEAVES || initialMaterial == Material.LEAVES_2)
             initialData = (byte) (initialData % 4);
-        this.ply = ply;                             // occurs on leaves mostly
+        this.ply = ply;
         this.modificationsPerAction = modificationsPerAction;
         this.maxModification = maxModification;
         this.currentSet = new ArrayList<>();
@@ -171,6 +171,11 @@ class TransmogrificationJob implements Job
                     }
                     else
                         offhanditem.setAmount(offhanditem.getAmount() - 1);
+                }
+                else
+                {
+                    if (offhanditem == null || offhanditem.getType() == Material.AIR)
+                        outOfBlocks = true;
                 }
                 Block cblock = currentSet.get(progressThroughSet);
                 cblock.getWorld().playEffect(cblock.getLocation(), Effect.TILE_BREAK, new MaterialData(cblock.getType()));

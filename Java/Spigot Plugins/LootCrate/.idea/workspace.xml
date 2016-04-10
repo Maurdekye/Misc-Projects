@@ -22,11 +22,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="600">
-      <file leaf-file-name="LootCrate.java" pinned="false" current-in-tab="true">
+      <file leaf-file-name="LootCrate.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/com/ncolaprete/lootcrate/LootCrate.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="174">
-              <caret line="809" column="17" selection-start-line="809" selection-start-column="17" selection-end-line="809" selection-end-column="17" />
+            <state relative-caret-position="372">
+              <caret line="850" column="5" selection-start-line="850" selection-start-column="5" selection-end-line="850" selection-end-column="5" />
               <folding>
                 <element signature="method#onDisable#0;class#LootCrate#0" expanded="false" />
                 <element signature="method#updateJobs#0;class#LootCrate#0" expanded="false" />
@@ -47,11 +47,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Job.java" pinned="false" current-in-tab="false">
+      <file leaf-file-name="Job.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/com/ncolaprete/lootcrate/Job.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="990">
-              <caret line="54" column="9" selection-start-line="54" selection-start-column="9" selection-end-line="54" selection-end-column="9" />
+            <state relative-caret-position="1526">
+              <caret line="177" column="43" selection-start-line="177" selection-start-column="43" selection-end-line="177" selection-end-column="43" />
               <folding>
                 <element signature="class#Job#0" expanded="false" />
                 <element signature="method#TreefellerJobBase#1;class#TreefellerJobBase#0" expanded="false" />
@@ -61,9 +61,6 @@
                 <element signature="method#getValidBlocks#0;class#TreefellerJob#0" expanded="false" />
                 <element signature="class#ShroomFellerJob#0" expanded="false" />
                 <element signature="method#ShroomFellerJob#1;class#ShroomFellerJob#0" expanded="false" />
-                <element signature="class#TransmogrificationJob#0" expanded="false" />
-                <element signature="method#TransmogrificationJob#0;class#TransmogrificationJob#0" expanded="false" />
-                <element signature="method#update#0;class#TransmogrificationJob#0" expanded="false" />
                 <element signature="method#getNewSet#0;class#TransmogrificationJob#0" expanded="false" />
                 <element signature="method#isDone#0;class#TransmogrificationJob#0" expanded="false" />
                 <element signature="class#TerramorpherJob#0" expanded="false" />
@@ -206,7 +203,6 @@
         <option value="$PROJECT_DIR$/src/crate_layouts.yml" />
         <option value="$PROJECT_DIR$/src/lootcrate_config.yml" />
         <option value="$PROJECT_DIR$/src/crate_layouts_sample_file.yml" />
-        <option value="$PROJECT_DIR$/src/com/ncolaprete/lootcrate/Job.java" />
         <option value="$PROJECT_DIR$/src/plugin.yml" />
         <option value="$PROJECT_DIR$/src/crate_keys_sample_file.yml" />
         <option value="$PROJECT_DIR$/src/crate_keys.yml" />
@@ -214,6 +210,7 @@
         <option value="$PROJECT_DIR$/src/com/ncolaprete/lootcrate/Prize.java" />
         <option value="$PROJECT_DIR$/src/com/ncolaprete/lootcrate/Utility.java" />
         <option value="$PROJECT_DIR$/src/com/ncolaprete/lootcrate/Crate.java" />
+        <option value="$PROJECT_DIR$/src/com/ncolaprete/lootcrate/Job.java" />
       </list>
     </option>
   </component>
@@ -256,6 +253,8 @@
     </navigator>
     <panes>
       <pane id="PackagesPane" />
+      <pane id="Scope" />
+      <pane id="Scratches" />
       <pane id="ProjectPane">
         <subPane>
           <PATH>
@@ -308,8 +307,6 @@
           </PATH>
         </subPane>
       </pane>
-      <pane id="Scope" />
-      <pane id="Scratches" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -588,6 +585,7 @@
     <layout>
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
+      <window_info id="Messages" active="false" anchor="left" auto_hide="false" internal_type="SLIDING" type="SLIDING" visible="false" show_stripe_button="true" weight="0.13619791" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" x="-10" y="671" width="3860" height="692" />
       <window_info id="Palette&#9;" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Capture Analysis" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3298264" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
@@ -602,7 +600,6 @@
       <window_info id="UI Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="5" side_tool="true" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
-      <window_info id="Messages" active="false" anchor="left" auto_hide="false" internal_type="SLIDING" type="SLIDING" visible="false" show_stripe_button="true" weight="0.13619791" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" x="-10" y="671" width="3860" height="692" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
@@ -634,6 +631,46 @@
     <option name="FILTER_TARGETS" value="false" />
   </component>
   <component name="editorHistoryManager">
+    <entry file="file://$PROJECT_DIR$/src/plugin.yml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="792">
+          <caret line="24" column="38" selection-start-line="24" selection-start-column="38" selection-end-line="24" selection-end-column="38" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/com/ncolaprete/lootcrate/Utility.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="2673">
+          <caret line="261" column="4" selection-start-line="261" selection-start-column="4" selection-end-line="261" selection-end-column="4" />
+          <folding>
+            <element signature="imports" expanded="true" />
+            <element signature="method#itemHasLoreLine#0;class#Utility#0" expanded="false" />
+            <element signature="method#addLoreLine#0;class#Utility#0" expanded="false" />
+            <element signature="method#getLore#0;class#Utility#0" expanded="false" />
+            <element signature="method#setName#0;class#Utility#0" expanded="false" />
+            <element signature="method#getName#0;class#Utility#0" expanded="false" />
+            <element signature="method#randomInsideUnitCircle#0;class#Utility#0" expanded="false" />
+            <element signature="method#randomElement#0;class#Utility#0" expanded="false" />
+            <element signature="method#randomWeightedIndex#0;class#Utility#0" expanded="false" />
+            <element signature="method#setChestInventoryName#0;class#Utility#0" expanded="false" />
+            <element signature="method#serializeLocation#0;class#Utility#0" expanded="false" />
+            <element signature="method#deserializeLocation#0;class#Utility#0" expanded="false" />
+            <element signature="method#formatVector#0;class#Utility#0" expanded="false" />
+            <element signature="method#getDefaultSpawn#0;class#Utility#0" expanded="false" />
+            <element signature="method#getHighestSolidBlock#0;class#Utility#0" expanded="false" />
+            <element signature="method#separateItemStacks#0;class#Utility#0" expanded="false" />
+            <element signature="method#getSurroundingBlocks#0;class#Utility#0" expanded="false" />
+            <element signature="method#isCorrectTool#0;class#Utility#0" expanded="false" />
+            <element signature="method#blockInBoundsInclusive#0;class#Utility#0" expanded="false" />
+            <element signature="method#getBlockFaceIsLookingAt#0;class#Utility#0" expanded="false" />
+            <element signature="method#reduceDurability#0;class#Utility#0" expanded="false" />
+            <element signature="method#getBalance#0;class#Utility#0" expanded="false" />
+            <element signature="method#modifyBalance#0;class#Utility#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/com/ncolaprete/lootcrate/LootCrate.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
@@ -670,9 +707,6 @@
             <element signature="method#getValidBlocks#0;class#TreefellerJob#0" expanded="false" />
             <element signature="class#ShroomFellerJob#0" expanded="false" />
             <element signature="method#ShroomFellerJob#1;class#ShroomFellerJob#0" expanded="false" />
-            <element signature="class#TransmogrificationJob#0" expanded="false" />
-            <element signature="method#TransmogrificationJob#0;class#TransmogrificationJob#0" expanded="false" />
-            <element signature="method#update#0;class#TransmogrificationJob#0" expanded="false" />
             <element signature="method#getNewSet#0;class#TransmogrificationJob#0" expanded="false" />
             <element signature="method#isDone#0;class#TransmogrificationJob#0" expanded="false" />
             <element signature="class#TerramorpherJob#0" expanded="false" />
@@ -1165,37 +1199,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/com/ncolaprete/lootcrate/Job.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="990">
-          <caret line="54" column="9" selection-start-line="54" selection-start-column="9" selection-end-line="54" selection-end-column="9" />
-          <folding>
-            <element signature="class#Job#0" expanded="false" />
-            <element signature="method#TreefellerJobBase#1;class#TreefellerJobBase#0" expanded="false" />
-            <element signature="method#getNewSet#0;class#TreefellerJobBase#0" expanded="false" />
-            <element signature="class#TreefellerJob#0" expanded="false" />
-            <element signature="method#TreefellerJob#1;class#TreefellerJob#0" expanded="false" />
-            <element signature="method#getValidBlocks#0;class#TreefellerJob#0" expanded="false" />
-            <element signature="class#ShroomFellerJob#0" expanded="false" />
-            <element signature="method#ShroomFellerJob#1;class#ShroomFellerJob#0" expanded="false" />
-            <element signature="class#TransmogrificationJob#0" expanded="false" />
-            <element signature="method#TransmogrificationJob#0;class#TransmogrificationJob#0" expanded="false" />
-            <element signature="method#update#0;class#TransmogrificationJob#0" expanded="false" />
-            <element signature="method#getNewSet#0;class#TransmogrificationJob#0" expanded="false" />
-            <element signature="method#isDone#0;class#TransmogrificationJob#0" expanded="false" />
-            <element signature="class#TerramorpherJob#0" expanded="false" />
-            <element signature="method#TerramorpherJob#0;class#TerramorpherJob#0" expanded="false" />
-            <element signature="method#update#0;class#TerramorpherJob#0" expanded="false" />
-            <element signature="class#Orientation#0;class#TerramorpherJob#0" expanded="false" />
-            <element signature="method#Orientation#0;class#Orientation#0;class#TerramorpherJob#0" expanded="false" />
-            <element signature="method#fromBlockFace#0;class#Orientation#0;class#TerramorpherJob#0" expanded="false" />
-            <element signature="class#BoomTimeJob#0" expanded="false" />
-            <element signature="method#BoomTimeJob#0;class#BoomTimeJob#0" expanded="false" />
-            <element signature="method#update#0;class#BoomTimeJob#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/com/ncolaprete/lootcrate/Crate.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="3498">
@@ -1264,8 +1267,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/com/ncolaprete/lootcrate/LootCrate.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="174">
-          <caret line="809" column="17" selection-start-line="809" selection-start-column="17" selection-end-line="809" selection-end-column="17" />
+        <state relative-caret-position="372">
+          <caret line="850" column="5" selection-start-line="850" selection-start-column="5" selection-end-line="850" selection-end-column="5" />
           <folding>
             <element signature="method#onDisable#0;class#LootCrate#0" expanded="false" />
             <element signature="method#updateJobs#0;class#LootCrate#0" expanded="false" />
@@ -1281,6 +1284,34 @@
             <element signature="method#removeCrate#1;class#LootCrate#0" expanded="false" />
             <element signature="method#addCrate#0;class#LootCrate#0" expanded="false" />
             <element signature="method#checkPlayerForSpecialItem#0;class#LootCrate#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/com/ncolaprete/lootcrate/Job.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1526">
+          <caret line="177" column="43" selection-start-line="177" selection-start-column="43" selection-end-line="177" selection-end-column="43" />
+          <folding>
+            <element signature="class#Job#0" expanded="false" />
+            <element signature="method#TreefellerJobBase#1;class#TreefellerJobBase#0" expanded="false" />
+            <element signature="method#getNewSet#0;class#TreefellerJobBase#0" expanded="false" />
+            <element signature="class#TreefellerJob#0" expanded="false" />
+            <element signature="method#TreefellerJob#1;class#TreefellerJob#0" expanded="false" />
+            <element signature="method#getValidBlocks#0;class#TreefellerJob#0" expanded="false" />
+            <element signature="class#ShroomFellerJob#0" expanded="false" />
+            <element signature="method#ShroomFellerJob#1;class#ShroomFellerJob#0" expanded="false" />
+            <element signature="method#getNewSet#0;class#TransmogrificationJob#0" expanded="false" />
+            <element signature="method#isDone#0;class#TransmogrificationJob#0" expanded="false" />
+            <element signature="class#TerramorpherJob#0" expanded="false" />
+            <element signature="method#TerramorpherJob#0;class#TerramorpherJob#0" expanded="false" />
+            <element signature="method#update#0;class#TerramorpherJob#0" expanded="false" />
+            <element signature="class#Orientation#0;class#TerramorpherJob#0" expanded="false" />
+            <element signature="method#Orientation#0;class#Orientation#0;class#TerramorpherJob#0" expanded="false" />
+            <element signature="method#fromBlockFace#0;class#Orientation#0;class#TerramorpherJob#0" expanded="false" />
+            <element signature="class#BoomTimeJob#0" expanded="false" />
+            <element signature="method#BoomTimeJob#0;class#BoomTimeJob#0" expanded="false" />
+            <element signature="method#update#0;class#BoomTimeJob#0" expanded="false" />
           </folding>
         </state>
       </provider>
