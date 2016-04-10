@@ -1,4 +1,4 @@
-name: Word_Guesser
+name: WordGuesser
 version: 1.0
 author: Maurdekye
 main: com.ncolaprete.wordguesser.Main

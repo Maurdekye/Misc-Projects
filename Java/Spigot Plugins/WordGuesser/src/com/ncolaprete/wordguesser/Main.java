@@ -17,9 +17,6 @@ import org.bukkit.scheduler.BukkitScheduler;
 import java.util.Arrays;
 import java.util.List;
 
-/**
- * Created by ncola on 4/4/2016.
- */
 public class Main extends JavaPlugin implements Listener, CommandExecutor {
 
     private List<String> words;
