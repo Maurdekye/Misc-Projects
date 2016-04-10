@@ -61,8 +61,8 @@
       <file leaf-file-name="Job.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/com/ncolaprete/lootcrate/Job.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1416">
-              <caret line="360" column="41" selection-start-line="360" selection-start-column="41" selection-end-line="360" selection-end-column="41" />
+            <state relative-caret-position="1131">
+              <caret line="388" column="24" selection-start-line="388" selection-start-column="24" selection-end-line="388" selection-end-column="24" />
               <folding>
                 <element signature="class#Job#0" expanded="false" />
                 <element signature="method#TreefellerJobBase#1;class#TreefellerJobBase#0" expanded="false" />
@@ -81,10 +81,10 @@
                 <element signature="class#BoomTimeJob#0" expanded="false" />
                 <element signature="method#BoomTimeJob#0;class#BoomTimeJob#0" expanded="false" />
                 <element signature="method#update#0;class#BoomTimeJob#0" expanded="false" />
-                <element signature="e#11028#11029#0" expanded="true" />
-                <element signature="e#11078#11079#0" expanded="true" />
-                <element signature="e#12038#12039#0" expanded="true" />
-                <element signature="e#12083#12084#0" expanded="true" />
+                <element signature="e#11098#11099#0" expanded="true" />
+                <element signature="e#11148#11149#0" expanded="true" />
+                <element signature="e#12429#12430#0" expanded="true" />
+                <element signature="e#12474#12475#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -603,7 +603,7 @@
     <layout>
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
-      <window_info id="Messages" active="true" anchor="left" auto_hide="false" internal_type="SLIDING" type="SLIDING" visible="true" show_stripe_button="true" weight="0.13619791" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" x="-10" y="671" width="3860" height="692" />
+      <window_info id="Messages" active="false" anchor="left" auto_hide="false" internal_type="SLIDING" type="SLIDING" visible="false" show_stripe_button="true" weight="0.13619791" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" x="-10" y="671" width="3860" height="692" />
       <window_info id="Palette&#9;" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Capture Analysis" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3298264" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
@@ -750,10 +750,10 @@
             <element signature="class#BoomTimeJob#0" expanded="false" />
             <element signature="method#BoomTimeJob#0;class#BoomTimeJob#0" expanded="false" />
             <element signature="method#update#0;class#BoomTimeJob#0" expanded="false" />
-            <element signature="e#11028#11029#0" expanded="true" />
-            <element signature="e#11078#11079#0" expanded="true" />
-            <element signature="e#12038#12039#0" expanded="true" />
-            <element signature="e#12083#12084#0" expanded="true" />
+            <element signature="e#11098#11099#0" expanded="true" />
+            <element signature="e#11148#11149#0" expanded="true" />
+            <element signature="e#12429#12430#0" expanded="true" />
+            <element signature="e#12474#12475#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -1424,8 +1424,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/com/ncolaprete/lootcrate/Job.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1416">
-          <caret line="360" column="41" selection-start-line="360" selection-start-column="41" selection-end-line="360" selection-end-column="41" />
+        <state relative-caret-position="1131">
+          <caret line="388" column="24" selection-start-line="388" selection-start-column="24" selection-end-line="388" selection-end-column="24" />
           <folding>
             <element signature="class#Job#0" expanded="false" />
             <element signature="method#TreefellerJobBase#1;class#TreefellerJobBase#0" expanded="false" />
@@ -1444,10 +1444,10 @@
             <element signature="class#BoomTimeJob#0" expanded="false" />
             <element signature="method#BoomTimeJob#0;class#BoomTimeJob#0" expanded="false" />
             <element signature="method#update#0;class#BoomTimeJob#0" expanded="false" />
-            <element signature="e#11028#11029#0" expanded="true" />
-            <element signature="e#11078#11079#0" expanded="true" />
-            <element signature="e#12038#12039#0" expanded="true" />
-            <element signature="e#12083#12084#0" expanded="true" />
+            <element signature="e#11098#11099#0" expanded="true" />
+            <element signature="e#11148#11149#0" expanded="true" />
+            <element signature="e#12429#12430#0" expanded="true" />
+            <element signature="e#12474#12475#0" expanded="true" />
           </folding>
         </state>
       </provider>

@@ -161,7 +161,7 @@ class TransmogrificationJob implements Job
             if (progressThroughSet >= currentSet.size()) {
                 progressThroughSet = 0;
                 getNewSet();
-            } else {
+            } else if (currentSet.get(progressThroughSet).getType() != Material.BEDROCK) {
                 if (ply.getGameMode() != GameMode.CREATIVE)
                 {
                     if (offhanditem.getAmount() == 1)
@@ -370,13 +370,23 @@ class DematerializationJob implements Job
 
     public void update()
     {
-            if (progressThroughSet >= currentSet.size()) {
+        do {
+            if (progressThroughSet >= currentSet.size())
+            {
                 progressThroughSet = 0;
                 getNewSet();
-            } else {
+                return;
+            }
+            if (currentSet.get(progressThroughSet).getType() == Material.AIR)
+            {
+                progressThroughSet++;
+                continue;
+            }
+            if (currentSet.get(progressThroughSet).getType() != Material.BEDROCK) {
                 currentSet.get(progressThroughSet).setType(Material.AIR);
                 progressThroughSet++;
             }
+        } while (false);
     }
 
     public void getNewSet()
