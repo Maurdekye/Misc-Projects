@@ -18,6 +18,7 @@ import org.json.simple.parser.JSONParser;
 import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -25,7 +26,7 @@ import java.util.Objects;
  */
 public class Main extends JavaPlugin implements Listener, CommandExecutor {
 
-    private final String[] words = new String[] {"lever", "taste", "cantelope", "rasberry", "juniper", "calisthenics", "livery", "tonsil", "thesaurus", "melancholy", "zebra"};
+    private List<String> words;
     private final int normalgametime = 10;
     private final int intermissiontime = 5;
     private final int scrambledgametime = 20;
@@ -39,11 +40,13 @@ public class Main extends JavaPlugin implements Listener, CommandExecutor {
 
     public void onEnable()
     {
+        getConfig().addDefault("words", Arrays.asList("jaunt", "haggard", "jellybean", "suture", "barnacle", "calgary", "tencent", "parsnip", "caliber", "ludicrous", "sanctuary"));
+        getConfig().options().copyDefaults(true);
+        saveConfig();
+        words = getConfig().getStringList("words");
+
         calendar = getServer().getScheduler();
         getServer().getPluginManager().registerEvents(this, this);
-        JSONObject jsconf = (JSONObject) new JSONParser().parse(new FileReader("/config.json"));
-        JSONArray prizes = jsconf.get("prizes");
-        JSONArray layouts = jsconf.get("layouts");
 
     }
 
@@ -127,7 +130,7 @@ public class Main extends JavaPlugin implements Listener, CommandExecutor {
     {
         playing = true;
         running = true;
-        currentword = words[(int) (Math.random() * words.length)];
+        currentword = words.get((int) (Math.random() * words.size()));
         if (Math.random() > 0.5)
             newScrambledGame();
         else
