@@ -88,12 +88,7 @@ public class Main extends JavaPlugin implements Listener, CommandExecutor {
             getServer().broadcastMessage(ChatColor.DARK_AQUA + "Nobody typed the word in time. New game will start in " + intermissiontime + " seconds.");
         else if (gametype == GameType.SCRAMBLED)
             getServer().broadcastMessage(ChatColor.DARK_AQUA + "Nobody guessed the word; it was '" + ChatColor.AQUA + currentword + ChatColor.DARK_AQUA + "'. New game will start in " + intermissiontime + " seconds.");
-        globalScheduleId = calendar.scheduleSyncDelayedTask(this, new Runnable() {
-            @Override
-            public void run() {
-                newGame();
-            }
-        }, 20*intermissiontime);
+        globalScheduleId = calendar.scheduleSyncDelayedTask(this, this::newGame, 20*intermissiontime);
     }
 
     public void finishCorrectGuess(Player guesser)
@@ -106,24 +101,7 @@ public class Main extends JavaPlugin implements Listener, CommandExecutor {
         else if (gametype == GameType.NORMAL)
             getServer().broadcastMessage(ChatColor.YELLOW + guesser.getName() + ChatColor.DARK_AQUA + " typed the word. A new game will begin in " + intermissiontime + " seconds.");
         calendar.cancelTask(globalScheduleId);
-        globalScheduleId = calendar.scheduleSyncDelayedTask(this, new Runnable() {
-            @Override
-            public void run() {
-                newGame();
-            }
-        }, 20*intermissiontime);
-    }
-
-    public void newNormalGame()
-    {
-        getServer().broadcastMessage(ChatColor.GOLD + "Type the word: '" + ChatColor.AQUA + currentword + ChatColor.GOLD + "'. You have " + normalgametime + " seconds.");
-        gametype = GameType.NORMAL;
-    }
-
-    public void newScrambledGame()
-    {
-        getServer().broadcastMessage(ChatColor.GOLD + "Guess what the scrambled word is: '" + ChatColor.AQUA + scramble(currentword) + ChatColor.GOLD + "'. You have " + scrambledgametime + " seconds.");
-        gametype = GameType.SCRAMBLED;
+        globalScheduleId = calendar.scheduleSyncDelayedTask(this, this::newGame, 20*intermissiontime);
     }
 
     public void newGame()
@@ -131,21 +109,20 @@ public class Main extends JavaPlugin implements Listener, CommandExecutor {
         playing = true;
         running = true;
         currentword = words.get((int) (Math.random() * words.size()));
-        if (Math.random() > 0.5)
-            newScrambledGame();
-        else
-            newNormalGame();
         int gametime = 0;
-        if (gametype == GameType.SCRAMBLED)
+        if (Math.random() > 0.5)
+        {
+            getServer().broadcastMessage(ChatColor.GOLD + "Guess what the scrambled word is: '" + ChatColor.AQUA + scramble(currentword) + ChatColor.GOLD + "'. You have " + scrambledgametime + " seconds.");
+            gametype = GameType.SCRAMBLED;
             gametime = scrambledgametime;
-        if (gametype == GameType.NORMAL)
+        }
+        else
+        {
+            getServer().broadcastMessage(ChatColor.GOLD + "Type the word: '" + ChatColor.AQUA + currentword + ChatColor.GOLD + "'. You have " + normalgametime + " seconds.");
+            gametype = GameType.NORMAL;
             gametime = normalgametime;
-        globalScheduleId = calendar.scheduleSyncDelayedTask(this, new Runnable() {
-            @Override
-            public void run() {
-                finishNoAnswer();
-            }
-        }, 20*gametime);
+        }
+        globalScheduleId = calendar.scheduleSyncDelayedTask(this, this::finishNoAnswer, 20*gametime);
     }
 
     @EventHandler
