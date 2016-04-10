@@ -1,7 +1,7 @@
 name: Word_Guesser
 version: 1.0
 author: Maurdekye
-main: Main
+main: com.ncolaprete.wordguesser.Main
 commands:
   startgame:
     description: Start the guessing game
