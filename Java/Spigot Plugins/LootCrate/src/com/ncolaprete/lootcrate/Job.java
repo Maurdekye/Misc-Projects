@@ -355,3 +355,47 @@ class BoomTimeJob implements Job
         return counter > clicks * clickdelay;
     }
 }
+
+class DematerializationJob implements Job
+{
+    public List<Block> currentSet;
+    int progressThroughSet;
+
+    public DematerializationJob(List<Block> currentActiveSet)
+    {
+        this.currentSet = currentActiveSet;
+    }
+
+    public void update()
+    {
+            if (progressThroughSet >= currentSet.size()) {
+                progressThroughSet = 0;
+                getNewSet();
+            } else {
+                currentSet.get(progressThroughSet).setType(Material.AIR);
+                progressThroughSet++;
+            }
+    }
+
+    public void getNewSet()
+    {
+        ArrayList<Block> nextUpdate = new ArrayList<>();
+        for (Block currentblock : currentSet)
+        {
+            for (Block nblock : Utility.getSurroundingBlocks(currentblock, true, false, false))
+            {
+                if (nblock.getType() == Material.AIR)
+                    continue;
+                if (nextUpdate.contains(nblock))
+                    continue;
+                nextUpdate.add(nblock);
+            }
+        }
+        currentSet = nextUpdate;
+    }
+
+    public boolean isDone()
+    {
+        return currentSet.size() == 0;
+    }
+}

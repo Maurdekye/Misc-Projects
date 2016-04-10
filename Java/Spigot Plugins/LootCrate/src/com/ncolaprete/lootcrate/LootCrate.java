@@ -58,6 +58,7 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
     public CustomConfig cratePositionConfig;
     public CustomConfig tempCreativeTimestampConfig;
     public CustomConfig optionsConfig;
+    public CustomConfig dematerializerPersistenceConfig;
 
     private ConsoleCommandSender csend = getServer().getConsoleSender();
 
@@ -109,6 +110,7 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
         cratePositionConfig = new CustomConfig(this, "crate_positions.yml");
         tempCreativeTimestampConfig = new CustomConfig(this, "temp_creatives.yml");
         optionsConfig = new CustomConfig(this, "lootcrate_config.yml");
+        dematerializerPersistenceConfig = new CustomConfig(this, "dematerializer_persistence.yml");
 
         crateKeyConfig.getConfig().options().copyDefaults(true);
         crateLayoutConfig.getConfig().options().copyDefaults(true);
@@ -119,6 +121,7 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
         cratePositionConfig.saveConfig();
         tempCreativeTimestampConfig.saveConfig();
         optionsConfig.saveConfig();
+        dematerializerPersistenceConfig.saveConfig();
 
         // load in crate keys
         for (String key : crateKeyConfig.getConfig().getKeys(false))
@@ -295,6 +298,18 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
         ConfigurationSection wandofleapingCfg = optionsConfig.getConfig().getConfigurationSection("wand_of_leaping");
         WandOfLeapingPower = wandofleapingCfg.getInt("power", 4);
 
+        // load in persistent dematerializations
+        ConfigurationSection demaerializeBlockSetCfg = dematerializerPersistenceConfig.getConfig().getConfigurationSection("sets");
+        if (demaerializeBlockSetCfg != null)
+        {
+            for (String blockset : demaerializeBlockSetCfg.getKeys(false))
+            {
+                List<String> serializedList = demaerializeBlockSetCfg.getStringList(blockset);
+                List<Block> deserailizedList = serializedList.stream().map(s -> Utility.deserializeLocation(getServer(), s).getBlock()).collect(Collectors.toList());
+                activeJobs.add(new DematerializationJob(deserailizedList));
+            }
+        }
+
         // startup random crate dropper
         ConfigurationSection cratespawningSection = optionsConfig.getConfig().getConfigurationSection("cratespawning");
         if (cratespawningSection.getBoolean("spawncrates")) {
@@ -309,6 +324,20 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
     {
         cratePositionConfig.saveConfig();
         tempCreativeTimestampConfig.saveConfig();
+
+        // serialize and save dematerializations
+        dematerializerPersistenceConfig.getConfig().set("sets", null);
+        dematerializerPersistenceConfig.saveConfig();
+        int i = 0;
+        for (Job j : activeJobs)
+        {
+            if (j instanceof DematerializationJob)
+            {
+                DematerializationJob djob = (DematerializationJob) j;
+                dematerializerPersistenceConfig.getConfig().set("sets.set" + i++, djob.currentSet.stream().map(b -> Utility.serializeLocation(b.getLocation())).collect(Collectors.toList()));
+            }
+        }
+        dematerializerPersistenceConfig.saveConfig();
     }
 
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args)
@@ -690,7 +719,7 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
 
         // Transmogrifier
         if (ev.getAction() == Action.LEFT_CLICK_BLOCK &&
-                Prize.itemIsPrize(ply.getInventory().getItemInMainHand(), Prize.TRANSMOGRIFIER))
+                Prize.itemIsPrize(ev.getItem(), Prize.TRANSMOGRIFIER))
         {
             ItemStack offhandItem = ply.getInventory().getItemInOffHand();
             if (offhandItem == null)
@@ -706,9 +735,18 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
             activeJobs.add(new TransmogrificationJob(ev.getClickedBlock(), ply, TransmogiphySpeed, MaxBlocksPerTransmogrophy));
         }
 
+        // Antimatter Dematerializer
+        if (ev.getAction() == Action.LEFT_CLICK_BLOCK &&
+                Prize.itemIsPrize(ev.getItem(), Prize.ANTIMATTER_DEMATERIALIZER))
+        {
+            Utility.reduceDurability(ply, ev.getItem(), Short.MAX_VALUE);
+            ply.getWorld().spawnEntity(ev.getClickedBlock().getLocation().add(0, 1, 0), EntityType.LIGHTNING);
+            activeJobs.add(new DematerializationJob(Collections.singletonList(ev.getClickedBlock())));
+        }
+
         // Wand of Leaping
         if ((ev.getAction() == Action.LEFT_CLICK_BLOCK || ev.getAction() == Action.LEFT_CLICK_AIR) &&
-                Prize.itemIsPrize(ply.getInventory().getItemInMainHand(), Prize.WAND_OF_LEAPING))
+                Prize.itemIsPrize(ev.getItem(), Prize.WAND_OF_LEAPING))
         {
             if (!Utility.isOnGround(ply))
                 return;
@@ -717,7 +755,7 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
             ply.setVelocity(direction);
             ply.playSound(ply.getLocation(), Sound.ENTITY_PLAYER_ATTACK_SWEEP, 1, 1);
             if (ply.getGameMode() != GameMode.CREATIVE)
-                Utility.reduceDurability(ply, ply.getInventory().getItemInMainHand(), 1);
+                Utility.reduceDurability(ply, ev.getItem(), 1);
         }
     }
 

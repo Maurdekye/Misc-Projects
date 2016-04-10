@@ -138,6 +138,18 @@ enum Prize
 
     // Tools
 
+    ANTIMATTER_DEMATERIALIZER (params -> {
+        ItemStack item = new ItemStack(Material.GOLD_PICKAXE);
+        Utility.setName(item, ChatColor.GRAY + "" + ChatColor.ITALIC + ChatColor.BOLD + "Antimatter Dematerializer");
+        Utility.addLoreLine(item, ChatColor.GRAY + "" + ChatColor.ITALIC + "It can only be used once.");
+        Utility.addLoreLine(item, ChatColor.DARK_GRAY + "" + ChatColor.ITALIC + "But what is done, cannot be undone...");
+        params.rewardee.sendMessage(ChatColor.GRAY + "You have been burdened with the Antimatter Dematerializer.");
+        return Collections.singletonList(item);
+    }, params -> {
+        ItemStack item = new ItemStack(Material.GOLD_PICKAXE);
+        return Utility.setName(item, ChatColor.GRAY + "" + ChatColor.ITALIC + ChatColor.BOLD + "Antimatter Dematerializer");
+    }),
+
     WAND_OF_LEAPING (params -> {
         ItemStack item = new ItemStack(Material.GOLD_HOE);
         Utility.setName(item, ChatColor.LIGHT_PURPLE + "" + ChatColor.ITALIC + "Wand of Leaping");
