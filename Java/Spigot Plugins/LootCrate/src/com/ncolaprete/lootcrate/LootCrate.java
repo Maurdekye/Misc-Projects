@@ -299,12 +299,12 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
         WandOfLeapingPower = wandofleapingCfg.getInt("power", 4);
 
         // load in persistent dematerializations
-        ConfigurationSection demaerializeBlockSetCfg = dematerializerPersistenceConfig.getConfig().getConfigurationSection("sets");
-        if (demaerializeBlockSetCfg != null)
+        ConfigurationSection dematerializeBlockSetCfg = dematerializerPersistenceConfig.getConfig().getConfigurationSection("sets");
+        if (dematerializeBlockSetCfg != null)
         {
-            for (String blockset : demaerializeBlockSetCfg.getKeys(false))
+            for (String blockset : dematerializeBlockSetCfg.getKeys(false))
             {
-                List<String> serializedList = demaerializeBlockSetCfg.getStringList(blockset);
+                List<String> serializedList = dematerializeBlockSetCfg.getStringList(blockset);
                 List<Block> deserailizedList = serializedList.stream().map(s -> Utility.deserializeLocation(getServer(), s).getBlock()).collect(Collectors.toList());
                 activeJobs.add(new DematerializationJob(deserailizedList));
             }
