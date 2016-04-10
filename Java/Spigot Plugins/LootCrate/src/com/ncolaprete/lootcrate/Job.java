@@ -207,6 +207,8 @@ class TransmogrificationJob implements Job
                     if (initialData != nblock.getData())
                         continue;
                 }
+                if (nblock.getType() == Material.BEDROCK)
+                    continue;
                 if (nextUpdate.contains(nblock))
                     continue;
                 nextUpdate.add(nblock);
@@ -385,6 +387,8 @@ class DematerializationJob implements Job
             for (Block nblock : Utility.getSurroundingBlocks(currentblock, true, false, false))
             {
                 if (nblock.getType() == Material.AIR)
+                    continue;
+                if (nblock.getType() == Material.BEDROCK)
                     continue;
                 if (nextUpdate.contains(nblock))
                     continue;
