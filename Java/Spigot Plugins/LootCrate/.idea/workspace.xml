@@ -25,8 +25,8 @@
       <file leaf-file-name="LootCrate.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/com/ncolaprete/lootcrate/LootCrate.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1166">
-              <caret line="905" column="41" selection-start-line="905" selection-start-column="41" selection-end-line="905" selection-end-column="41" />
+            <state relative-caret-position="1271">
+              <caret line="916" column="34" selection-start-line="916" selection-start-column="34" selection-end-line="916" selection-end-column="34" />
               <folding>
                 <element signature="method#onEnable#0;class#LootCrate#0" expanded="false" />
                 <element signature="method#onDisable#0;class#LootCrate#0" expanded="false" />
@@ -39,7 +39,6 @@
                 <element signature="e#28266#28298#0" expanded="false" />
                 <element signature="method#playerInteract#0;class#LootCrate#0" expanded="false" />
                 <element signature="method#blockBreak#0;class#LootCrate#0" expanded="false" />
-                <element signature="method#blockPlace#0;class#LootCrate#0" expanded="false" />
                 <element signature="method#playerItemHeld#0;class#LootCrate#0" expanded="false" />
                 <element signature="method#projectileLaunch#0;class#LootCrate#0" expanded="false" />
                 <element signature="method#entityDamage#0;class#LootCrate#0" expanded="false" />
@@ -48,6 +47,7 @@
                 <element signature="method#addCrate#0;class#LootCrate#0" expanded="false" />
                 <element signature="method#isCrate#0;class#LootCrate#0" expanded="false" />
                 <element signature="method#isCrate#1;class#LootCrate#0" expanded="false" />
+                <element signature="method#isCrate#2;class#LootCrate#0" expanded="false" />
                 <element signature="method#getCrate#0;class#LootCrate#0" expanded="false" />
                 <element signature="method#getLayout#0;class#LootCrate#0" expanded="false" />
                 <element signature="method#dropRandomCrate#0;class#LootCrate#0" expanded="false" />
@@ -100,11 +100,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Job.java" pinned="false" current-in-tab="false">
+      <file leaf-file-name="Job.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/com/ncolaprete/lootcrate/Job.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="865">
-              <caret line="179" column="43" selection-start-line="179" selection-start-column="43" selection-end-line="179" selection-end-column="43" />
+            <state relative-caret-position="1255">
+              <caret line="179" column="26" selection-start-line="179" selection-start-column="26" selection-end-line="179" selection-end-column="26" />
               <folding>
                 <element signature="class#Job#0" expanded="false" />
                 <element signature="method#TreefellerJobBase#1;class#TreefellerJobBase#0" expanded="false" />
@@ -113,7 +113,7 @@
                 <element signature="method#getValidBlocks#0;class#TreefellerJob#0" expanded="false" />
                 <element signature="class#ShroomFellerJob#0" expanded="false" />
                 <element signature="method#ShroomFellerJob#1;class#ShroomFellerJob#0" expanded="false" />
-                <element signature="method#isDone#0;class#TransmogrificationJob#0" expanded="false" />
+                <element signature="e#4502#4534#0" expanded="true" />
                 <element signature="method#TerramorpherJob#0;class#TerramorpherJob#0" expanded="false" />
                 <element signature="class#Orientation#0;class#TerramorpherJob#0" expanded="false" />
                 <element signature="method#Orientation#0;class#Orientation#0;class#TerramorpherJob#0" expanded="false" />
@@ -121,20 +121,20 @@
                 <element signature="class#BoomTimeJob#0" expanded="false" />
                 <element signature="method#BoomTimeJob#0;class#BoomTimeJob#0" expanded="false" />
                 <element signature="method#update#0;class#BoomTimeJob#0" expanded="false" />
-                <element signature="e#11221#11222#0" expanded="true" />
-                <element signature="e#11271#11272#0" expanded="true" />
-                <element signature="e#12640#12641#0" expanded="true" />
-                <element signature="e#12685#12686#0" expanded="true" />
+                <element signature="e#11207#11208#0" expanded="true" />
+                <element signature="e#11257#11258#0" expanded="true" />
+                <element signature="e#12626#12627#0" expanded="true" />
+                <element signature="e#12671#12672#0" expanded="true" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="Utility.java" pinned="false" current-in-tab="true">
+      <file leaf-file-name="Utility.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/com/ncolaprete/lootcrate/Utility.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="4356">
-              <caret line="423" column="21" selection-start-line="423" selection-start-column="21" selection-end-line="423" selection-end-column="21" />
+            <state relative-caret-position="891">
+              <caret line="104" column="0" selection-start-line="104" selection-start-column="0" selection-end-line="104" selection-end-column="0" />
               <folding>
                 <element signature="method#itemHasLoreLine#0;class#Utility#0" expanded="false" />
                 <element signature="method#addLoreLine#0;class#Utility#0" expanded="false" />
@@ -191,10 +191,10 @@
         <option value="$PROJECT_DIR$/src/crate_keys.yml" />
         <option value="$PROJECT_DIR$/src/plugin.yml" />
         <option value="$PROJECT_DIR$/src/com/ncolaprete/lootcrate/Prize.java" />
-        <option value="$PROJECT_DIR$/src/com/ncolaprete/lootcrate/Job.java" />
-        <option value="$PROJECT_DIR$/src/com/ncolaprete/lootcrate/LootCrate.java" />
         <option value="$PROJECT_DIR$/src/com/ncolaprete/lootcrate/Crate.java" />
         <option value="$PROJECT_DIR$/src/com/ncolaprete/lootcrate/Utility.java" />
+        <option value="$PROJECT_DIR$/src/com/ncolaprete/lootcrate/LootCrate.java" />
+        <option value="$PROJECT_DIR$/src/com/ncolaprete/lootcrate/Job.java" />
       </list>
     </option>
   </component>
@@ -569,7 +569,7 @@
     <layout>
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
-      <window_info id="Messages" active="false" anchor="left" auto_hide="false" internal_type="SLIDING" type="SLIDING" visible="false" show_stripe_button="true" weight="0.1359375" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" x="-10" y="671" width="3860" height="692" />
+      <window_info id="Messages" active="true" anchor="left" auto_hide="false" internal_type="SLIDING" type="SLIDING" visible="true" show_stripe_button="true" weight="0.1359375" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" x="-10" y="671" width="3860" height="692" />
       <window_info id="Palette&#9;" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Capture Analysis" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3298264" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
@@ -606,7 +606,7 @@
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
-      <option name="time" value="44" />
+      <option name="time" value="45" />
     </breakpoint-manager>
     <watches-manager />
   </component>
@@ -670,7 +670,6 @@
             <element signature="e#28266#28298#0" expanded="false" />
             <element signature="method#playerInteract#0;class#LootCrate#0" expanded="false" />
             <element signature="method#blockBreak#0;class#LootCrate#0" expanded="false" />
-            <element signature="method#blockPlace#0;class#LootCrate#0" expanded="false" />
             <element signature="method#playerItemHeld#0;class#LootCrate#0" expanded="false" />
             <element signature="method#projectileLaunch#0;class#LootCrate#0" expanded="false" />
             <element signature="method#entityDamage#0;class#LootCrate#0" expanded="false" />
@@ -679,6 +678,7 @@
             <element signature="method#addCrate#0;class#LootCrate#0" expanded="false" />
             <element signature="method#isCrate#0;class#LootCrate#0" expanded="false" />
             <element signature="method#isCrate#1;class#LootCrate#0" expanded="false" />
+            <element signature="method#isCrate#2;class#LootCrate#0" expanded="false" />
             <element signature="method#getCrate#0;class#LootCrate#0" expanded="false" />
             <element signature="method#getLayout#0;class#LootCrate#0" expanded="false" />
             <element signature="method#dropRandomCrate#0;class#LootCrate#0" expanded="false" />
@@ -699,7 +699,7 @@
             <element signature="method#getValidBlocks#0;class#TreefellerJob#0" expanded="false" />
             <element signature="class#ShroomFellerJob#0" expanded="false" />
             <element signature="method#ShroomFellerJob#1;class#ShroomFellerJob#0" expanded="false" />
-            <element signature="method#isDone#0;class#TransmogrificationJob#0" expanded="false" />
+            <element signature="e#4502#4534#0" expanded="true" />
             <element signature="method#TerramorpherJob#0;class#TerramorpherJob#0" expanded="false" />
             <element signature="class#Orientation#0;class#TerramorpherJob#0" expanded="false" />
             <element signature="method#Orientation#0;class#Orientation#0;class#TerramorpherJob#0" expanded="false" />
@@ -707,10 +707,10 @@
             <element signature="class#BoomTimeJob#0" expanded="false" />
             <element signature="method#BoomTimeJob#0;class#BoomTimeJob#0" expanded="false" />
             <element signature="method#update#0;class#BoomTimeJob#0" expanded="false" />
-            <element signature="e#11221#11222#0" expanded="true" />
-            <element signature="e#11271#11272#0" expanded="true" />
-            <element signature="e#12640#12641#0" expanded="true" />
-            <element signature="e#12685#12686#0" expanded="true" />
+            <element signature="e#11207#11208#0" expanded="true" />
+            <element signature="e#11257#11258#0" expanded="true" />
+            <element signature="e#12626#12627#0" expanded="true" />
+            <element signature="e#12671#12672#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -825,7 +825,6 @@
             <element signature="e#28266#28298#0" expanded="false" />
             <element signature="method#playerInteract#0;class#LootCrate#0" expanded="false" />
             <element signature="method#blockBreak#0;class#LootCrate#0" expanded="false" />
-            <element signature="method#blockPlace#0;class#LootCrate#0" expanded="false" />
             <element signature="method#playerItemHeld#0;class#LootCrate#0" expanded="false" />
             <element signature="method#projectileLaunch#0;class#LootCrate#0" expanded="false" />
             <element signature="method#entityDamage#0;class#LootCrate#0" expanded="false" />
@@ -834,6 +833,7 @@
             <element signature="method#addCrate#0;class#LootCrate#0" expanded="false" />
             <element signature="method#isCrate#0;class#LootCrate#0" expanded="false" />
             <element signature="method#isCrate#1;class#LootCrate#0" expanded="false" />
+            <element signature="method#isCrate#2;class#LootCrate#0" expanded="false" />
             <element signature="method#getCrate#0;class#LootCrate#0" expanded="false" />
             <element signature="method#getLayout#0;class#LootCrate#0" expanded="false" />
             <element signature="method#dropRandomCrate#0;class#LootCrate#0" expanded="false" />
@@ -889,7 +889,6 @@
             <element signature="e#28266#28298#0" expanded="false" />
             <element signature="method#playerInteract#0;class#LootCrate#0" expanded="false" />
             <element signature="method#blockBreak#0;class#LootCrate#0" expanded="false" />
-            <element signature="method#blockPlace#0;class#LootCrate#0" expanded="false" />
             <element signature="method#playerItemHeld#0;class#LootCrate#0" expanded="false" />
             <element signature="method#projectileLaunch#0;class#LootCrate#0" expanded="false" />
             <element signature="method#entityDamage#0;class#LootCrate#0" expanded="false" />
@@ -898,6 +897,7 @@
             <element signature="method#addCrate#0;class#LootCrate#0" expanded="false" />
             <element signature="method#isCrate#0;class#LootCrate#0" expanded="false" />
             <element signature="method#isCrate#1;class#LootCrate#0" expanded="false" />
+            <element signature="method#isCrate#2;class#LootCrate#0" expanded="false" />
             <element signature="method#getCrate#0;class#LootCrate#0" expanded="false" />
             <element signature="method#getLayout#0;class#LootCrate#0" expanded="false" />
             <element signature="method#dropRandomCrate#0;class#LootCrate#0" expanded="false" />
@@ -946,7 +946,6 @@
             <element signature="e#28266#28298#0" expanded="false" />
             <element signature="method#playerInteract#0;class#LootCrate#0" expanded="false" />
             <element signature="method#blockBreak#0;class#LootCrate#0" expanded="false" />
-            <element signature="method#blockPlace#0;class#LootCrate#0" expanded="false" />
             <element signature="method#playerItemHeld#0;class#LootCrate#0" expanded="false" />
             <element signature="method#projectileLaunch#0;class#LootCrate#0" expanded="false" />
             <element signature="method#entityDamage#0;class#LootCrate#0" expanded="false" />
@@ -955,6 +954,7 @@
             <element signature="method#addCrate#0;class#LootCrate#0" expanded="false" />
             <element signature="method#isCrate#0;class#LootCrate#0" expanded="false" />
             <element signature="method#isCrate#1;class#LootCrate#0" expanded="false" />
+            <element signature="method#isCrate#2;class#LootCrate#0" expanded="false" />
             <element signature="method#getCrate#0;class#LootCrate#0" expanded="false" />
             <element signature="method#getLayout#0;class#LootCrate#0" expanded="false" />
             <element signature="method#dropRandomCrate#0;class#LootCrate#0" expanded="false" />
@@ -1003,7 +1003,6 @@
             <element signature="e#28266#28298#0" expanded="false" />
             <element signature="method#playerInteract#0;class#LootCrate#0" expanded="false" />
             <element signature="method#blockBreak#0;class#LootCrate#0" expanded="false" />
-            <element signature="method#blockPlace#0;class#LootCrate#0" expanded="false" />
             <element signature="method#playerItemHeld#0;class#LootCrate#0" expanded="false" />
             <element signature="method#projectileLaunch#0;class#LootCrate#0" expanded="false" />
             <element signature="method#entityDamage#0;class#LootCrate#0" expanded="false" />
@@ -1012,6 +1011,7 @@
             <element signature="method#addCrate#0;class#LootCrate#0" expanded="false" />
             <element signature="method#isCrate#0;class#LootCrate#0" expanded="false" />
             <element signature="method#isCrate#1;class#LootCrate#0" expanded="false" />
+            <element signature="method#isCrate#2;class#LootCrate#0" expanded="false" />
             <element signature="method#getCrate#0;class#LootCrate#0" expanded="false" />
             <element signature="method#getLayout#0;class#LootCrate#0" expanded="false" />
             <element signature="method#dropRandomCrate#0;class#LootCrate#0" expanded="false" />
@@ -1060,7 +1060,6 @@
             <element signature="e#28266#28298#0" expanded="false" />
             <element signature="method#playerInteract#0;class#LootCrate#0" expanded="false" />
             <element signature="method#blockBreak#0;class#LootCrate#0" expanded="false" />
-            <element signature="method#blockPlace#0;class#LootCrate#0" expanded="false" />
             <element signature="method#playerItemHeld#0;class#LootCrate#0" expanded="false" />
             <element signature="method#projectileLaunch#0;class#LootCrate#0" expanded="false" />
             <element signature="method#entityDamage#0;class#LootCrate#0" expanded="false" />
@@ -1069,6 +1068,7 @@
             <element signature="method#addCrate#0;class#LootCrate#0" expanded="false" />
             <element signature="method#isCrate#0;class#LootCrate#0" expanded="false" />
             <element signature="method#isCrate#1;class#LootCrate#0" expanded="false" />
+            <element signature="method#isCrate#2;class#LootCrate#0" expanded="false" />
             <element signature="method#getCrate#0;class#LootCrate#0" expanded="false" />
             <element signature="method#getLayout#0;class#LootCrate#0" expanded="false" />
             <element signature="method#dropRandomCrate#0;class#LootCrate#0" expanded="false" />
@@ -1117,7 +1117,6 @@
             <element signature="e#28266#28298#0" expanded="false" />
             <element signature="method#playerInteract#0;class#LootCrate#0" expanded="false" />
             <element signature="method#blockBreak#0;class#LootCrate#0" expanded="false" />
-            <element signature="method#blockPlace#0;class#LootCrate#0" expanded="false" />
             <element signature="method#playerItemHeld#0;class#LootCrate#0" expanded="false" />
             <element signature="method#projectileLaunch#0;class#LootCrate#0" expanded="false" />
             <element signature="method#entityDamage#0;class#LootCrate#0" expanded="false" />
@@ -1126,6 +1125,7 @@
             <element signature="method#addCrate#0;class#LootCrate#0" expanded="false" />
             <element signature="method#isCrate#0;class#LootCrate#0" expanded="false" />
             <element signature="method#isCrate#1;class#LootCrate#0" expanded="false" />
+            <element signature="method#isCrate#2;class#LootCrate#0" expanded="false" />
             <element signature="method#getCrate#0;class#LootCrate#0" expanded="false" />
             <element signature="method#getLayout#0;class#LootCrate#0" expanded="false" />
             <element signature="method#dropRandomCrate#0;class#LootCrate#0" expanded="false" />
@@ -1174,7 +1174,6 @@
             <element signature="e#28266#28298#0" expanded="false" />
             <element signature="method#playerInteract#0;class#LootCrate#0" expanded="false" />
             <element signature="method#blockBreak#0;class#LootCrate#0" expanded="false" />
-            <element signature="method#blockPlace#0;class#LootCrate#0" expanded="false" />
             <element signature="method#playerItemHeld#0;class#LootCrate#0" expanded="false" />
             <element signature="method#projectileLaunch#0;class#LootCrate#0" expanded="false" />
             <element signature="method#entityDamage#0;class#LootCrate#0" expanded="false" />
@@ -1183,6 +1182,7 @@
             <element signature="method#addCrate#0;class#LootCrate#0" expanded="false" />
             <element signature="method#isCrate#0;class#LootCrate#0" expanded="false" />
             <element signature="method#isCrate#1;class#LootCrate#0" expanded="false" />
+            <element signature="method#isCrate#2;class#LootCrate#0" expanded="false" />
             <element signature="method#getCrate#0;class#LootCrate#0" expanded="false" />
             <element signature="method#getLayout#0;class#LootCrate#0" expanded="false" />
             <element signature="method#dropRandomCrate#0;class#LootCrate#0" expanded="false" />
@@ -1267,67 +1267,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/com/ncolaprete/lootcrate/Job.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="865">
-          <caret line="179" column="43" selection-start-line="179" selection-start-column="43" selection-end-line="179" selection-end-column="43" />
-          <folding>
-            <element signature="class#Job#0" expanded="false" />
-            <element signature="method#TreefellerJobBase#1;class#TreefellerJobBase#0" expanded="false" />
-            <element signature="class#TreefellerJob#0" expanded="false" />
-            <element signature="method#TreefellerJob#1;class#TreefellerJob#0" expanded="false" />
-            <element signature="method#getValidBlocks#0;class#TreefellerJob#0" expanded="false" />
-            <element signature="class#ShroomFellerJob#0" expanded="false" />
-            <element signature="method#ShroomFellerJob#1;class#ShroomFellerJob#0" expanded="false" />
-            <element signature="method#isDone#0;class#TransmogrificationJob#0" expanded="false" />
-            <element signature="method#TerramorpherJob#0;class#TerramorpherJob#0" expanded="false" />
-            <element signature="class#Orientation#0;class#TerramorpherJob#0" expanded="false" />
-            <element signature="method#Orientation#0;class#Orientation#0;class#TerramorpherJob#0" expanded="false" />
-            <element signature="method#fromBlockFace#0;class#Orientation#0;class#TerramorpherJob#0" expanded="false" />
-            <element signature="class#BoomTimeJob#0" expanded="false" />
-            <element signature="method#BoomTimeJob#0;class#BoomTimeJob#0" expanded="false" />
-            <element signature="method#update#0;class#BoomTimeJob#0" expanded="false" />
-            <element signature="e#11221#11222#0" expanded="true" />
-            <element signature="e#11271#11272#0" expanded="true" />
-            <element signature="e#12640#12641#0" expanded="true" />
-            <element signature="e#12685#12686#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/com/ncolaprete/lootcrate/LootCrate.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1166">
-          <caret line="905" column="41" selection-start-line="905" selection-start-column="41" selection-end-line="905" selection-end-column="41" />
-          <folding>
-            <element signature="method#onEnable#0;class#LootCrate#0" expanded="false" />
-            <element signature="method#onDisable#0;class#LootCrate#0" expanded="false" />
-            <element signature="method#onCommand#0;class#LootCrate#0" expanded="false" />
-            <element signature="method#updateJobs#0;class#LootCrate#0" expanded="false" />
-            <element signature="method#checkAllPlayersForSpecialItems#0;class#LootCrate#0" expanded="false" />
-            <element signature="method#checkForCreativeTimeUp#0;class#LootCrate#0" expanded="false" />
-            <element signature="method#checkForInvalidCrateLocations#0;class#LootCrate#0" expanded="false" />
-            <element signature="e#28266#28298#0" expanded="false" />
-            <element signature="e#28266#28298#0" expanded="false" />
-            <element signature="method#playerInteract#0;class#LootCrate#0" expanded="false" />
-            <element signature="method#blockBreak#0;class#LootCrate#0" expanded="false" />
-            <element signature="method#blockPlace#0;class#LootCrate#0" expanded="false" />
-            <element signature="method#playerItemHeld#0;class#LootCrate#0" expanded="false" />
-            <element signature="method#projectileLaunch#0;class#LootCrate#0" expanded="false" />
-            <element signature="method#entityDamage#0;class#LootCrate#0" expanded="false" />
-            <element signature="method#removeCrate#0;class#LootCrate#0" expanded="false" />
-            <element signature="method#removeCrate#1;class#LootCrate#0" expanded="false" />
-            <element signature="method#addCrate#0;class#LootCrate#0" expanded="false" />
-            <element signature="method#isCrate#0;class#LootCrate#0" expanded="false" />
-            <element signature="method#isCrate#1;class#LootCrate#0" expanded="false" />
-            <element signature="method#getCrate#0;class#LootCrate#0" expanded="false" />
-            <element signature="method#getLayout#0;class#LootCrate#0" expanded="false" />
-            <element signature="method#dropRandomCrate#0;class#LootCrate#0" expanded="false" />
-            <element signature="method#checkPlayerForSpecialItem#0;class#LootCrate#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/com/ncolaprete/lootcrate/Crate.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1692">
@@ -1369,8 +1308,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/com/ncolaprete/lootcrate/Utility.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="4356">
-          <caret line="423" column="21" selection-start-line="423" selection-start-column="21" selection-end-line="423" selection-end-column="21" />
+        <state relative-caret-position="891">
+          <caret line="104" column="0" selection-start-line="104" selection-start-column="0" selection-end-line="104" selection-end-column="0" />
           <folding>
             <element signature="method#itemHasLoreLine#0;class#Utility#0" expanded="false" />
             <element signature="method#addLoreLine#0;class#Utility#0" expanded="false" />
@@ -1394,6 +1333,67 @@
             <element signature="method#reduceDurability#0;class#Utility#0" expanded="false" />
             <element signature="method#getBalance#0;class#Utility#0" expanded="false" />
             <element signature="method#modifyBalance#0;class#Utility#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/com/ncolaprete/lootcrate/LootCrate.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1271">
+          <caret line="916" column="34" selection-start-line="916" selection-start-column="34" selection-end-line="916" selection-end-column="34" />
+          <folding>
+            <element signature="method#onEnable#0;class#LootCrate#0" expanded="false" />
+            <element signature="method#onDisable#0;class#LootCrate#0" expanded="false" />
+            <element signature="method#onCommand#0;class#LootCrate#0" expanded="false" />
+            <element signature="method#updateJobs#0;class#LootCrate#0" expanded="false" />
+            <element signature="method#checkAllPlayersForSpecialItems#0;class#LootCrate#0" expanded="false" />
+            <element signature="method#checkForCreativeTimeUp#0;class#LootCrate#0" expanded="false" />
+            <element signature="method#checkForInvalidCrateLocations#0;class#LootCrate#0" expanded="false" />
+            <element signature="e#28266#28298#0" expanded="false" />
+            <element signature="e#28266#28298#0" expanded="false" />
+            <element signature="method#playerInteract#0;class#LootCrate#0" expanded="false" />
+            <element signature="method#blockBreak#0;class#LootCrate#0" expanded="false" />
+            <element signature="method#playerItemHeld#0;class#LootCrate#0" expanded="false" />
+            <element signature="method#projectileLaunch#0;class#LootCrate#0" expanded="false" />
+            <element signature="method#entityDamage#0;class#LootCrate#0" expanded="false" />
+            <element signature="method#removeCrate#0;class#LootCrate#0" expanded="false" />
+            <element signature="method#removeCrate#1;class#LootCrate#0" expanded="false" />
+            <element signature="method#addCrate#0;class#LootCrate#0" expanded="false" />
+            <element signature="method#isCrate#0;class#LootCrate#0" expanded="false" />
+            <element signature="method#isCrate#1;class#LootCrate#0" expanded="false" />
+            <element signature="method#isCrate#2;class#LootCrate#0" expanded="false" />
+            <element signature="method#getCrate#0;class#LootCrate#0" expanded="false" />
+            <element signature="method#getLayout#0;class#LootCrate#0" expanded="false" />
+            <element signature="method#dropRandomCrate#0;class#LootCrate#0" expanded="false" />
+            <element signature="method#checkPlayerForSpecialItem#0;class#LootCrate#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/com/ncolaprete/lootcrate/Job.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1255">
+          <caret line="179" column="26" selection-start-line="179" selection-start-column="26" selection-end-line="179" selection-end-column="26" />
+          <folding>
+            <element signature="class#Job#0" expanded="false" />
+            <element signature="method#TreefellerJobBase#1;class#TreefellerJobBase#0" expanded="false" />
+            <element signature="class#TreefellerJob#0" expanded="false" />
+            <element signature="method#TreefellerJob#1;class#TreefellerJob#0" expanded="false" />
+            <element signature="method#getValidBlocks#0;class#TreefellerJob#0" expanded="false" />
+            <element signature="class#ShroomFellerJob#0" expanded="false" />
+            <element signature="method#ShroomFellerJob#1;class#ShroomFellerJob#0" expanded="false" />
+            <element signature="e#4502#4534#0" expanded="true" />
+            <element signature="method#TerramorpherJob#0;class#TerramorpherJob#0" expanded="false" />
+            <element signature="class#Orientation#0;class#TerramorpherJob#0" expanded="false" />
+            <element signature="method#Orientation#0;class#Orientation#0;class#TerramorpherJob#0" expanded="false" />
+            <element signature="method#fromBlockFace#0;class#Orientation#0;class#TerramorpherJob#0" expanded="false" />
+            <element signature="class#BoomTimeJob#0" expanded="false" />
+            <element signature="method#BoomTimeJob#0;class#BoomTimeJob#0" expanded="false" />
+            <element signature="method#update#0;class#BoomTimeJob#0" expanded="false" />
+            <element signature="e#11207#11208#0" expanded="true" />
+            <element signature="e#11257#11258#0" expanded="true" />
+            <element signature="e#12626#12627#0" expanded="true" />
+            <element signature="e#12671#12672#0" expanded="true" />
           </folding>
         </state>
       </provider>

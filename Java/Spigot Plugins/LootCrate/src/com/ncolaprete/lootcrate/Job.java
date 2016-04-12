@@ -130,7 +130,7 @@ class TransmogrificationJob implements Job
     int blocksModified;
     int modificationsPerAction;
     int maxModification;
-    boolean outOfBlocks = false;
+    boolean finished = false;
 
     public TransmogrificationJob(Block initialBlock, Player ply, int modificationsPerAction, int maxModification)
     {
@@ -169,15 +169,15 @@ class TransmogrificationJob implements Job
                     if (offhanditem.getAmount() == 1)
                     {
                         ply.getInventory().setItem(40, null);
-                        outOfBlocks = true;
+                        finished = true;
                     }
                     else
                         offhanditem.setAmount(offhanditem.getAmount() - 1);
                 }
-                else
+                if (offhanditem.getType() != initialReplacementMaterial)
                 {
-                    if (offhanditem.getType() != initialReplacementMaterial)
-                        outOfBlocks = true;
+                    finished = true;
+                    break;
                 }
                 Block cblock = currentSet.get(progressThroughSet);
                 cblock.getWorld().playEffect(cblock.getLocation(), Effect.TILE_BREAK, new MaterialData(cblock.getType()));
@@ -223,7 +223,7 @@ class TransmogrificationJob implements Job
     {
         return currentSet.size() == 0 ||
                 blocksModified >= maxModification ||
-                outOfBlocks;
+                finished;
     }
 }
 
