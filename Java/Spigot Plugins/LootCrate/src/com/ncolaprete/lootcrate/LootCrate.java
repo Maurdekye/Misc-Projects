@@ -66,6 +66,8 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
 
     // config variables
 
+    public boolean BroadcastCrateDrops;
+
     public int MaxBlocksPerFell;
     public int TreefellerSpeed;
     public boolean CanFellTrees;
@@ -313,7 +315,7 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
         if (cratespawningSection.getBoolean("spawncrates")) {
             int interval = cratespawningSection.getInt("interval", 300) * 20;
             final int radius = cratespawningSection.getInt("radius", 1000);
-            final boolean broadcast = cratespawningSection.getBoolean("broadcast", false);
+            BroadcastCrateDrops = cratespawningSection.getBoolean("broadcast", false);
             getServer().getScheduler().scheduleSyncRepeatingTask(this, () -> dropRandomCrate(Utility.getDefaultSpawn(this), radius), 0, interval);
         }
     }
@@ -944,7 +946,7 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
         } while (newChest.getLocation().getY() >= droplocation.getWorld().getMaxHeight());
 
         // broadcast crate position
-        if (layout.shouldBroadcast)
+        if (BroadcastCrateDrops && layout.shouldBroadcast)
             getServer().broadcastMessage("A " + layout.printname + ChatColor.RESET + " has dropped at " + ChatColor.GOLD + newChest.getX() + ", " + newChest.getZ() + ChatColor.RESET + "!");
         csend.sendMessage(layout.printname + ChatColor.RESET + " spawned at " + Utility.formatVector(newChest.getLocation().toVector()));
 
