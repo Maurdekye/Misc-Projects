@@ -118,6 +118,11 @@ class CrateLayout
         return display;
     }
 
+    public String toString()
+    {
+        return type.toLowerCase();
+    }
+
     public boolean isKeyValid(ItemStack key)
     {
         if (keyRequired == null)
@@ -186,6 +191,11 @@ class CrateKey
     public String getLoreTag()
     {
         return ChatColor.BLACK + type;
+    }
+
+    public String toString()
+    {
+        return type.toLowerCase();
     }
 }
 

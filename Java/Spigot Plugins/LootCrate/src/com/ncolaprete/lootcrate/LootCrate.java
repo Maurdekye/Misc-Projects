@@ -394,16 +394,9 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
             CrateKey key = maybeKey.get();
 
             // Find amount of keys to buy
-            int amount = 1;
-            if (args.length >= 2)
-            {
-                try {
-                    amount = Integer.parseInt(args[1]);
-                } catch (Exception e) {
-                    sender.sendMessage(ChatColor.RED + "'" + args[1] + "' is not a number.");
-                    return true;
-                }
-            }
+            int amount = getIntegerFromArg(sender, command, label, args, 1);
+            if (amount == -1)
+                return true;
 
             // Check if key is buyable
             if (key.buyprice == 0)
@@ -443,15 +436,8 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
             }
 
             // Check if enough arguments were provided
-            if (args.length == 0)
-            {
-                StringBuilder rewardslist = new StringBuilder();
-                rewardslist.append("Available crate keys are: ");
-                for (CrateKey k : crateKeys)
-                    rewardslist.append(k.type.toLowerCase() + ", ");
-                ply.sendMessage(rewardslist.substring(0, rewardslist.length()-2));
+            if (!printOptionsIfTooFewArgs(sender, command, label, args, 1, "Available crate keys are: ", crateKeys))
                 return false;
-            }
 
             // Find crate key to give
             Optional<CrateKey> maybeKey = crateKeys.stream().filter(k -> k.type.equalsIgnoreCase(args[0])).findFirst();
@@ -463,40 +449,14 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
             CrateKey key = maybeKey.get();
 
             // Find amount to give
-            int amount = 1;
-            if (args.length >= 2)
-            {
-                try {
-                    amount = Integer.parseInt(args[1]);
-                } catch (Exception e) {
-                    sender.sendMessage(ChatColor.RED + "'" + args[1] + "' is not a number.");
-                    return true;
-                }
-            }
+            int amount = getIntegerFromArg(sender, command, label, args, 1);
+            if (amount == -1)
+                return true;
 
             // Find player to give key to
-            Player target = ply;
-            if (args.length >= 3)
-            {
-                String targetname = "";
-                for (int i=2;i<args.length;i++)
-                    targetname += args[i] + " ";
-                targetname = targetname.trim().toLowerCase();
-                Player newtarget = getServer().getPlayer(targetname);
-                if (newtarget == null)
-                {
-                    sender.sendMessage(ChatColor.RED + "Could not find player with the name '" + targetname + "'");
-                    return true;
-                }
-                target = newtarget;
-            }
-
-            // Check if sender is player and target is unset
+            Player target = getPlayerOrConsoleTargetFromArg(sender, command, label, args, 2);
             if (target == null)
-            {
-                sender.sendMessage(ChatColor.RED + "You must be a player to use this command on yourself");
                 return true;
-            }
 
             // Give the key(s)
             ItemStack keyStack = key.getKey(false);
@@ -517,15 +477,8 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
             }
 
             // Check if enough arguments were provided
-            if (args.length == 0)
-            {
-                StringBuilder rewardslist = new StringBuilder();
-                rewardslist.append("Available crate layouts are: ");
-                for (CrateLayout l : crateLayouts)
-                    rewardslist.append(l.type.toLowerCase() + ", ");
-                ply.sendMessage(rewardslist.substring(0, rewardslist.length()-2));
+            if (!printOptionsIfTooFewArgs(sender, command, label, args, 1, "Available crate layouts are: ", crateLayouts))
                 return false;
-            }
 
             // Find crate layout to use
             String type = args[0];
@@ -538,40 +491,14 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
             CrateLayout layout = maybeLayout.get();
 
             // Find amount to give
-            int amount = 1;
-            if (args.length >= 2)
-            {
-                try {
-                    amount = Integer.parseInt(args[1]);
-                } catch (Exception e) {
-                    sender.sendMessage(ChatColor.RED + "'" + args[1] + "' is not a number.");
-                    return true;
-                }
-            }
+            int amount = getIntegerFromArg(sender, command, label, args, 1);
+            if (amount == -1)
+                return true;
 
             // Find player to give crate to
-            Player target = ply;
-            if (args.length >= 3)
-            {
-                String targetname = "";
-                for (int i=2;i<args.length;i++)
-                    targetname += args[i] + " ";
-                targetname = targetname.trim().toLowerCase();
-                Player newtarget = getServer().getPlayer(targetname);
-                if (newtarget == null)
-                {
-                    sender.sendMessage(ChatColor.RED + "Could not find player with the name '" + targetname + "'");
-                    return true;
-                }
-                target = newtarget;
-            }
-
-            // Check if sender is player and target is unset
+            Player target = getPlayerOrConsoleTargetFromArg(sender, command, label, args, 2);
             if (target == null)
-            {
-                sender.sendMessage(ChatColor.RED + "You must be a player to use this command on yourself");
                 return true;
-            }
 
             // Give the crate(s)
             ItemStack crateStack = layout.getItemstack();
@@ -591,15 +518,8 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
             }
 
             // Check if enough arguments were provided
-            if (args.length == 0)
-            {
-                StringBuilder rewardslist = new StringBuilder();
-                rewardslist.append("Available rewards are: ");
-                for (Prize p : Prize.values())
-                    rewardslist.append(p.name().toLowerCase() + ", ");
-                ply.sendMessage(rewardslist.substring(0, rewardslist.length()-2));
+            if (!printOptionsIfTooFewArgs(sender, command, label, args, 1, "Available rewards are: ", Arrays.asList(Prize.values())))
                 return false;
-            }
 
             // Find prize type to give
             Prize type;
@@ -611,26 +531,12 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
             }
 
             // Find amount to give
-            int amount = 1;
-            if (args.length >= 2)
-            {
-                try {
-                    amount = Integer.parseInt(args[1]);
-                } catch (Exception e) {
-                    sender.sendMessage(ChatColor.RED + "'" + args[1] + "' is not a number.");
-                    return true;
-                }
-            }
+            int amount = getIntegerFromArg(sender, command, label, args, 1);
+            if (amount == -1)
+                return true;
 
             // Find chest to give from
-            Block chestBlock = null;
-            BlockIterator biter = new BlockIterator(ply, 40);
-            while (biter.hasNext())
-            {
-                chestBlock = biter.next();
-                if (chestBlock.getType() == Material.CHEST)
-                    break;
-            }
+            Block chestBlock = Utility.getTargetBlock(ply);
             if (chestBlock.getType() != Material.CHEST)
             {
                 sender.sendMessage(ChatColor.RED + "Unable to spawn prize; please look at a chest.");
@@ -639,6 +545,66 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
 
             // Give the prize
             type.giveReward(this, ply, amount, chestBlock);
+        }
+        return true;
+    }
+
+    // onCommand Helpers
+
+    private Player getPlayerOrConsoleTargetFromArg(CommandSender sender, Command command, String label, String[] args, int playerNameStartIndex)
+    {
+        Player ply = sender instanceof Player ? (Player) sender : null;
+
+        // Find player to give crate to
+        Player target = ply;
+        if (args.length >= 3)
+        {
+            String targetname = "";
+            for (int i=playerNameStartIndex;i<args.length;i++)
+                targetname += args[i] + " ";
+            targetname = targetname.trim().toLowerCase();
+            Player newtarget = getServer().getPlayer(targetname);
+            if (newtarget == null)
+            {
+                sender.sendMessage(ChatColor.RED + "Could not find player with the name '" + targetname + "'");
+                return null;
+            }
+            target = newtarget;
+        }
+
+        // Check if sender is player and target is unset
+        if (target == null)
+        {
+            sender.sendMessage(ChatColor.RED + "You must be a player to use this command on yourself");
+        }
+        return target;
+    }
+
+    private int getIntegerFromArg(CommandSender sender, Command command, String label, String[] args, int argIndex)
+    {
+        int amount = 1;
+        if (args.length >= 2)
+        {
+            try {
+                amount = Integer.parseInt(args[argIndex]);
+            } catch (Exception e) {
+                sender.sendMessage(ChatColor.RED + "'" + args[1] + "' is not a number.");
+                return -1;
+            }
+        }
+        return amount;
+    }
+
+    private <T> boolean printOptionsIfTooFewArgs(CommandSender sender, Command command, String label, String[] args, int minArgs, String listHeader, List<T> listItems)
+    {
+        if (args.length < minArgs)
+        {
+            StringBuilder rewardslist = new StringBuilder();
+            rewardslist.append(listHeader);
+            for (T i : listItems)
+                rewardslist.append(i.toString() + ", ");
+            sender.sendMessage(rewardslist.substring(0, rewardslist.length()-2));
+            return false;
         }
         return true;
     }

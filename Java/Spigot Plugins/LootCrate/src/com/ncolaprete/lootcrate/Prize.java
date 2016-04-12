@@ -645,6 +645,11 @@ enum Prize
         Utility.arrangeItemsInExistingInventory(chest.getInventory(), rewardItems);
     }
 
+    public String toString()
+    {
+        return name().toLowerCase();
+    }
+
     public ItemStack getVisualisation(LootCrate plugin, Player rewardee, int amount, Block chestBlock)
     {
         return visualisation.getVisualisation(new RewardActionParameter(plugin, rewardee, amount, chestBlock));
