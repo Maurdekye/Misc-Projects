@@ -394,7 +394,7 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
             CrateKey key = maybeKey.get();
 
             // Find amount of keys to buy
-            int amount = getIntegerFromArg(sender, command, label, args, 1);
+            int amount = getIntegerFromArg(sender, args, 1);
             if (amount == -1)
                 return true;
 
@@ -436,7 +436,7 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
             }
 
             // Check if enough arguments were provided
-            if (!printOptionsIfTooFewArgs(sender, command, label, args, 1, "Available crate keys are: ", crateKeys))
+            if (!printOptionsIfTooFewArgs(sender, args, 1, "Available crate keys are: ", crateKeys))
                 return false;
 
             // Find crate key to give
@@ -449,12 +449,12 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
             CrateKey key = maybeKey.get();
 
             // Find amount to give
-            int amount = getIntegerFromArg(sender, command, label, args, 1);
+            int amount = getIntegerFromArg(sender, args, 1);
             if (amount == -1)
                 return true;
 
             // Find player to give key to
-            Player target = getPlayerOrConsoleTargetFromArg(sender, command, label, args, 2);
+            Player target = getPlayerOrConsoleTargetFromArg(sender, args, 2);
             if (target == null)
                 return true;
 
@@ -477,7 +477,7 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
             }
 
             // Check if enough arguments were provided
-            if (!printOptionsIfTooFewArgs(sender, command, label, args, 1, "Available crate layouts are: ", crateLayouts))
+            if (!printOptionsIfTooFewArgs(sender, args, 1, "Available crate layouts are: ", crateLayouts))
                 return false;
 
             // Find crate layout to use
@@ -491,12 +491,12 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
             CrateLayout layout = maybeLayout.get();
 
             // Find amount to give
-            int amount = getIntegerFromArg(sender, command, label, args, 1);
+            int amount = getIntegerFromArg(sender, args, 1);
             if (amount == -1)
                 return true;
 
             // Find player to give crate to
-            Player target = getPlayerOrConsoleTargetFromArg(sender, command, label, args, 2);
+            Player target = getPlayerOrConsoleTargetFromArg(sender, args, 2);
             if (target == null)
                 return true;
 
@@ -518,7 +518,7 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
             }
 
             // Check if enough arguments were provided
-            if (!printOptionsIfTooFewArgs(sender, command, label, args, 1, "Available rewards are: ", Arrays.asList(Prize.values())))
+            if (!printOptionsIfTooFewArgs(sender, args, 1, "Available rewards are: ", Arrays.asList(Prize.values())))
                 return false;
 
             // Find prize type to give
@@ -531,7 +531,7 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
             }
 
             // Find amount to give
-            int amount = getIntegerFromArg(sender, command, label, args, 1);
+            int amount = getIntegerFromArg(sender, args, 1);
             if (amount == -1)
                 return true;
 
@@ -551,7 +551,7 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
 
     // onCommand Helpers
 
-    private Player getPlayerOrConsoleTargetFromArg(CommandSender sender, Command command, String label, String[] args, int playerNameStartIndex)
+    private Player getPlayerOrConsoleTargetFromArg(CommandSender sender, String[] args, int playerNameStartIndex)
     {
         Player ply = sender instanceof Player ? (Player) sender : null;
 
@@ -580,7 +580,7 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
         return target;
     }
 
-    private int getIntegerFromArg(CommandSender sender, Command command, String label, String[] args, int argIndex)
+    private int getIntegerFromArg(CommandSender sender, String[] args, int argIndex)
     {
         int amount = 1;
         if (args.length >= 2)
@@ -595,7 +595,7 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
         return amount;
     }
 
-    private <T> boolean printOptionsIfTooFewArgs(CommandSender sender, Command command, String label, String[] args, int minArgs, String listHeader, List<T> listItems)
+    private <T> boolean printOptionsIfTooFewArgs(CommandSender sender, String[] args, int minArgs, String listHeader, List<T> listItems)
     {
         if (args.length < minArgs)
         {
