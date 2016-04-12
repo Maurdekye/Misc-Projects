@@ -25,8 +25,8 @@
       <file leaf-file-name="LootCrate.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/com/ncolaprete/lootcrate/LootCrate.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1593">
-              <caret line="1013" column="5" selection-start-line="1013" selection-start-column="5" selection-end-line="1013" selection-end-column="5" />
+            <state relative-caret-position="1131">
+              <caret line="943" column="12" selection-start-line="943" selection-start-column="12" selection-end-line="943" selection-end-column="12" />
               <folding>
                 <element signature="method#onDisable#0;class#LootCrate#0" expanded="false" />
                 <element signature="method#onCommand#0;class#LootCrate#0" expanded="false" />
@@ -1349,8 +1349,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/com/ncolaprete/lootcrate/LootCrate.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1593">
-          <caret line="1013" column="5" selection-start-line="1013" selection-start-column="5" selection-end-line="1013" selection-end-column="5" />
+        <state relative-caret-position="1131">
+          <caret line="943" column="12" selection-start-line="943" selection-start-column="12" selection-end-line="943" selection-end-column="12" />
           <folding>
             <element signature="method#onDisable#0;class#LootCrate#0" expanded="false" />
             <element signature="method#onCommand#0;class#LootCrate#0" expanded="false" />
