@@ -10,6 +10,7 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.craftbukkit.v1_9_R1.block.CraftChest;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -366,5 +367,102 @@ class Utility
             return false;
         }
         return true;
+    }
+
+    public static Block getTargetBlock(Player ply)
+    {
+        BlockIterator iter = new BlockIterator(ply);
+        do {
+            Block b = iter.next();
+            if (b.getType() != Material.AIR)
+                return b;
+        } while (iter.hasNext());
+        return null;
+    }
+
+    public static Inventory arrangeItems(String invName, List<ItemStack> items)
+    {
+        int invSize = items.size() - (items.size()%9) + 9;
+
+        Inventory inv = Bukkit.createInventory(null, invSize, invName);
+        return arrangeItemsInExistingInventory(inv, items);
+    }
+
+    public static Inventory arrangeItemsWithBorder(Inventory inv, List<ItemStack> items, ItemStack border)
+    {
+        return arrangeItemsInExistingInventory(inv, items); // Placeholder for now
+    }
+
+    public static Inventory arrangeItemsInExistingInventory(Inventory inv, List<ItemStack> items)
+    {
+        int rowCount = inv.getSize()/9;
+        int centerRow = rowCount/2;
+        double rowOffset = 0;
+        int rowOffsetDirection = -1;
+        ListIterator<ItemStack> itemsListIter = items.listIterator();
+        if (rowCount % 2 == 0)
+        {
+            for (int r = 0; r < rowCount/2; r++)
+            {
+                rowOffset = r;
+                double slotOffset = 0;
+                int slotOffsetDirection = 1;
+                for (int c = 0; c < 9; c++)
+                {
+                    slotOffset += 0.5;
+                    slotOffsetDirection *= -1;
+                    int totalSlotOffset = (int)slotOffset * slotOffsetDirection;
+                    for (int j=0;j<2;j++)
+                    {
+                        if (!itemsListIter.hasNext())
+                            return inv;
+                        int totalRowOffset = (int)rowOffset * rowOffsetDirection;
+                        int slot = (centerRow - totalRowOffset)*9 + 4 + totalSlotOffset;
+                        inv.setItem(slot, itemsListIter.next());
+                        rowOffsetDirection *= -1;
+                        rowOffset += rowOffsetDirection;
+                    }
+                }
+            }
+        }
+        else
+        {
+            // fill out the middle row
+            double slotOffset = 0;
+            int slotOffsetDirection = 1;
+            for (int c = 0; c < 9; c++)
+            {
+                if (!itemsListIter.hasNext())
+                    return inv;
+                slotOffset += 0.5;
+                slotOffsetDirection *= -1;
+                int totalSlotOffset = (int)slotOffset * slotOffsetDirection;
+                int slot = centerRow * 9 + 4 + totalSlotOffset;
+                inv.setItem(slot, itemsListIter.next());
+            }
+
+            // fill out subsequent rows
+            for (int r = 1; r <= (rowCount-1)/2; r++)
+            {
+                rowOffset = r;
+                slotOffset = 0;
+                slotOffsetDirection = 1;
+                for (int c = 0; c < 9; c++)
+                {
+                    slotOffset += 0.5;
+                    slotOffsetDirection *= -1;
+                    int totalSlotOffset = (int)slotOffset * slotOffsetDirection;
+                    for (int j=0;j<2;j++)
+                    {
+                        if (!itemsListIter.hasNext())
+                            return inv;
+                        int slot = (int)(centerRow + rowOffset)*9 + 4 + totalSlotOffset;
+                        inv.setItem(slot, itemsListIter.next());
+                        rowOffset *= -1;
+                    }
+                }
+            }
+        }
+        return inv;
     }
 }

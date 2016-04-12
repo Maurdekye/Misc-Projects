@@ -122,6 +122,7 @@ class TransmogrificationJob implements Job
 {
     Block initialBlock;
     Material initialMaterial;
+    Material initialReplacementMaterial;
     byte initialData;
     Player ply;
     ArrayList<Block> currentSet;
@@ -135,6 +136,7 @@ class TransmogrificationJob implements Job
     {
         this.initialBlock = initialBlock;
         this.initialMaterial = initialBlock.getType();
+        this.initialReplacementMaterial = ply.getInventory().getItemInOffHand().getType();
         this.initialData = initialBlock.getData();
         if (initialMaterial == Material.LEAVES || initialMaterial == Material.LEAVES_2)
             initialData = (byte) (initialData % 4);
@@ -174,7 +176,7 @@ class TransmogrificationJob implements Job
                 }
                 else
                 {
-                    if (offhanditem == null || offhanditem.getType() == Material.AIR)
+                    if (offhanditem.getType() != initialReplacementMaterial)
                         outOfBlocks = true;
                 }
                 Block cblock = currentSet.get(progressThroughSet);
@@ -377,7 +379,8 @@ class DematerializationJob implements Job
                 getNewSet();
                 return;
             }
-            if (currentSet.get(progressThroughSet).getType() == Material.AIR)
+            if (currentSet.get(progressThroughSet).getType() == Material.AIR ||
+                    currentSet.get(progressThroughSet).getType() == Material.BEDROCK)
             {
                 progressThroughSet++;
                 continue;

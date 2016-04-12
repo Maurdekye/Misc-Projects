@@ -25,8 +25,12 @@ commands:
     usage: /givereward <type> [amount]
     permission: lootcrate.givereward
     permission-message: You do not have permission to spawn crate rewards.
+  invslots:
+    permission: lootcrate.invslots
 
 permissions:
+  lootcrate.invslots:
+    default: op
   lootcrate.buykey:
     default: true
   lootcrate.givekey:

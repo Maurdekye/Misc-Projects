@@ -328,7 +328,7 @@ enum Prize
         if (params.amountToGive > 1)
             params.rewardee.sendMessage(ChatColor.GREEN + "You got " + params.amountToGive + " Emeralds!");
         else
-            params.rewardee.sendMessage(ChatColor.GREEN + "You got a Emerald!");
+            params.rewardee.sendMessage(ChatColor.GREEN + "You got an Emerald!");
         return Collections.singletonList(new ItemStack(Material.EMERALD, params.amountToGive));
     }, params -> {
         ItemStack item = new ItemStack(Material.EMERALD);
@@ -474,7 +474,7 @@ enum Prize
     MONEY (params -> {
         Utility.modifyBalance(params.rewardee, new BigDecimal(params.amountToGive));
         params.rewardee.sendMessage("You got $" + params.amountToGive + "!");
-        return Collections.singletonList(Utility.setName(new ItemStack(Material.PAPER), ChatColor.DARK_AQUA + "$" + params.amountToGive + " invoice"));
+        return Collections.singletonList(Utility.setName(new ItemStack(Material.PAPER), ChatColor.DARK_AQUA + "$" + params.amountToGive + " bank invoice"));
     }, params -> {
         ItemStack item = new ItemStack(Material.GOLD_INGOT, 1);
         Utility.setName(item, ChatColor.DARK_AQUA + "$" + params.amountToGive);
@@ -637,14 +637,12 @@ enum Prize
         List<ItemStack> rewardItems = Utility.separateItemStacks(rewardItemsRaw);
         Chest chest = (Chest) chestBlock.getState();
         int offsetdirection = -1;
-        for (int i=0;i<rewardItems.size();i++)
+        for (ItemStack i : rewardItems)
         {
-            int index = chest.getInventory().getSize()/2 + ((int)(i/2.0f + 0.5)*offsetdirection);
-            if (rewardItems.get(i).getAmount() == 1 && Utility.getLore(rewardItems.get(i)).size() > 0)
-                rewardItems.set(i, Utility.addLoreLine(rewardItems.get(i), getLoreTag()));
-            chest.getInventory().setItem(index, rewardItems.get(i));
-            offsetdirection*=-1;
+            if (i.getAmount() == 1 && Utility.getLore(i).size() > 0)
+                Utility.addLoreLine(i, getLoreTag());
         }
+        Utility.arrangeItemsInExistingInventory(chest.getInventory(), rewardItems);
     }
 
     public ItemStack getVisualisation(LootCrate plugin, Player rewardee, int amount, Block chestBlock)

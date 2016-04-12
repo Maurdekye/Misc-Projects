@@ -1,16 +1,16 @@
 package com.ncolaprete.lootcrate;
 
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Material;
-import org.bukkit.Sound;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.material.Colorable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.stream.Collectors;
 
 class Crate
@@ -54,7 +54,7 @@ class CrateLayout
     double spawnChance;
     CrateKey keyRequired;
     public boolean shouldBroadcast;
-    ArrayList<Reward> contents;
+    List<Reward> contents;
 
     public CrateLayout(String printname, String type, double spawnChance, CrateKey keyRequired, boolean shouldBroadcast, ArrayList<Reward> contents)
     {
@@ -88,17 +88,32 @@ class CrateLayout
 
     public Inventory showContents(LootCrate plugin, Player ply, Block chestblock)
     {
-        Inventory display = Bukkit.createInventory(null, (int)Math.floor((contents.size()-1)/9.0 + 1)*9 /*lock the size to multiples of 9*/, getPrintname(true));
         double totalProbability = 0;
         for (Reward r : contents)
             totalProbability += r.rewardChance;
+        List<ItemStack> itemsToShow = new ArrayList<>();
         for (Reward r : contents)
         {
             double chance = (r.rewardChance / totalProbability) * 10000;
             chance = Math.round(chance) / 100;
-            ItemStack displayItem =  r.item.getVisualisation(plugin, ply, r.amount, chestblock);
-            displayItem = Utility.addLoreLine(displayItem, ChatColor.WHITE + "%" + chance + " chance");
-            display.addItem(displayItem);
+            ItemStack displayItem = r.item.getVisualisation(plugin, ply, r.amount, chestblock);
+            Utility.addLoreLine(displayItem, ChatColor.WHITE + "%" + chance + " chance");
+            itemsToShow.add(displayItem);
+        }
+        int invSize = itemsToShow.size() - (itemsToShow.size()%9) + 9;
+        Inventory display = Bukkit.createInventory((InventoryHolder) chestblock.getState(), invSize, getPrintname(true));
+        for (int i=0;i<invSize;i++)
+        {
+            ItemStack pane = Utility.setName(new ItemStack(Material.STAINED_GLASS_PANE), " ");
+            pane.setDurability((short)15);
+            display.setItem(i, pane);
+        }
+        ListIterator<ItemStack> iter = itemsToShow.listIterator();
+        for (int i=0;i<invSize;i++)
+        {
+            if (!iter.hasNext())
+                break;
+            display.setItem(i, iter.next());
         }
         return display;
     }
@@ -163,7 +178,7 @@ class CrateKey
         if (isDisplayKey)
             return key;
         for (String line : lore)
-            key = Utility.addLoreLine(key, line);
+            Utility.addLoreLine(key, line);
         key = Utility.addLoreLine(key, getLoreTag());
         return key;
     }

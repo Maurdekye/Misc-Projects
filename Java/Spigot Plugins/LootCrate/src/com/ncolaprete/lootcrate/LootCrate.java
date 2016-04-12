@@ -2,12 +2,13 @@ package com.ncolaprete.lootcrate;
 
 import net.ess3.api.Economy;
 import net.minecraft.server.v1_9_R1.*;
+import net.minecraft.server.v1_9_R1.Item;
 import org.bukkit.*;
 import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.block.*;
 import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
-import org.bukkit.block.Chest;
+import org.bukkit.block.BlockState;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -29,6 +30,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerItemHeldEvent;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.FireworkMeta;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -127,6 +129,7 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
         for (String key : crateKeyConfig.getConfig().getKeys(false))
         {
             ConfigurationSection keysection = crateKeyConfig.getConfig().getConfigurationSection(key);
+
             String type = key;
             try {
                 Prize.valueOf(type.toUpperCase());
@@ -138,6 +141,7 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
                 csend.sendMessage(ChatColor.RED + "Error: The key name '_no_key' is disallowed.");
                 continue;
             }
+
             String materialname = keysection.getString("material", "tripwire_hook");
             Material material = Material.getMaterial(materialname.toUpperCase());
             if (material == null)
@@ -145,8 +149,10 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
                 csend.sendMessage(ChatColor.RED + "Error! '" + materialname + "' is not a valid block or item.");
                 continue;
             }
+
             String name = keysection.getString("name", ChatColor.RED + "Undefined Key");
             name = ChatColor.translateAlternateColorCodes('?', name);
+
             double buyprice;
             try {
                 buyprice = Double.parseDouble(keysection.getString("price", "0"));
@@ -154,9 +160,11 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
                 csend.sendMessage(ChatColor.RED + "Error! '" + keysection.getString("price") + "' is not a number!");
                 continue;
             }
+
             String lorestring = keysection.getString("description", "");
             lorestring = ChatColor.translateAlternateColorCodes('?', lorestring);
             List<String> lore = Arrays.asList(lorestring.split("\\\\n"));
+
             crateKeys.add(new CrateKey(type, material, name, buyprice, lore));
         }
 
@@ -169,38 +177,36 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
         for (String key : crateLayoutConfig.getConfig().getKeys(false))
         {
             ConfigurationSection cratesection = crateLayoutConfig.getConfig().getConfigurationSection(key);
+
             String type = key;
+
             String printname = cratesection.getString("name");
             printname = ChatColor.translateAlternateColorCodes('?', printname);
-            String reqKeyName = cratesection.getString("required_key", "_no_key");
+
             double spawnChance = cratesection.getDouble("spawn_chance", 0);
+
             boolean broadcast = cratesection.getBoolean("broadcast_on_drop", false);
+
+            String reqKeyName = cratesection.getString("required_key", "_no_key");
             CrateKey reqKey = null;
             if (!reqKeyName.equalsIgnoreCase("_no_key"))
             {
-                for (CrateKey ck : crateKeys)
-                {
-                    if (ck.type.equalsIgnoreCase(reqKeyName))
-                    {
-                        reqKey = ck;
-                        break;
-                    }
-                }
+                reqKey = crateKeys.stream().filter(ck -> ck.type.equalsIgnoreCase(reqKeyName)).findFirst().orElse(null);
                 if (reqKey == null)
                 {
                     csend.sendMessage(ChatColor.RED + "Error! crate key '" + reqKeyName + "' not found in crate_keys.yml!");
                     continue;
                 }
             }
+
             ArrayList<Reward> rewardList = new ArrayList<>();
             for (String rewardKey : cratesection.getConfigurationSection("rewards").getKeys(false))
             {
                 ConfigurationSection rewardsection = cratesection.getConfigurationSection("rewards." + rewardKey);
+
                 String prizeName = rewardsection.getString(".prize");
                 Prize prize = null;
-                double rewardChance;
-                int amount;
-                int keyPrizeIndex = 0;
+                int keyPrizeIndex = -1;
                 try {
                     prize = Prize.valueOf(prizeName.toUpperCase());
                     if (prize == Prize._CRATE_KEY)
@@ -209,27 +215,25 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
                         continue;
                     }
                 } catch (Exception e) {
-                    for (CrateKey ck : crateKeys)
-                    {
-                        if (ck.type.equalsIgnoreCase(prizeName))
-                        {
-                            prize = Prize._CRATE_KEY;
-                            break;
-                        }
-                        keyPrizeIndex++;
-                    }
-                    if (prize == null)
+                    reqKey = crateKeys.stream().filter(ck -> ck.type.equalsIgnoreCase(prizeName)).findFirst().orElse(null);
+                    if (reqKey == null)
                     {
                         csend.sendMessage(ChatColor.RED + "Error! Unknown prize: " + prizeName);
                         continue;
                     }
+                    prize = Prize._CRATE_KEY;
+                    keyPrizeIndex = crateKeys.indexOf(reqKey);
                 }
+
+                double rewardChance;
                 try {
                     rewardChance = Double.parseDouble(rewardsection.getString("chance"));
                 } catch (Exception e) {
                     csend.sendMessage(ChatColor.RED + "Error! '" + rewardsection.getString("chance") + "' is not a number!");
                     continue;
                 }
+
+                int amount;
                 try {
                     amount = Integer.parseInt(rewardsection.getString("amount"));
                 } catch (Exception e) {
@@ -256,19 +260,13 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
         for (String key : cratePositionConfig.getConfig().getKeys(false))
         {
             Location pos = Utility.deserializeLocation(getServer(), key);
+
             String layoutname = cratePositionConfig.getConfig().getString(key);
-            CrateLayout layout = null;
-            for (CrateLayout l : crateLayouts)
-            {
-                if (l.type.equalsIgnoreCase(layoutname))
-                {
-                    layout = l;
-                    break;
-                }
-            }
-            if (layout == null)
+            Optional<CrateLayout> layout = crateLayouts.stream().filter(l -> l.type.equalsIgnoreCase(layoutname)).findFirst();
+            if (!layout.isPresent())
                 continue;
-            addCrate(new Crate(pos.getBlock(), layout));
+
+            addCrate(new Crate(pos.getBlock(), layout.get()));
         }
         checkForInvalidCrateLocations();
 
@@ -344,6 +342,19 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
     {
         Player ply = sender instanceof Player ? (Player) sender : null;
 
+        if (command.getName().equalsIgnoreCase("invslots"))
+        {
+            if (ply == null)
+                return false;
+            Inventory inv = ply.getInventory();
+            Block look = Utility.getTargetBlock(ply);
+            if (look != null && look.getState() != null && look.getState() instanceof InventoryHolder)
+                inv = ((InventoryHolder) look.getState()).getInventory();
+            for (int i=0; i<inv.getSize();i++)
+                inv.setItem(i, Utility.setName(new ItemStack(Material.THIN_GLASS), "#" + i));
+        }
+
+        // buykey
         if (command.getName().equalsIgnoreCase("buykey"))
         {
             String genericErrorMessage = ChatColor.RED + "Cannot buy any keys at this time.";
@@ -634,13 +645,13 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
 
     private void updateJobs()
     {
-        activeJobs.stream().forEach(Job::update);
+        activeJobs.forEach(Job::update);
         activeJobs.removeIf(Job::isDone);
     }
 
     private void checkAllPlayersForSpecialItems()
     {
-        getServer().getOnlinePlayers().stream().forEach(this::checkPlayerForSpecialItem);
+        getServer().getOnlinePlayers().forEach(this::checkPlayerForSpecialItem);
     }
 
     private void checkForCreativeTimeUp()
@@ -667,10 +678,7 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
 
     private void checkForInvalidCrateLocations()
     {
-        ArrayList<Integer> toRemove = new ArrayList<>();
-        for (int i=0;i<cratePositions.size();i++)
-            if (cratePositions.get(i).location.getType() != Material.CHEST)
-                toRemove.add(i);
+        List<Crate> toRemove = cratePositions.stream().filter(p -> p.location.getType() != Material.CHEST).collect(Collectors.toList());
         toRemove.stream().forEach(this::removeCrate);
     }
 
@@ -723,6 +731,8 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
         {
             ItemStack offhandItem = ply.getInventory().getItemInOffHand();
             if (offhandItem == null)
+                return;
+            if (offhandItem.getType() == Material.CHEST)
                 return;
             if (!offhandItem.getType().isBlock())
                 return;
@@ -822,7 +832,7 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
     @EventHandler
     public void inventoryClick(InventoryClickEvent ev)
     {
-        if (crateLayouts.stream().anyMatch(l -> l.getPrintname(true).equals(ev.getInventory().getName())))
+        if (isCrate(ev.getInventory()))
             ev.setCancelled(true);
     }
 
@@ -891,6 +901,17 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
     public boolean isCrate(ItemStack item)
     {
         return crateLayouts.stream().filter(l -> Utility.itemHasLoreLine(item, l.getLoreTag())).findFirst().isPresent();
+    }
+
+    public boolean isCrate(Inventory inv)
+    {
+        if (inv.getHolder() == null)
+            return false;
+        if (!(inv.getHolder() instanceof BlockState))
+            return false;
+        Block invBlock = ((BlockState) inv.getHolder()).getBlock();
+        Optional<Crate> possibleCrate = cratePositions.stream().filter(c -> c.location.equals(invBlock)).findFirst();
+        return possibleCrate.isPresent();
     }
 
     public Crate getCrate(Block b)
