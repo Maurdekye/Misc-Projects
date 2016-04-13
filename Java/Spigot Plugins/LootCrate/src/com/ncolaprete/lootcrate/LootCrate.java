@@ -394,7 +394,7 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
             CrateKey key = maybeKey.get();
 
             // Find amount of keys to buy
-            int amount = getIntegerFromArg(sender, args, 1);
+            int amount = getIntegerAmountFromArg(sender, args, 1);
             if (amount == -1)
                 return true;
 
@@ -449,7 +449,7 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
             CrateKey key = maybeKey.get();
 
             // Find amount to give
-            int amount = getIntegerFromArg(sender, args, 1);
+            int amount = getIntegerAmountFromArg(sender, args, 1);
             if (amount == -1)
                 return true;
 
@@ -491,7 +491,7 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
             CrateLayout layout = maybeLayout.get();
 
             // Find amount to give
-            int amount = getIntegerFromArg(sender, args, 1);
+            int amount = getIntegerAmountFromArg(sender, args, 1);
             if (amount == -1)
                 return true;
 
@@ -531,7 +531,7 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
             }
 
             // Find amount to give
-            int amount = getIntegerFromArg(sender, args, 1);
+            int amount = getIntegerAmountFromArg(sender, args, 1);
             if (amount == -1)
                 return true;
 
@@ -580,7 +580,7 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
         return target;
     }
 
-    private int getIntegerFromArg(CommandSender sender, String[] args, int argIndex)
+    private int getIntegerAmountFromArg(CommandSender sender, String[] args, int argIndex)
     {
         int amount = 1;
         if (args.length >= 2)
@@ -592,6 +592,8 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
                 return -1;
             }
         }
+        if (amount <= 0)
+            return -1;
         return amount;
     }
 

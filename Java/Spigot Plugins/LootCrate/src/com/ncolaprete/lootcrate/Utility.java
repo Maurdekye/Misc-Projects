@@ -395,7 +395,13 @@ class Utility
 
     public static Inventory arrangeItemsInExistingInventory(Inventory inv, List<ItemStack> items)
     {
-        int rowCount = inv.getSize()/9;
+        return arrangeItemsInExistingInventory(inv, items, 9);
+    }
+
+    public static Inventory arrangeItemsInExistingInventory(Inventory inv, List<ItemStack> items, int invWidth)
+    {
+        int centerSlot = (int)((invWidth-1) / 2.0);
+        int rowCount = inv.getSize()/invWidth;
         int centerRow = rowCount/2;
         double rowOffset = 0;
         int rowOffsetDirection = -1;
@@ -407,7 +413,7 @@ class Utility
                 rowOffset = r;
                 double slotOffset = 0;
                 int slotOffsetDirection = 1;
-                for (int c = 0; c < 9; c++)
+                for (int c = 0; c < invWidth; c++)
                 {
                     slotOffset += 0.5;
                     slotOffsetDirection *= -1;
@@ -417,7 +423,7 @@ class Utility
                         if (!itemsListIter.hasNext())
                             return inv;
                         int totalRowOffset = (int)rowOffset * rowOffsetDirection;
-                        int slot = (centerRow - totalRowOffset)*9 + 4 + totalSlotOffset;
+                        int slot = (centerRow - totalRowOffset)*invWidth + centerSlot + totalSlotOffset;
                         inv.setItem(slot, itemsListIter.next());
                         rowOffsetDirection *= -1;
                         rowOffset += rowOffsetDirection;
@@ -430,14 +436,14 @@ class Utility
             // fill out the middle row
             double slotOffset = 0;
             int slotOffsetDirection = 1;
-            for (int c = 0; c < 9; c++)
+            for (int c = 0; c < invWidth; c++)
             {
                 if (!itemsListIter.hasNext())
                     return inv;
                 slotOffset += 0.5;
                 slotOffsetDirection *= -1;
                 int totalSlotOffset = (int)slotOffset * slotOffsetDirection;
-                int slot = centerRow * 9 + 4 + totalSlotOffset;
+                int slot = centerRow * invWidth + centerSlot + totalSlotOffset;
                 inv.setItem(slot, itemsListIter.next());
             }
 
@@ -447,7 +453,7 @@ class Utility
                 rowOffset = r;
                 slotOffset = 0;
                 slotOffsetDirection = 1;
-                for (int c = 0; c < 9; c++)
+                for (int c = 0; c < invWidth; c++)
                 {
                     slotOffset += 0.5;
                     slotOffsetDirection *= -1;
@@ -456,7 +462,7 @@ class Utility
                     {
                         if (!itemsListIter.hasNext())
                             return inv;
-                        int slot = (int)(centerRow + rowOffset)*9 + 4 + totalSlotOffset;
+                        int slot = (int)(centerRow + rowOffset)*invWidth + centerSlot + totalSlotOffset;
                         inv.setItem(slot, itemsListIter.next());
                         rowOffset *= -1;
                     }
