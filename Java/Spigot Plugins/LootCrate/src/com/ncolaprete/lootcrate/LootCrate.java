@@ -64,7 +64,7 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
 
     private ConsoleCommandSender csend = getServer().getConsoleSender();
 
-    // config variables
+    // configuration variables
 
     public boolean BroadcastCrateDrops;
 
