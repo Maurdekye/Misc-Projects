@@ -124,6 +124,7 @@ class TransmogrificationJob implements Job
     Material initialMaterial;
     Material initialReplacementMaterial;
     byte initialData;
+    byte initialReplacementData;
     Player ply;
     ArrayList<Block> currentSet;
     int progressThroughSet;
@@ -138,6 +139,7 @@ class TransmogrificationJob implements Job
         this.initialMaterial = initialBlock.getType();
         this.initialReplacementMaterial = ply.getInventory().getItemInOffHand().getType();
         this.initialData = initialBlock.getData();
+        this.initialReplacementData = (byte)ply.getInventory().getItemInOffHand().getDurability();
         if (initialMaterial == Material.LEAVES || initialMaterial == Material.LEAVES_2)
             initialData = (byte) (initialData % 4);
         this.ply = ply;

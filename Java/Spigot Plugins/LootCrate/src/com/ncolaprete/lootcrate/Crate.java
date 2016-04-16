@@ -6,7 +6,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.material.Colorable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,27 +14,27 @@ import java.util.stream.Collectors;
 
 class Crate
 {
-    public Block location;
+    public Block block;
     public CrateLayout layout;
 
     public Crate(Block location, CrateLayout layout)
     {
-        this.location = location;
+        this.block = location;
         this.layout = layout;
 
-        if (this.location.getType() != Material.CHEST)
-            this.location.setType(Material.CHEST);
+        if (this.block.getType() != Material.CHEST)
+            this.block.setType(Material.CHEST);
     }
 
     public void unlockAndGivePrize(LootCrate plugin, Player rewardee)
     {
-        layout.givePrize(plugin, rewardee, location);
-        Utility.setChestInventoryName(location, layout.getPrintname(false));
+        layout.givePrize(plugin, rewardee, block);
+        Utility.setChestInventoryName(block, layout.getPrintname(false));
     }
 
-    public Inventory showContents(LootCrate plugin, Player ply)
+    public Inventory getPreview(LootCrate plugin, Player ply)
     {
-        return layout.showContents(plugin, ply, location);
+        return layout.getPreview(plugin, ply, block);
     }
 
     public boolean isKeyValid(ItemStack key)
@@ -86,7 +85,7 @@ class CrateLayout implements LoreTaggable
             rewardee.playSound(rewardee.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1, 1);
     }
 
-    public Inventory showContents(LootCrate plugin, Player ply, Block chestblock)
+    public Inventory getPreview(LootCrate plugin, Player ply, Block chestblock)
     {
         double totalProbability = 0;
         for (Reward r : contents)

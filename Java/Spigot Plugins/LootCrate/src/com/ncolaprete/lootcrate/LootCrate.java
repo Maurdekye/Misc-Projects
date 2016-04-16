@@ -1,11 +1,7 @@
 package com.ncolaprete.lootcrate;
 
-import net.ess3.api.Economy;
-import net.minecraft.server.v1_9_R1.*;
-import net.minecraft.server.v1_9_R1.Item;
 import org.bukkit.*;
 import org.bukkit.Material;
-import org.bukkit.World;
 import org.bukkit.block.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
@@ -13,12 +9,8 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
-import org.bukkit.configuration.Configuration;
 import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.craftbukkit.v1_9_R1.block.CraftChest;
-import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.*;
-import org.bukkit.entity.Entity;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
@@ -32,17 +24,11 @@ import org.bukkit.event.player.PlayerItemHeldEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.FireworkMeta;
-import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.inventory.meta.PotionMeta;
-import org.bukkit.material.MaterialData;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
-import org.bukkit.util.BlockIterator;
 import org.bukkit.util.Vector;
 
-import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -262,6 +248,9 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
             Optional<CrateLayout> layout = crateLayouts.stream().filter(l -> l.type.equalsIgnoreCase(layoutname)).findFirst();
             if (!layout.isPresent())
                 continue;
+
+            // Note: Do not automatically remove existing crate positions from the config file if they do not have layouts.
+            // Do not want an admin to delete a layout and accidentally lose half of all placed crates.
 
             addCrate(new Crate(pos.getBlock(), layout.get()));
         }
@@ -532,7 +521,7 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
 
             // Find chest to give from
             Block chestBlock = Utility.getTargetBlock(ply);
-            if (chestBlock.getType() != Material.CHEST)
+            if (chestBlock == null || chestBlock.getType() != Material.CHEST)
             {
                 sender.sendMessage(ChatColor.RED + "Unable to spawn prize; please look at a chest.");
                 return true;
@@ -643,7 +632,7 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
 
     private void checkForInvalidCrateLocations()
     {
-        List<Crate> toRemove = cratePositions.stream().filter(p -> p.location.getType() != Material.CHEST).collect(Collectors.toList());
+        List<Crate> toRemove = cratePositions.stream().filter(p -> p.block.getType() != Material.CHEST).collect(Collectors.toList());
         toRemove.stream().forEach(this::removeCrate);
     }
 
@@ -656,37 +645,36 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
         Player ply = ev.getPlayer();
 
         // manage opening of crates
-        if (ev.getAction() == Action.RIGHT_CLICK_BLOCK && !ply.isSneaking())
+        Crate crate = getCrate(ev.getClickedBlock());
+        ItemStack hand = ply.getInventory().getItemInMainHand();
+        if (ev.getAction() == Action.RIGHT_CLICK_BLOCK && crate != null)
         {
-            Block block = ev.getClickedBlock();
-            if (block.getType() != Material.CHEST)
-                return;
-            Crate crateToOpen = cratePositions.stream().filter(c -> c.location.equals(block)).findFirst().orElse(null);
-            if (crateToOpen == null)
-                return;
-            if (!ply.hasPermission("lootcrate.opencrate"))
+            boolean keyValid = crate.isKeyValid(hand);
+            if (ply.isSneaking() && (keyValid || !hand.getType().isBlock()))
             {
-                ply.sendMessage(ChatColor.RED + "You do not have permission to open crates.");
                 ev.setCancelled(true);
-                return;
-            }
-            ItemStack handItem = ply.getInventory().getItemInMainHand();
-            if (crateToOpen.isKeyValid(handItem))
-            {
-                if (!crateToOpen.layout.isFree())
-                {
-                    if (handItem.getAmount() > 1)
-                        handItem.setAmount(handItem.getAmount() - 1);
-                    else
-                        ply.getInventory().remove(handItem);
-                }
-                crateToOpen.unlockAndGivePrize(this, ply);
-                removeCrate(crateToOpen);
+                ply.openInventory(crate.getPreview(this, ply));
             }
             else
             {
-                ev.setCancelled(true);
-                ply.openInventory(crateToOpen.showContents(this, ply));
+                if (!ply.hasPermission("lootcrate.opencrate"))
+                {
+                    ply.sendMessage(ChatColor.RED + "You do not have permission to open crates.");
+                    ev.setCancelled(true);
+                    return;
+                }
+                if (keyValid)
+                {
+                    if (!crate.layout.isFree())
+                        Utility.reduceAmountInHand(ply, 1);
+                    crate.unlockAndGivePrize(this, ply);
+                    removeCrate(crate);
+                }
+                else
+                {
+                    ev.setCancelled(true);
+                    ply.openInventory(crate.getPreview(this, ply));
+                }
             }
         }
 
@@ -706,6 +694,8 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
             if (!ev.getClickedBlock().getType().isSolid())
                 return;
             if (ev.getClickedBlock().getType() == offhandItem.getType() && ev.getClickedBlock().getData() == offhandItem.getDurability())
+                return;
+            if (isCrate(ev.getClickedBlock()))
                 return;
             activeJobs.add(new TransmogrificationJob(ev.getClickedBlock(), ply, TransmogiphySpeed, MaxBlocksPerTransmogrophy));
         }
@@ -739,8 +729,19 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
     {
         ItemStack mainHand = ev.getPlayer().getInventory().getItemInMainHand();
 
+        // Manage picking up of crates
+        Crate crate = getCrate(ev.getBlock());
+        if (crate != null)
+        {
+            ev.setCancelled(true);
+            ItemStack crateDrop = crate.layout.getItemstack();
+            ev.getBlock().setType(Material.AIR);
+            ev.getBlock().getWorld().dropItemNaturally(ev.getBlock().getLocation().add(0.5, 0.5, 0.5), crateDrop);
+            removeCrate(crate);
+        }
+
         // Treefeller Chainsaw
-        if (Prize.itemIsPrize(mainHand, Prize.TREEFELLER_CHAINSAW))
+        else if (Prize.itemIsPrize(mainHand, Prize.TREEFELLER_CHAINSAW))
         {
             if (new TreefellerJob().getValidBlocks().contains(ev.getBlock().getType()) && CanFellTrees)
                 activeJobs.add(new TreefellerJob(ev.getBlock(), TreefellerSpeed, MaxBlocksPerFell));
@@ -749,7 +750,7 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
         }
 
         // Terramorpher
-        if (Prize.itemIsPrize(mainHand, Prize.TERRAMORPHER))
+        else if (Prize.itemIsPrize(mainHand, Prize.TERRAMORPHER))
         {
             if (!Utility.isCorrectTool(Material.DIAMOND_SPADE, ev.getBlock().getType()))
                 return;
@@ -757,7 +758,7 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
         }
 
         // Giga Drill Breaker
-        if (Prize.itemIsPrize(mainHand, Prize.GIGA_DRILL_BREAKER))
+        else if (Prize.itemIsPrize(mainHand, Prize.GIGA_DRILL_BREAKER))
         {
             if (!Utility.isCorrectTool(Material.DIAMOND_PICKAXE, ev.getBlock().getType()))
                 return;
@@ -765,20 +766,9 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
         }
 
         // Transmogriphier
-        if (Prize.itemIsPrize(mainHand, Prize.TRANSMOGRIFIER) &&
+        else if (Prize.itemIsPrize(mainHand, Prize.TRANSMOGRIFIER) &&
                 ev.getPlayer().getGameMode() == GameMode.CREATIVE)
             ev.setCancelled(true);
-
-        // Manage picking up of crates
-        if (ev.getBlock().getType() == Material.CHEST && isCrate(ev.getBlock()))
-        {
-            Crate crate = getCrate(ev.getBlock());
-            ev.setCancelled(true);
-            ItemStack crateDrop = crate.layout.getItemstack();
-            ev.getBlock().setType(Material.AIR);
-            ev.getBlock().getWorld().dropItemNaturally(ev.getBlock().getLocation().add(0.5, 0.5, 0.5), crateDrop);
-            removeCrate(crate);
-        }
     }
 
     @EventHandler
@@ -839,14 +829,14 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
 
     private void removeCrate(Crate c)
     {
-        cratePositionConfig.getConfig().set(Utility.serializeLocation(c.location.getLocation()), null);
+        cratePositionConfig.getConfig().set(Utility.serializeLocation(c.block.getLocation()), null);
         cratePositionConfig.saveConfig();
         cratePositions.remove(c);
     }
 
     private void removeCrate(int index)
     {
-        cratePositionConfig.getConfig().set(Utility.serializeLocation(cratePositions.get(index).location.getLocation()), null);
+        cratePositionConfig.getConfig().set(Utility.serializeLocation(cratePositions.get(index).block.getLocation()), null);
         cratePositionConfig.saveConfig();
         cratePositions.remove(index);
     }
@@ -854,12 +844,14 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
     private void addCrate(Crate c)
     {
         cratePositions.add(c);
-        cratePositionConfig.getConfig().set(Utility.serializeLocation(c.location.getLocation()), c.layout.type);
+        cratePositionConfig.getConfig().set(Utility.serializeLocation(c.block.getLocation()), c.layout.type);
         cratePositionConfig.saveConfig();
     }
 
     public boolean isCrate(Block b)
     {
+        if (b.getType() != Material.CHEST)
+            return false;
         return cratePositions.stream().filter(c -> c.layout.equals(b)).findFirst().isPresent();
     }
 
@@ -875,12 +867,14 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
         if (!(inv.getHolder() instanceof BlockState))
             return false;
         Block invBlock = ((BlockState) inv.getHolder()).getBlock();
-        Optional<Crate> possibleCrate = cratePositions.stream().filter(c -> c.location.equals(invBlock)).findFirst();
+        Optional<Crate> possibleCrate = cratePositions.stream().filter(c -> c.block.equals(invBlock)).findFirst();
         return possibleCrate.isPresent();
     }
 
     public Crate getCrate(Block b)
     {
+        if (b.getType() != Material.CHEST)
+            return null;
         return cratePositions.stream().filter(c -> c.layout.equals(b)).findFirst().orElse(null);
     }
 
@@ -900,7 +894,7 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
         }
         CrateLayout layout = crateLayouts.get(index);
 
-        // get location to use
+        // get block to use
         Location droplocation;
         Block newChest;
         int maxguesses = 256;
@@ -909,7 +903,7 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
             newChest = Utility.getHighestSolidBlock(center.getWorld(), droplocation.getBlockX(), droplocation.getBlockZ());
             if (maxguesses-- <= 0)
                 return;
-        } while (newChest != null &&  newChest.getLocation().getY() >= droplocation.getWorld().getMaxHeight());
+        } while (newChest != null &&  newChest.getLocation().getY() >= droplocation.getWorld().getMaxHeight() - 1);
 
         // broadcast crate position
         if (BroadcastCrateDrops && layout.shouldBroadcast)

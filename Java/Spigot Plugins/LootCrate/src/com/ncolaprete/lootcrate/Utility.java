@@ -3,8 +3,10 @@ package com.ncolaprete.lootcrate;
 import com.earth2me.essentials.api.NoLoanPermittedException;
 import com.earth2me.essentials.api.UserDoesNotExistException;
 import net.ess3.api.Economy;
-import net.minecraft.server.v1_9_R1.TileEntityChest;
+import net.minecraft.server.v1_9_R1.*;
 import org.bukkit.*;
+import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.craftbukkit.v1_9_R1.block.CraftChest;
@@ -238,8 +240,6 @@ class Utility
         if (sides)
         {
             surrounds.addAll(cardinalFaces.stream().map(block::getRelative).collect(Collectors.toList()));
-            surrounds.add(block.getRelative(BlockFace.UP));
-            surrounds.add(block.getRelative(BlockFace.DOWN));
         }
         if (diagonals)
         {
@@ -266,7 +266,7 @@ class Utility
 
     public static boolean isCorrectTool(Material tool, Material block)
     {
-        EnumSet<Material> Pickaxes = EnumSet.of(Material.WOOD_PICKAXE, Material.STONE_PICKAXE, Material.IRON_PICKAXE, Material.DIAMOND_PICKAXE);
+        EnumSet<Material> Pickaxes = EnumSet.of(Material.STONE_PICKAXE, Material.IRON_PICKAXE, Material.DIAMOND_PICKAXE);
         EnumSet<Material> Axes = EnumSet.of(Material.WOOD_AXE, Material.STONE_AXE, Material.IRON_AXE, Material.DIAMOND_AXE);
         EnumSet<Material> Shovels = EnumSet.of(Material.WOOD_SPADE, Material.STONE_SPADE, Material.IRON_SPADE, Material.DIAMOND_SPADE);
         EnumSet<Material> validAxeBlocks = EnumSet.of(
@@ -289,7 +289,8 @@ class Utility
                 Material.CARROT, Material.POTATO, Material.SUGAR_CANE_BLOCK,
                 Material.NETHER_STALK, Material.LONG_GRASS, Material.WATER_LILY,
                 Material.CHORUS_FLOWER, Material.YELLOW_FLOWER, Material.GLASS,
-                Material.THIN_GLASS, Material.BEDROCK);
+                Material.THIN_GLASS, Material.BEDROCK, Material.STAINED_GLASS,
+                Material.STAINED_GLASS_PANE);
         if (tool == Material.SHEARS && EnumSet.of(Material.LEAVES, Material.LEAVES_2).contains(block))
             return true;
         if (Pickaxes.contains(tool))
@@ -347,6 +348,26 @@ class Utility
             return true;
         }
         return false;
+    }
+
+    public static boolean reduceAmountInHand(Player ply, int amount)
+    {
+        return reduceAmount(ply.getInventory(), ply.getInventory().getHeldItemSlot(), amount);
+    }
+
+    public static boolean reduceAmount(Inventory inv, int slot, int amount)
+    {
+        ItemStack item = inv.getItem(slot);
+        if (item.getAmount() <= amount)
+        {
+            inv.setItem(slot, null);
+            return true;
+        }
+        else
+        {
+            item.setAmount(item.getAmount() - amount);
+            return false;
+        }
     }
 
     public static BigDecimal getBalance(Player ply)
