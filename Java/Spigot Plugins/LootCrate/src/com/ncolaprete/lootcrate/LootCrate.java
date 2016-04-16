@@ -64,6 +64,8 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
 
     private ConsoleCommandSender csend = getServer().getConsoleSender();
 
+    private static final String ConsoleErrorPrefix = ChatColor.RED + "Error: ";
+
     // configuration variables
 
     public boolean BroadcastCrateDrops;
@@ -135,12 +137,12 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
             String type = key;
             try {
                 Prize.valueOf(type.toUpperCase());
-                csend.sendMessage(ChatColor.RED + "Error! Key name '" + type + "' conflicts with existing prize!");
+                printError("Key name '" + type + "' conflicts with existing prize!");
                 continue;
             } catch (Exception e){};
             if (type.equalsIgnoreCase("_no_key"))
             {
-                csend.sendMessage(ChatColor.RED + "Error: The key name '_no_key' is disallowed.");
+                printError("The key name '_no_key' is disallowed.");
                 continue;
             }
 
@@ -148,20 +150,14 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
             Material material = Material.getMaterial(materialname.toUpperCase());
             if (material == null)
             {
-                csend.sendMessage(ChatColor.RED + "Error! '" + materialname + "' is not a valid block or item.");
+                printError("'" + materialname + "' is not a valid block or item.");
                 continue;
             }
 
-            String name = keysection.getString("name", ChatColor.RED + "Undefined Key");
+            String name = keysection.getString("name", type);
             name = ChatColor.translateAlternateColorCodes('?', name);
 
-            double buyprice;
-            try {
-                buyprice = Double.parseDouble(keysection.getString("price", "0"));
-            } catch (Exception e) {
-                csend.sendMessage(ChatColor.RED + "Error! '" + keysection.getString("price") + "' is not a number!");
-                continue;
-            }
+            double buyprice = keysection.getDouble("price", 0);
 
             String lorestring = keysection.getString("description", "");
             lorestring = ChatColor.translateAlternateColorCodes('?', lorestring);
@@ -172,7 +168,7 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
 
         if (crateKeys.size() == 0)
         {
-            csend.sendMessage(ChatColor.RED + "Error; No crate keys detected! Add them to crate_keys.yml and reload the plugin.");
+            printError("No crate keys detected! Add them to crate_keys.yml and reload the plugin.");
         }
 
         // load in crate layouts
@@ -182,7 +178,7 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
 
             String type = key;
 
-            String printname = cratesection.getString("name");
+            String printname = cratesection.getString("name", type);
             printname = ChatColor.translateAlternateColorCodes('?', printname);
 
             double spawnChance = cratesection.getDouble("spawn_chance", 0);
@@ -196,7 +192,7 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
                 reqKey = crateKeys.stream().filter(ck -> ck.type.equalsIgnoreCase(reqKeyName)).findFirst().orElse(null);
                 if (reqKey == null)
                 {
-                    csend.sendMessage(ChatColor.RED + "Error! crate key '" + reqKeyName + "' not found in crate_keys.yml!");
+                    printError("crate key '" + reqKeyName + "' not found in crate_keys.yml!");
                     continue;
                 }
             }
@@ -206,40 +202,33 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
             {
                 ConfigurationSection rewardsection = cratesection.getConfigurationSection("rewards." + rewardKey);
 
-                String prizeName = rewardsection.getString(".prize");
-                Prize prize = null;
+                String prizeName = rewardsection.getString("prize");
+                Prize prize;
                 int keyPrizeIndex = -1;
                 try {
                     prize = Prize.valueOf(prizeName.toUpperCase());
                     if (prize == Prize._CRATE_KEY)
                     {
-                        csend.sendMessage(ChatColor.RED + "Error: cannot reference the '_crate_key' prize directly. Use key names as prizes instead.");
+                        printError("Cannot reference the '_crate_key' prize directly. Use key names as prizes instead.");
                         continue;
                     }
                 } catch (Exception e) {
                     reqKey = crateKeys.stream().filter(ck -> ck.type.equalsIgnoreCase(prizeName)).findFirst().orElse(null);
                     if (reqKey == null)
                     {
-                        csend.sendMessage(ChatColor.RED + "Error! Unknown prize: " + prizeName);
+                        printError("Unknown prize: " + prizeName);
                         continue;
                     }
                     prize = Prize._CRATE_KEY;
                     keyPrizeIndex = crateKeys.indexOf(reqKey);
                 }
 
-                double rewardChance;
-                try {
-                    rewardChance = Double.parseDouble(rewardsection.getString("chance"));
-                } catch (Exception e) {
-                    csend.sendMessage(ChatColor.RED + "Error! '" + rewardsection.getString("chance") + "' is not a number!");
-                    continue;
-                }
+                double rewardChance = rewardsection.getDouble("chance", 0);
 
-                int amount;
-                try {
-                    amount = Integer.parseInt(rewardsection.getString("amount"));
-                } catch (Exception e) {
-                    csend.sendMessage(ChatColor.RED + "Error! '" + rewardsection.getString("amount") + "' is not an integer!");
+                int amount = rewardsection.getInt("amount", 1);
+                if (amount <= 0)
+                {
+                    printError("Prize reward amount cannot be less than 1!");
                     continue;
                 }
 
@@ -982,5 +971,10 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
         {
             ply.addPotionEffect(new PotionEffect(PotionEffectType.INCREASE_DAMAGE, 25, 4), true);
         }
+    }
+
+    private void printError(String msg)
+    {
+        csend.sendMessage(ConsoleErrorPrefix + msg);
     }
 }
