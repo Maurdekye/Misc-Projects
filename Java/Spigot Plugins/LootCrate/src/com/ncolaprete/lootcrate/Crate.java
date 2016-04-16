@@ -104,7 +104,7 @@ class CrateLayout
         Inventory display = Bukkit.createInventory((InventoryHolder) chestblock.getState(), invSize, getPrintname(true));
         for (int i=0;i<invSize;i++)
         {
-            ItemStack pane = Utility.setName(new ItemStack(Material.STAINED_GLASS_PANE), " ");
+            ItemStack pane = Utility.setName(Material.STAINED_GLASS_PANE, " ");
             pane.setDurability((short)15);
             display.setItem(i, pane);
         }
@@ -144,7 +144,7 @@ class CrateLayout
 
     public ItemStack getItemstack()
     {
-        ItemStack crateDrop = Utility.setName(new ItemStack(Material.CHEST), getPrintname(true));
+        ItemStack crateDrop = Utility.setName(Material.CHEST, getPrintname(true));
         if (keyRequired != null)
             Utility.addLoreLine(crateDrop, ChatColor.RESET + "" + ChatColor.GRAY + "Requires a " + keyRequired.displayname + ChatColor.RESET + ChatColor.GRAY + " to unlock");
         else
@@ -178,8 +178,7 @@ class CrateKey
 
     public ItemStack getKey(boolean isDisplayKey)
     {
-        ItemStack key = new ItemStack(material);
-        key = Utility.setName(key, displayname);
+        ItemStack key = Utility.setName(material, displayname);
         if (isDisplayKey)
             return key;
         for (String line : lore)

@@ -55,10 +55,7 @@ enum Prize
         else
             params.rewardee.sendMessage("You have received the ultimate reward: " + ChatColor.BOLD + "you may be in creative for " + params.amountToGive + " hours.");
         return null;
-    }, params -> {
-        ItemStack item = new ItemStack(Material.COMMAND);
-        return Utility.setName(item, ChatColor.UNDERLINE + "" + ChatColor.BOLD + "" + "The Ultimate Reward");
-    }),
+    }, params -> Utility.setName(Material.COMMAND, ChatColor.UNDERLINE + "" + ChatColor.BOLD + "" + "The Ultimate Reward")),
 
     // Armor
 
@@ -72,10 +69,7 @@ enum Prize
         item.addEnchantment(Enchantment.PROTECTION_FALL, 4);
         params.rewardee.sendMessage(ChatColor.YELLOW + "You got the Frostspark Cleats!");
         return Collections.singletonList(item);
-    }, params -> {
-        ItemStack item = new ItemStack(Material.DIAMOND_BOOTS);
-        return Utility.setName(item, ChatColor.YELLOW + "Frostspark Cleats");
-    }),
+    }, params -> Utility.setName(Material.DIAMOND_BOOTS, ChatColor.YELLOW + "Frostspark Cleats")),
 
     WATERGLIDE_BOOTS (params -> {
         ItemStack item = new ItemStack(Material.DIAMOND_BOOTS);
@@ -85,10 +79,7 @@ enum Prize
         item.addEnchantment(Enchantment.DEPTH_STRIDER, 3);
         params.rewardee.sendMessage(ChatColor.AQUA + "You got the Waterglide Boots!");
         return Collections.singletonList(item);
-    }, params -> {
-        ItemStack item = new ItemStack(Material.DIAMOND_BOOTS);
-        return Utility.setName(item, ChatColor.AQUA + "Waterglide Boots");
-    }),
+    }, params -> Utility.setName(Material.DIAMOND_BOOTS, ChatColor.AQUA + "Waterglide Boots")),
 
     LUCKY_TROUSERS (params -> {
         ItemStack item = new ItemStack(Material.DIAMOND_LEGGINGS);
@@ -98,10 +89,7 @@ enum Prize
         item.addEnchantment(Enchantment.DURABILITY, 1);
         params.rewardee.sendMessage(ChatColor.GREEN + "You got the Lucky Trousers!");
         return Collections.singletonList(item);
-    }, params -> {
-        ItemStack item = new ItemStack(Material.DIAMOND_LEGGINGS);
-        return Utility.setName(item, ChatColor.GREEN + "Lucky Trousers");
-    }),
+    }, params -> Utility.setName(Material.DIAMOND_LEGGINGS, ChatColor.GREEN + "Lucky Trousers")),
 
     KNACKERBREAKER_CHESTERPLATE (params -> {
         ItemStack item = new ItemStack(Material.DIAMOND_CHESTPLATE);
@@ -116,10 +104,7 @@ enum Prize
         item.addEnchantment(Enchantment.MENDING, 1);
         params.rewardee.sendMessage(ChatColor.YELLOW + "You got the Knackerbreaker Chesterplate!");
         return Collections.singletonList(item);
-    }, params -> {
-        ItemStack item = new ItemStack(Material.DIAMOND_CHESTPLATE);
-        return Utility.setName(item, ChatColor.GOLD + "Knackerbreaker Chesterplate");
-    }),
+    }, params -> Utility.setName(Material.DIAMOND_CHESTPLATE, ChatColor.GOLD + "Knackerbreaker Chesterplate")),
 
     HYDRODYNE_HELMET (params -> {
         ItemStack item = new ItemStack(Material.DIAMOND_HELMET);
@@ -131,10 +116,7 @@ enum Prize
         item.addEnchantment(Enchantment.WATER_WORKER, 1);
         params.rewardee.sendMessage(ChatColor.BLUE + "You got the Hydrodyne Helmet!");
         return Collections.singletonList(item);
-    }, params -> {
-        ItemStack item = new ItemStack(Material.DIAMOND_HELMET);
-        return Utility.setName(item, ChatColor.BLUE + "Hydrodyne Helmet");
-    }),
+    }, params -> Utility.setName(Material.DIAMOND_HELMET, ChatColor.BLUE + "Hydrodyne Helmet")),
 
     // Tools
 
@@ -145,10 +127,7 @@ enum Prize
         Utility.addLoreLine(item, ChatColor.DARK_GRAY + "" + ChatColor.ITALIC + "But what is done, cannot be undone...");
         params.rewardee.sendMessage(ChatColor.GRAY + "You have been burdened with the Antimatter Dematerializer.");
         return Collections.singletonList(item);
-    }, params -> {
-        ItemStack item = new ItemStack(Material.GOLD_PICKAXE);
-        return Utility.setName(item, ChatColor.GRAY + "" + ChatColor.ITALIC + ChatColor.BOLD + "Antimatter Dematerializer");
-    }),
+    }, params -> Utility.setName(Material.GOLD_PICKAXE, ChatColor.GRAY + "" + ChatColor.ITALIC + ChatColor.BOLD + "Antimatter Dematerializer")),
 
     WAND_OF_LEAPING (params -> {
         ItemStack item = new ItemStack(Material.GOLD_HOE);
@@ -157,10 +136,7 @@ enum Prize
         item.addEnchantment(Enchantment.DURABILITY, 1);
         params.rewardee.sendMessage(ChatColor.LIGHT_PURPLE + "You got the " + ChatColor.ITALIC + "Wand of Leaping!");
         return Collections.singletonList(item);
-    }, params -> {
-        ItemStack item = new ItemStack(Material.GOLD_HOE);
-        return Utility.setName(item, ChatColor.LIGHT_PURPLE + "" + ChatColor.ITALIC + "Wand of Leaping");
-    }),
+    }, params -> Utility.setName(Material.GOLD_HOE, ChatColor.LIGHT_PURPLE + "" + ChatColor.ITALIC + "Wand of Leaping")),
 
     TERRAMORPHER (params -> {
         ItemStack item = new ItemStack(Material.DIAMOND_SPADE);
@@ -170,10 +146,7 @@ enum Prize
         item.addEnchantment(Enchantment.DIG_SPEED, 3);
         params.rewardee.sendMessage(ChatColor.GREEN + "You got the " + ChatColor.BOLD + "Terramorpher!");
         return Collections.singletonList(item);
-    }, params -> {
-        ItemStack item = new ItemStack(Material.DIAMOND_SPADE);
-        return Utility.setName(item, ChatColor.GREEN + "" + ChatColor.BOLD + "Terramorpher");
-    }),
+    }, params -> Utility.setName(Material.DIAMOND_SPADE, ChatColor.GREEN + "" + ChatColor.BOLD + "Terramorpher")),
 
     TRANSMOGRIFIER (params -> {
         ItemStack item = new ItemStack(Material.DIAMOND_HOE);
@@ -183,10 +156,7 @@ enum Prize
         item.addEnchantment(Enchantment.DURABILITY, 2);
         params.rewardee.sendMessage(ChatColor.GOLD + "You got the " + ChatColor.BOLD + "Transmogrifier!");
         return Collections.singletonList(item);
-    }, params -> {
-        ItemStack item = new ItemStack(Material.DIAMOND_HOE);
-        return Utility.setName(item, ChatColor.GOLD + "" + ChatColor.BOLD + "Transmogrifier");
-    }),
+    }, params -> Utility.setName(Material.DIAMOND_HOE, ChatColor.GOLD + "" + ChatColor.BOLD + "Transmogrifier")),
 
     TREEFELLER_CHAINSAW (params -> {
         ItemStack item = new ItemStack(Material.DIAMOND_AXE);
@@ -196,10 +166,7 @@ enum Prize
         item.addEnchantment(Enchantment.DURABILITY, 2);
         params.rewardee.sendMessage(ChatColor.DARK_GREEN + "You got the Treefeller Chainsaw!");
         return Collections.singletonList(item);
-    }, params -> {
-        ItemStack item = new ItemStack(Material.DIAMOND_AXE);
-        return Utility.setName(item, ChatColor.DARK_GREEN + "" + ChatColor.ITALIC + "Treefeller Chainsaw");
-    }),
+    }, params -> Utility.setName(Material.DIAMOND_AXE, ChatColor.DARK_GREEN + "" + ChatColor.ITALIC + "Treefeller Chainsaw")),
 
     GIGA_DRILL_BREAKER (params -> {
         ItemStack item = new ItemStack(Material.DIAMOND_PICKAXE);
@@ -209,10 +176,7 @@ enum Prize
         item.addEnchantment(Enchantment.DURABILITY, 3);
         params.rewardee.sendMessage(ChatColor.AQUA + "You got the Giga Drill Breaker; thrust through the heavens with your spirit!");
         return Collections.singletonList(item);
-    }, params -> {
-        ItemStack item = new ItemStack(Material.DIAMOND_PICKAXE);
-        return Utility.setName(item, ChatColor.AQUA + "" + ChatColor.BOLD + "Giga Drill Breaker");
-    }),
+    }, params -> Utility.setName(Material.DIAMOND_PICKAXE, ChatColor.AQUA + "" + ChatColor.BOLD + "Giga Drill Breaker")),
 
     UNYIELDING_BATTERSEA (params -> {
         ItemStack item = new ItemStack(Material.SHIELD);
@@ -223,10 +187,7 @@ enum Prize
         item.addEnchantment(Enchantment.MENDING, 1);
         params.rewardee.sendMessage(ChatColor.YELLOW + "You got the Unyielding Battersea!");
         return Collections.singletonList(item);
-    }, params -> {
-        ItemStack item = new ItemStack(Material.SHIELD);
-        return Utility.setName(item, ChatColor.YELLOW + "Unyielding Battersea");
-    }),
+    }, params -> Utility.setName(Material.SHIELD, ChatColor.YELLOW + "Unyielding Battersea")),
 
     HYPERSHOT_LONGBOW (params -> {
         ItemStack item = new ItemStack(Material.BOW);
@@ -239,10 +200,7 @@ enum Prize
         item.addEnchantment(Enchantment.MENDING, 1);
         params.rewardee.sendMessage(ChatColor.YELLOW + "" + ChatColor.ITALIC + "You got the Hypershot Longbow!");
         return Arrays.asList(item, new ItemStack(Material.ARROW, params.amountToGive));
-    }, params -> {
-        ItemStack item = new ItemStack(Material.BOW);
-        return Utility.setName(item, ChatColor.YELLOW + "" + ChatColor.ITALIC + "Hypershot Longbow");
-    }),
+    }, params -> Utility.setName(Material.BOW, ChatColor.YELLOW + "" + ChatColor.ITALIC + "Hypershot Longbow")),
 
     VEILSTRIKE_SHORTBOW (params -> {
         ItemStack item = new ItemStack(Material.BOW);
@@ -254,10 +212,7 @@ enum Prize
         item.addEnchantment(Enchantment.MENDING, 1);
         params.rewardee.sendMessage(ChatColor.BLUE + "" + ChatColor.ITALIC + "You got the Veilstrike Shortbow!");
         return Arrays.asList(item, new ItemStack(Material.ARROW, params.amountToGive));
-    }, params -> {
-        ItemStack item = new ItemStack(Material.BOW);
-        return Utility.setName(item, ChatColor.BLUE + "" + ChatColor.ITALIC + "Veilstrike Shortbow");
-    }),
+    }, params -> Utility.setName(Material.BOW, ChatColor.BLUE + "" + ChatColor.ITALIC + "Veilstrike Shortbow")),
 
     HEAVENS_BLADE (params -> {
         ItemStack item = new ItemStack(Material.DIAMOND_SWORD);
@@ -270,10 +225,7 @@ enum Prize
         item.addEnchantment(Enchantment.MENDING, 1);
         params.rewardee.sendMessage(ChatColor.YELLOW + "" + ChatColor.BOLD + "You got Heaven's Blade!");
         return Collections.singletonList(item);
-    }, params -> {
-        ItemStack item = new ItemStack(Material.DIAMOND_SWORD);
-        return Utility.setName(item, ChatColor.YELLOW + "" + ChatColor.BOLD + "Heaven's Blade");
-    }),
+    }, params -> Utility.setName(Material.DIAMOND_SWORD, ChatColor.YELLOW + "" + ChatColor.BOLD + "Heaven's Blade")),
 
     // Other rewards
 
@@ -290,10 +242,7 @@ enum Prize
         rewards.add(new ItemStack(Material.IRON_BOOTS));
         params.rewardee.sendMessage("You got full iron combat gear!");
         return rewards;
-    }, params -> {
-        ItemStack item = new ItemStack(Material.IRON_CHESTPLATE);
-        return Utility.setName(item, ChatColor.AQUA + "Full Iron Combat Gear");
-    }),
+    }, params -> Utility.setName(Material.IRON_CHESTPLATE, ChatColor.AQUA + "Full Iron Combat Gear")),
 
     IRON_TOOLSET (params -> {
         ArrayList<ItemStack> rewards = new ArrayList<>();
@@ -304,10 +253,7 @@ enum Prize
         rewards.add(new ItemStack(Material.IRON_HOE));
         params.rewardee.sendMessage("You got a full iron toolset!");
         return rewards;
-    }, params -> {
-        ItemStack item = new ItemStack(Material.IRON_PICKAXE);
-        return Utility.setName(item, ChatColor.AQUA + "Full Iron Toolset");
-    }),
+    }, params -> Utility.setName(Material.IRON_PICKAXE, ChatColor.AQUA + "Full Iron Toolset")),
 
     DIAMONDS (params -> {
         if (params.amountToGive > 1)
@@ -316,12 +262,10 @@ enum Prize
             params.rewardee.sendMessage("You got a Diamond!");
         return Collections.singletonList(new ItemStack(Material.DIAMOND, params.amountToGive));
     }, params -> {
-        ItemStack item = new ItemStack(Material.DIAMOND, 1);
         if (params.amountToGive > 1)
-            Utility.setName(item, ChatColor.DARK_AQUA + "" + params.amountToGive + " Diamonds");
+            return Utility.setName(Material.DIAMOND, ChatColor.DARK_AQUA + "" + params.amountToGive + " Diamonds");
         else
-            Utility.setName(item, ChatColor.DARK_AQUA + "1 Diamond");
-        return item;
+            return Utility.setName(Material.DIAMOND, ChatColor.DARK_AQUA + "1 Diamond");
     }),
 
     EMERALDS (params -> {
@@ -331,12 +275,10 @@ enum Prize
             params.rewardee.sendMessage(ChatColor.GREEN + "You got an Emerald!");
         return Collections.singletonList(new ItemStack(Material.EMERALD, params.amountToGive));
     }, params -> {
-        ItemStack item = new ItemStack(Material.EMERALD);
         if (params.amountToGive > 1)
-            Utility.setName(item, ChatColor.GREEN + "" + params.amountToGive + " Emeralds");
+            return Utility.setName(Material.EMERALD, ChatColor.GREEN + "" + params.amountToGive + " Emeralds");
         else
-            Utility.setName(item, ChatColor.GREEN + "1 Emerald");
-        return item;
+            return Utility.setName(Material.EMERALD, ChatColor.GREEN + "1 Emerald");
     }),
 
     IRON_BARS (params -> {
@@ -346,12 +288,10 @@ enum Prize
             params.rewardee.sendMessage("You got an iron ingot!");
         return Collections.singletonList(new ItemStack(Material.IRON_INGOT, params.amountToGive));
     }, params -> {
-        ItemStack item = new ItemStack(Material.IRON_INGOT, 1);
         if (params.amountToGive > 1)
-            Utility.setName(item, ChatColor.DARK_AQUA + "" + params.amountToGive + " Iron Ingots");
+            return Utility.setName(Material.IRON_INGOT, ChatColor.DARK_AQUA + "" + params.amountToGive + " Iron Ingots");
         else
-            Utility.setName(item, ChatColor.DARK_AQUA + "1 Iron Ingot");
-        return item;
+            return Utility.setName(Material.IRON_INGOT, ChatColor.DARK_AQUA + "1 Iron Ingot");
     }),
 
     GOLD_BARS (params -> {
@@ -361,12 +301,10 @@ enum Prize
             params.rewardee.sendMessage("You got a gold ingot!");
         return Collections.singletonList(new ItemStack(Material.GOLD_INGOT, params.amountToGive));
     }, params -> {
-        ItemStack item = new ItemStack(Material.IRON_INGOT, 1);
         if (params.amountToGive > 1)
-            Utility.setName(item, ChatColor.DARK_AQUA + "" + params.amountToGive + " Gold Ingots");
+            return Utility.setName(Material.IRON_INGOT, ChatColor.DARK_AQUA + "" + params.amountToGive + " Gold Ingots");
         else
-            Utility.setName(item, ChatColor.DARK_AQUA + "1 Gold Ingot");
-        return item;
+            return Utility.setName(Material.IRON_INGOT, ChatColor.DARK_AQUA + "1 Gold Ingot");
     }),
 
     RAW_ORE_BLOCKS (params -> {
@@ -387,10 +325,7 @@ enum Prize
         }
         params.rewardee.sendMessage(ChatColor.AQUA + "You got various raw ore blocks!");
         return rewards;
-    }, params -> {
-        ItemStack item = new ItemStack(Material.REDSTONE_ORE);
-        return Utility.setName(item, ChatColor.AQUA + "" + params.amountToGive + "xAssorted Raw Ore Blocks");
-    }),
+    }, params -> Utility.setName(Material.REDSTONE_ORE, ChatColor.AQUA + "" + params.amountToGive + "xAssorted Raw Ore Blocks")),
 
     ASSORTED_ORES (params -> {
         ArrayList<ItemStack> rewards = new ArrayList<>();
@@ -413,10 +348,7 @@ enum Prize
         }
         params.rewardee.sendMessage(ChatColor.AQUA + "You got an assortment of ores!");
         return rewards;
-    }, params -> {
-        ItemStack item = new ItemStack(Material.COAL);
-        return Utility.setName(item, ChatColor.AQUA + "" + params.amountToGive + "xAssorted Ores");
-    }),
+    }, params -> Utility.setName(Material.COAL, ChatColor.AQUA + "" + params.amountToGive + "xAssorted Ores")),
 
     ASSORTMENT (params -> {
         ArrayList<ItemStack> rewards = new ArrayList<>();
@@ -439,11 +371,7 @@ enum Prize
         }
         params.rewardee.sendMessage(ChatColor.GREEN + "You got a random assortment of items.");
         return rewards;
-    }, params -> {
-        ItemStack item = new ItemStack(Material.CHEST);
-        Utility.setName(item, ChatColor.GREEN + "" + params.amountToGive + "xAssorted Items");
-        return item;
-    }),
+    }, params -> Utility.setName(Material.CHEST, ChatColor.GREEN + "" + params.amountToGive + "xAssorted Items")),
 
     PLANTS (params -> {
         ArrayList<ItemStack> rewards = new ArrayList<>();
@@ -465,21 +393,13 @@ enum Prize
         }
         params.rewardee.sendMessage(ChatColor.GREEN + "You got an assorted planter set.");
         return rewards;
-    }, params -> {
-        ItemStack item = new ItemStack(Material.SAPLING);
-        Utility.setName(item, ChatColor.DARK_GREEN + "" + params.amountToGive + "xAssorted Plants");
-        return item;
-    }),
+    }, params -> Utility.setName(Material.SAPLING, ChatColor.DARK_GREEN + "" + params.amountToGive + "xAssorted Plants")),
 
     MONEY (params -> {
         Utility.modifyBalance(params.rewardee, new BigDecimal(params.amountToGive));
         params.rewardee.sendMessage("You got $" + params.amountToGive + "!");
-        return Collections.singletonList(Utility.setName(new ItemStack(Material.PAPER), ChatColor.DARK_AQUA + "$" + params.amountToGive + " bank invoice"));
-    }, params -> {
-        ItemStack item = new ItemStack(Material.GOLD_INGOT, 1);
-        Utility.setName(item, ChatColor.DARK_AQUA + "$" + params.amountToGive);
-        return item;
-    }),
+        return Collections.singletonList(Utility.setName(Material.PAPER, ChatColor.DARK_AQUA + "$" + params.amountToGive + " bank invoice"));
+    }, params -> Utility.setName(Material.GOLD_INGOT, ChatColor.DARK_AQUA + "$" + params.amountToGive)),
 
     INVINCIBILITY (params -> {
         params.rewardee.addPotionEffect(new PotionEffect(PotionEffectType.REGENERATION, 100, 4));
@@ -545,12 +465,10 @@ enum Prize
         params.rewardee.sendMessage(ChatColor.DARK_AQUA + "You got " + params.amountToGive + " individually placed gold nuggets!");
         return nuggets;
     }, params -> {
-        ItemStack item = new ItemStack(Material.GOLD_NUGGET);
         if (params.amountToGive > 1)
-            Utility.setName(item, ChatColor.DARK_AQUA + "" + params.amountToGive + " Individually Placed Gold Nuggets");
+            return Utility.setName(Material.GOLD_NUGGET, ChatColor.DARK_AQUA + "" + params.amountToGive + " Individually Placed Gold Nuggets");
         else
-            Utility.setName(item, ChatColor.DARK_AQUA + "1 Gold Nugget");
-        return item;
+            return Utility.setName(Material.GOLD_NUGGET, ChatColor.DARK_AQUA + "1 Gold Nugget");
     }),
 
     // bad prizes
@@ -573,22 +491,16 @@ enum Prize
         }
         params.rewardee.sendMessage(ChatColor.GOLD + "You got a fireworks show! Yaayyy!!");
         return null;
-    }, params -> {
-        ItemStack item = new ItemStack(Material.FIREWORK);
-        return Utility.setName(item, ChatColor.GOLD + "A Fireworks Show");
-    }),
+    }, params -> Utility.setName(Material.FIREWORK, ChatColor.GOLD + "A Fireworks Show")),
 
     BOOM_TIME (params -> {
         Chest chest = (Chest) params.chestBlock.getState();
         for (int i=0;i<chest.getInventory().getSize();i++)
-            chest.getInventory().setItem(i, Utility.setName(new ItemStack(Material.TNT), ChatColor.RED + "BOOM TIME!"));
+            chest.getInventory().setItem(i, Utility.setName(Material.TNT, ChatColor.RED + "BOOM TIME!"));
         params.rewardee.sendMessage(ChatColor.RED + "Boom Time!");
         params.plugin.activeJobs.add(new BoomTimeJob(params.chestBlock, 8, 6, params.amountToGive));
         return null;
-    }, params -> {
-        ItemStack item = new ItemStack(Material.TNT);
-        return Utility.setName(item, ChatColor.RED + "Boom Time!");
-    }),
+    }, params -> Utility.setName(Material.TNT, ChatColor.RED + "Boom Time!")),
 
     PANDORAS_BOX (params -> {
         Location spawnPos = params.chestBlock.getLocation().add(0, 1, 0);
@@ -605,19 +517,12 @@ enum Prize
         spawnPos.getWorld().spawnEntity(spawnPos.add(0, 5, 0), EntityType.LIGHTNING);
         params.rewardee.sendMessage(ChatColor.DARK_PURPLE + "You opened pandora's box!");
         return null;
-    }, params -> {
-        ItemStack item = new ItemStack(Material.ENDER_CHEST);
-        return Utility.setName(item, ChatColor.DARK_PURPLE + "Pandora's Box");
-    }),
+    }, params -> Utility.setName(Material.ENDER_CHEST, ChatColor.DARK_PURPLE + "Pandora's Box")),
 
     NOTHING (params -> {
         params.rewardee.sendMessage(ChatColor.DARK_GRAY + "You got nothing.");
         return null;
-    }, params -> {
-        ItemStack item = new ItemStack(Material.THIN_GLASS);
-        Utility.setName(item, ChatColor.DARK_GRAY + "Nothing");
-        return item;
-    });
+    }, params -> Utility.setName(Material.THIN_GLASS, ChatColor.DARK_GRAY + "Nothing"));
 
     private PrizeAction action;
     private PrizeVisual visualisation;

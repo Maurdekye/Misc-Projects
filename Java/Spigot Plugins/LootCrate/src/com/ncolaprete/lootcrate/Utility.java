@@ -70,6 +70,11 @@ class Utility
         return lore;
     }
 
+    public static ItemStack setName(Material item, String name)
+    {
+        return setName(new ItemStack(item), name);
+    }
+
     public static ItemStack setName(ItemStack item, String name)
     {
         ItemMeta meta = item.getItemMeta();

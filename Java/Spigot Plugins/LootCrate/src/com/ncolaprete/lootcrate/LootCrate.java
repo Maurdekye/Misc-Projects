@@ -353,7 +353,7 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
             if (look != null && look.getState() != null && look.getState() instanceof InventoryHolder)
                 inv = ((InventoryHolder) look.getState()).getInventory();
             for (int i=0; i<inv.getSize();i++)
-                inv.setItem(i, Utility.setName(new ItemStack(Material.THIN_GLASS), "#" + i));
+                inv.setItem(i, Utility.setName(Material.THIN_GLASS, "#" + i));
         }
 
         // buykey
