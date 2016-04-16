@@ -44,7 +44,7 @@ class Crate
     }
 }
 
-class CrateLayout
+class CrateLayout implements LoreTaggable
 {
     private static final String LockedTag = ChatColor.RED + " [Locked]";
     private static final String UnlockedTag = ChatColor.YELLOW + " [Unlocked]";
@@ -159,7 +159,7 @@ class CrateLayout
     }
 }
 
-class CrateKey
+class CrateKey implements LoreTaggable
 {
     public String type;
     public Material material;

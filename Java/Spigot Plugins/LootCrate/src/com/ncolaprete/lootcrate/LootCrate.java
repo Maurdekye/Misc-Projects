@@ -197,6 +197,12 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
                 }
             }
 
+            if (cratesection.getConfigurationSection("rewards") == null)
+            {
+                printError("No rewards were given for crate layout '" + type + "'. Please specify them.");
+                continue;
+            }
+
             ArrayList<Reward> rewardList = new ArrayList<>();
             for (String rewardKey : cratesection.getConfigurationSection("rewards").getKeys(false))
             {

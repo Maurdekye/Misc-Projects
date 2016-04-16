@@ -18,7 +18,7 @@ import org.bukkit.util.Vector;
 import java.math.BigDecimal;
 import java.util.*;
 
-enum Prize
+enum Prize implements LoreTaggable
 {
     _CRATE_KEY (params -> {
         if (params.plugin.crateKeys.size() == 0)
