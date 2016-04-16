@@ -97,18 +97,18 @@
       <file leaf-file-name="Prize.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/com/ncolaprete/lootcrate/Prize.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="768">
-              <caret line="526" column="31" selection-start-line="526" selection-start-column="31" selection-end-line="526" selection-end-column="31" />
+            <state relative-caret-position="867">
+              <caret line="532" column="5" selection-start-line="532" selection-start-column="5" selection-end-line="532" selection-end-column="5" />
               <folding>
                 <element signature="method#Prize#0;class#Prize#0" expanded="false" />
                 <element signature="method#giveReward#0;class#Prize#0" expanded="false" />
                 <element signature="method#getVisualisation#0;class#Prize#0" expanded="false" />
                 <element signature="method#itemIsPrize#0;class#Prize#0" expanded="false" />
-                <element signature="e#31305#31395#0" expanded="false" />
+                <element signature="e#31311#31401#0" expanded="false" />
                 <element signature="class#RewardActionParameter#0;class#Prize#0" expanded="false" />
                 <element signature="method#RewardActionParameter#0;class#RewardActionParameter#0;class#Prize#0" expanded="false" />
-                <element signature="class#PrizeVisual#0;class#Prize#0" expanded="false" />
-                <element signature="class#PrizeAction#0;class#Prize#0" expanded="false" />
+                <element signature="class#PrizeVisualizer#0;class#Prize#0" expanded="false" />
+                <element signature="class#PrizeActor#0;class#Prize#0" expanded="false" />
               </folding>
             </state>
           </provider>
@@ -801,11 +801,11 @@
             <element signature="method#giveReward#0;class#Prize#0" expanded="false" />
             <element signature="method#getVisualisation#0;class#Prize#0" expanded="false" />
             <element signature="method#itemIsPrize#0;class#Prize#0" expanded="false" />
-            <element signature="e#31305#31395#0" expanded="false" />
+            <element signature="e#31311#31401#0" expanded="false" />
             <element signature="class#RewardActionParameter#0;class#Prize#0" expanded="false" />
             <element signature="method#RewardActionParameter#0;class#RewardActionParameter#0;class#Prize#0" expanded="false" />
-            <element signature="class#PrizeVisual#0;class#Prize#0" expanded="false" />
-            <element signature="class#PrizeAction#0;class#Prize#0" expanded="false" />
+            <element signature="class#PrizeVisualizer#0;class#Prize#0" expanded="false" />
+            <element signature="class#PrizeActor#0;class#Prize#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -1475,18 +1475,18 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/com/ncolaprete/lootcrate/Prize.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="768">
-          <caret line="526" column="31" selection-start-line="526" selection-start-column="31" selection-end-line="526" selection-end-column="31" />
+        <state relative-caret-position="867">
+          <caret line="532" column="5" selection-start-line="532" selection-start-column="5" selection-end-line="532" selection-end-column="5" />
           <folding>
             <element signature="method#Prize#0;class#Prize#0" expanded="false" />
             <element signature="method#giveReward#0;class#Prize#0" expanded="false" />
             <element signature="method#getVisualisation#0;class#Prize#0" expanded="false" />
             <element signature="method#itemIsPrize#0;class#Prize#0" expanded="false" />
-            <element signature="e#31305#31395#0" expanded="false" />
+            <element signature="e#31311#31401#0" expanded="false" />
             <element signature="class#RewardActionParameter#0;class#Prize#0" expanded="false" />
             <element signature="method#RewardActionParameter#0;class#RewardActionParameter#0;class#Prize#0" expanded="false" />
-            <element signature="class#PrizeVisual#0;class#Prize#0" expanded="false" />
-            <element signature="class#PrizeAction#0;class#Prize#0" expanded="false" />
+            <element signature="class#PrizeVisualizer#0;class#Prize#0" expanded="false" />
+            <element signature="class#PrizeActor#0;class#Prize#0" expanded="false" />
           </folding>
         </state>
       </provider>

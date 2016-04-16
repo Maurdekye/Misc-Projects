@@ -524,9 +524,9 @@ enum Prize implements LoreTaggable
         return null;
     }, params -> Utility.setName(Material.THIN_GLASS, ChatColor.DARK_GRAY + "Nothing"));
 
-    private PrizeAction action;
-    private PrizeVisual visualisation;
-    Prize(PrizeAction action, PrizeVisual visualisation)
+    private PrizeActor action;
+    private PrizeVisualizer visualisation;
+    Prize(PrizeActor action, PrizeVisualizer visualisation)
     {
         this.action = action;
         this.visualisation = visualisation;
@@ -588,12 +588,12 @@ enum Prize implements LoreTaggable
         }
     }
 
-    interface PrizeVisual
+    interface PrizeVisualizer
     {
         ItemStack getVisualisation(RewardActionParameter parameters);
     }
 
-    interface PrizeAction
+    interface PrizeActor
     {
         List<ItemStack> enactReward(RewardActionParameter parameters);
     }
