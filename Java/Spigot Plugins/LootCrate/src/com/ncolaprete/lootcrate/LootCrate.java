@@ -680,7 +680,7 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
 
         // Transmogrifier
         if (ev.getAction() == Action.LEFT_CLICK_BLOCK &&
-                Prize.itemIsPrize(ev.getItem(), Prize.TRANSMOGRIFIER))
+                Prize.TRANSMOGRIFIER.isPrizeItem(ev.getItem()))
         {
             ItemStack offhandItem = ply.getInventory().getItemInOffHand();
             if (offhandItem == null)
@@ -702,7 +702,7 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
 
         // Antimatter Dematerializer
         if (ev.getAction() == Action.LEFT_CLICK_BLOCK &&
-                Prize.itemIsPrize(ev.getItem(), Prize.ANTIMATTER_DEMATERIALIZER))
+                Prize.ANTIMATTER_DEMATERIALIZER.isPrizeItem(ev.getItem()))
         {
             Utility.reduceDurability(ply, ev.getItem(), Short.MAX_VALUE);
             ply.getWorld().spawnEntity(ev.getClickedBlock().getLocation().add(0, 1, 0), EntityType.LIGHTNING);
@@ -711,7 +711,7 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
 
         // Wand of Leaping
         if ((ev.getAction() == Action.LEFT_CLICK_BLOCK || ev.getAction() == Action.LEFT_CLICK_AIR) &&
-                Prize.itemIsPrize(ev.getItem(), Prize.WAND_OF_LEAPING))
+                Prize.WAND_OF_LEAPING.isPrizeItem(ev.getItem()))
         {
             if (!Utility.isOnGround(ply))
                 return;
@@ -741,7 +741,7 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
         }
 
         // Treefeller Chainsaw
-        else if (Prize.itemIsPrize(mainHand, Prize.TREEFELLER_CHAINSAW))
+        else if (Prize.TREEFELLER_CHAINSAW.isPrizeItem(mainHand))
         {
             if (new TreefellerJob().getValidBlocks().contains(ev.getBlock().getType()) && CanFellTrees)
                 activeJobs.add(new TreefellerJob(ev.getBlock(), TreefellerSpeed, MaxBlocksPerFell));
@@ -750,7 +750,7 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
         }
 
         // Terramorpher
-        else if (Prize.itemIsPrize(mainHand, Prize.TERRAMORPHER))
+        else if (Prize.TERRAMORPHER.isPrizeItem(mainHand))
         {
             if (!Utility.isCorrectTool(Material.DIAMOND_SPADE, ev.getBlock().getType()))
                 return;
@@ -758,7 +758,7 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
         }
 
         // Giga Drill Breaker
-        else if (Prize.itemIsPrize(mainHand, Prize.GIGA_DRILL_BREAKER))
+        else if (Prize.GIGA_DRILL_BREAKER.isPrizeItem(mainHand))
         {
             if (!Utility.isCorrectTool(Material.DIAMOND_PICKAXE, ev.getBlock().getType()))
                 return;
@@ -766,7 +766,7 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
         }
 
         // Transmogriphier
-        else if (Prize.itemIsPrize(mainHand, Prize.TRANSMOGRIFIER) &&
+        else if (Prize.TRANSMOGRIFIER.isPrizeItem(mainHand) &&
                 ev.getPlayer().getGameMode() == GameMode.CREATIVE)
             ev.setCancelled(true);
     }
@@ -803,7 +803,7 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
         if (ev.getEntity() instanceof Arrow && ev.getEntity().getShooter() instanceof Player)
         {
             Player ply = (Player) ev.getEntity().getShooter();
-            if (Prize.itemIsPrize(ply.getInventory().getItemInMainHand(), Prize.HYPERSHOT_LONGBOW))
+            if (Prize.HYPERSHOT_LONGBOW.isPrizeItem(ply.getInventory().getItemInMainHand()))
             {
                 ev.getEntity().setVelocity(ev.getEntity().getVelocity().multiply(4));
             }
@@ -819,7 +819,7 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
 
         // Wand of Leaping
         if (ev.getCause() == EntityDamageEvent.DamageCause.FALL &&
-                Prize.itemIsPrize(ply.getInventory().getItemInMainHand(), Prize.WAND_OF_LEAPING))
+                Prize.WAND_OF_LEAPING.isPrizeItem(ply.getInventory().getItemInMainHand()))
         {
             ev.setCancelled(true);
         }
@@ -922,40 +922,40 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
         ItemStack offHandItem = ply.getInventory().getItemInOffHand();
 
         // Frostspark Cleats
-        if (Prize.itemIsPrize(ply.getInventory().getBoots(), Prize.FROSTSPARK_CLEATS))
+        if (Prize.FROSTSPARK_CLEATS.isPrizeItem(ply.getInventory().getBoots()))
         {
             ply.addPotionEffect(new PotionEffect(PotionEffectType.SPEED, 40, 2), true);
             ply.addPotionEffect(new PotionEffect(PotionEffectType.JUMP, 40, 1), true);
         }
 
         // Lucky Trousers
-        if (Prize.itemIsPrize(ply.getInventory().getLeggings(), Prize.LUCKY_TROUSERS))
+        if (Prize.LUCKY_TROUSERS.isPrizeItem(ply.getInventory().getLeggings()))
         {
             ply.addPotionEffect(new PotionEffect(PotionEffectType.LUCK, 40, 2), true);
         }
 
         // Knackerbreaker Chesterplate
-        if (Prize.itemIsPrize(ply.getInventory().getChestplate(), Prize.KNACKERBREAKER_CHESTERPLATE))
+        if (Prize.KNACKERBREAKER_CHESTERPLATE.isPrizeItem(ply.getInventory().getChestplate()))
         {
             ply.addPotionEffect(new PotionEffect(PotionEffectType.ABSORPTION, 40, 0), true);
         }
 
         // Hydrodyne Helmet
-        if (Prize.itemIsPrize(ply.getInventory().getHelmet(), Prize.HYDRODYNE_HELMET))
+        if (Prize.HYDRODYNE_HELMET.isPrizeItem(ply.getInventory().getHelmet()))
         {
             ply.addPotionEffect(new PotionEffect(PotionEffectType.NIGHT_VISION, 250, 0), true);
             ply.addPotionEffect(new PotionEffect(PotionEffectType.WATER_BREATHING, 40, 0), true);
         }
 
         // Giga Drill Breaker
-        if (Prize.itemIsPrize(mainHandItem, Prize.GIGA_DRILL_BREAKER))
+        if (Prize.GIGA_DRILL_BREAKER.isPrizeItem(mainHandItem))
         {
             ply.addPotionEffect(new PotionEffect(PotionEffectType.FAST_DIGGING, 25, 3), true);
         }
 
         // Unyielding Battersea
-        if ((Prize.itemIsPrize(offHandItem, Prize.UNYIELDING_BATTERSEA) ||
-                Prize.itemIsPrize(mainHandItem, Prize.UNYIELDING_BATTERSEA)) &&
+        if ((Prize.UNYIELDING_BATTERSEA.isPrizeItem(offHandItem) ||
+                Prize.UNYIELDING_BATTERSEA.isPrizeItem(mainHandItem)) &&
                 ply.isBlocking())
         {
             ply.addPotionEffect(new PotionEffect(PotionEffectType.DAMAGE_RESISTANCE, 40, 0), true);
@@ -963,13 +963,13 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
         }
 
         // Veilstrike Shortbow
-        if (Prize.itemIsPrize(mainHandItem, Prize.VEILSTRIKE_SHORTBOW))
+        if (Prize.VEILSTRIKE_SHORTBOW.isPrizeItem(mainHandItem))
         {
             ply.addPotionEffect(new PotionEffect(PotionEffectType.INVISIBILITY, 25, 0), true);
         }
 
         // Heaven's Blade
-        if (Prize.itemIsPrize(mainHandItem, Prize.HEAVENS_BLADE))
+        if (Prize.HEAVENS_BLADE.isPrizeItem(mainHandItem))
         {
             ply.addPotionEffect(new PotionEffect(PotionEffectType.INCREASE_DAMAGE, 25, 4), true);
         }

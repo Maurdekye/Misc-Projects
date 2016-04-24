@@ -565,9 +565,9 @@ enum Prize implements LoreTaggable
         return ChatColor.BLACK + toString().toLowerCase();
     }
 
-    public static boolean itemIsPrize(ItemStack item, Prize prize)
+    public boolean isPrizeItem(ItemStack item)
     {
-        return Utility.itemHasLoreLine(item, prize.getLoreTag());
+        return Utility.itemHasLoreLine(item, getLoreTag());
         //TODO There was another check here that I wanted to add... but i've forgotten what it was
         // maybe i'll remember it someday
     }
