@@ -903,7 +903,9 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
             newChest = Utility.getHighestSolidBlock(center.getWorld(), droplocation.getBlockX(), droplocation.getBlockZ());
             if (maxguesses-- <= 0)
                 return;
-        } while (newChest != null &&  newChest.getLocation().getY() >= droplocation.getWorld().getMaxHeight() - 1);
+        } while (newChest != null &&  newChest.getLocation().getY() < droplocation.getWorld().getMaxHeight() - 1);
+        if (newChest == null)
+            return;
 
         // broadcast crate position
         if (BroadcastCrateDrops && layout.shouldBroadcast)
