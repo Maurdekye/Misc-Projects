@@ -1,0 +1,9 @@
+C:\Repos\Misc-Projects\C#\BeatTracker\BeatTracker\bin\Debug\BeatTracker.exe.config
+C:\Repos\Misc-Projects\C#\BeatTracker\BeatTracker\obj\Debug\BeatTracker.csprojResolveAssemblyReference.cache
+C:\Repos\Misc-Projects\C#\BeatTracker\BeatTracker\obj\Debug\BeatTracker.window.resources
+C:\Repos\Misc-Projects\C#\BeatTracker\BeatTracker\obj\Debug\BeatTracker.Properties.Resources.resources
+C:\Repos\Misc-Projects\C#\BeatTracker\BeatTracker\obj\Debug\BeatTracker.csproj.GenerateResource.Cache
+C:\Repos\Misc-Projects\C#\BeatTracker\BeatTracker\bin\Debug\BeatTracker.exe
+C:\Repos\Misc-Projects\C#\BeatTracker\BeatTracker\bin\Debug\BeatTracker.pdb
+C:\Repos\Misc-Projects\C#\BeatTracker\BeatTracker\obj\Debug\BeatTracker.exe
+C:\Repos\Misc-Projects\C#\BeatTracker\BeatTracker\obj\Debug\BeatTracker.pdb
