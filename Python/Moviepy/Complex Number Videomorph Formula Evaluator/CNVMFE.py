@@ -1,13 +1,17 @@
 from moviepy.editor import *
 import copy
 import sys
-print(sys.argv)
+
+if len(sys.argv) <= 1:
+    print("Open with a video to modify")
+    sys.exit()
+
 clipfile = sys.argv[1]
+outputfile = "output/" + clipfile
 
 print("Loading clip " + clipfile + "...")
 
 clip = VideoFileClip(clipfile)
-modifiedclip = VideoFileClip(clipfile)
 
 ratio = clip.w / clip.h
 
@@ -44,15 +48,12 @@ def is_in_bounds(x, y):
 equation = lambda x: x**2 + 1
 
 numframes = int(clip.fps * clip.duration)
-'''
+
 print("Creating blank clip...")
 
-for f, frame in enumerate(modifiedclip.iter_frames()):
-    print("\t\tFrame " + str(f) + "/" + str(numframes))
-    for y, row in enumerate(frame):
-        for x, pixel in enumerate(row):
-            frame[y][x] = [0, 0, 0]
-'''
+ColorClip((clip.w, clip.h), (0, 0, 0), duration=clip.duration).write_videofile(outputfile, fps=clip.fps)
+modifiedclip = VideoFileClip(outputfile)
+
 print("Evaluating clip function...")
 
 for f, frame in enumerate(clip.iter_frames()):
@@ -67,4 +68,4 @@ for f, frame in enumerate(clip.iter_frames()):
 
 print("Saving clip...")
 
-modifiedclip.write_videofile("output/" + clipfile)
+modifiedclip.write_videofile(outputfile)
