@@ -1,0 +1,8 @@
+C:\Repos\Misc-Projects\C#\Particle Simulation\Particle Simulation\bin\Release\Particle Simulation.exe.config
+C:\Repos\Misc-Projects\C#\Particle Simulation\Particle Simulation\bin\Release\Particle Simulation.exe
+C:\Repos\Misc-Projects\C#\Particle Simulation\Particle Simulation\bin\Release\Particle Simulation.pdb
+C:\Repos\Misc-Projects\C#\Particle Simulation\Particle Simulation\obj\Release\Particle_Simulation.Window.resources
+C:\Repos\Misc-Projects\C#\Particle Simulation\Particle Simulation\obj\Release\Particle_Simulation.Properties.Resources.resources
+C:\Repos\Misc-Projects\C#\Particle Simulation\Particle Simulation\obj\Release\Particle Simulation.csproj.GenerateResource.Cache
+C:\Repos\Misc-Projects\C#\Particle Simulation\Particle Simulation\obj\Release\Particle Simulation.exe
+C:\Repos\Misc-Projects\C#\Particle Simulation\Particle Simulation\obj\Release\Particle Simulation.pdb
