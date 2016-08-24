@@ -6,3 +6,4 @@ C:\Repos\Misc-Projects\C#\Particle Simulation\Particle Simulation\obj\Release\Pa
 C:\Repos\Misc-Projects\C#\Particle Simulation\Particle Simulation\obj\Release\Particle Simulation.csproj.GenerateResource.Cache
 C:\Repos\Misc-Projects\C#\Particle Simulation\Particle Simulation\obj\Release\Particle Simulation.exe
 C:\Repos\Misc-Projects\C#\Particle Simulation\Particle Simulation\obj\Release\Particle Simulation.pdb
+C:\Repos\Misc-Projects\C#\Particle Simulation\Particle Simulation\obj\Release\Particle Simulation.csprojResolveAssemblyReference.cache

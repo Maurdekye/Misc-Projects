@@ -52,6 +52,7 @@
             this.Text = "Particle Sim";
             this.Activated += new System.EventHandler(this.Window_Activated);
             this.Deactivate += new System.EventHandler(this.Window_Deactivate);
+            this.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.Window_KeyPress);
             ((System.ComponentModel.ISupportInitialize)(this.Canvas)).EndInit();
             this.ResumeLayout(false);
 
