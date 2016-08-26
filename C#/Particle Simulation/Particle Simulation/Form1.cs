@@ -18,7 +18,7 @@ namespace Particle_Simulation
         public static float RenderRate = 1f / 60;
         public static float SimulationRate = 1f / 120;
         public static float Timescale = 1f;
-        public static int ParticleCount = 2;
+        public static int ParticleCount = 10;
 
         private Thread RenderThread;
         private Thread SimulationThread;
@@ -57,14 +57,10 @@ namespace Particle_Simulation
             Size CSize = Canvas.Bounds.Size;
             EnvironmentBounds = new Bounds(new PointF(0, 0), new PointF(CSize.Width, CSize.Height));
             Particles = new List<Particle>();
-            /*for (int i = 0; i < ParticleCount; i++)
+            for (int i = 0; i < ParticleCount; i++)
             {
                 Particles.Add(new Particle(RandomFloat()*30 + 10, RandomPointFInBounds(EnvironmentBounds), RandomInUnitCircle().Times(1000)));
-            }*/
-            // Test Case
-            Particles.Add(new Particle(15, new PointF(150, 250), new PointF(300, 0)));
-            Particles.Add(new Particle(15, new PointF(250, 270), new PointF(0, 0)));
-            Paused = true;
+            }
         }
 
         public void InitializeThreads()
@@ -143,10 +139,7 @@ namespace Particle_Simulation
             // Draw particles
             foreach (Particle P in Particles)
             {
-                Brush PColor = Brushes.Blue;
-                if (P.Colliding)
-                    PColor = Brushes.Red;
-                g.FillEllipse(PColor, new Rectangle(P.Position.Minus(P.Radius).ToPoint(), new Size((int)P.Radius*2, (int)P.Radius*2)));
+                g.FillEllipse(Brushes.Blue, new Rectangle(P.Position.Minus(P.Radius).ToPoint(), new Size((int)P.Radius*2, (int)P.Radius*2)));
             }
 
             // Update and Draw Framerate
@@ -177,7 +170,7 @@ namespace Particle_Simulation
         public PointF Velocity = new PointF(0, 0);
         public PointF Position = new PointF(0, 0);
 
-        public bool Colliding { get; private set; }
+        private List<Particle> CollidedRecently = new List<Particle>();
 
         public Particle() { }
 
@@ -230,16 +223,23 @@ namespace Particle_Simulation
 
         private void TestForParticleCollision(float DeltaTime, List<Particle> Particles)
         {
-            Colliding = false;
             foreach (Particle Other in Particles)
             {
                 if (Other == this)
                     continue;
+                bool HasRecentlyCollided = CollidedRecently.Contains(Other);
                 if (Other.Position.Distance(Position) <= Other.Radius + this.Radius)
                 {
+                    if (HasRecentlyCollided)
+                        continue;
                     SimulateCollision(DeltaTime, Other);
-                    Colliding = true;
+                    CollidedRecently.Add(Other);
                 }
+                else if (HasRecentlyCollided)
+                {
+                    CollidedRecently.Remove(Other);
+                }
+
             }
         }
 
