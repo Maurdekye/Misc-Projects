@@ -26,8 +26,7 @@ namespace Particle_Simulation
         private List<Particle> Particles;
         private Bounds EnvironmentBounds;
 
-        private Stopwatch FramerateCounter;
-        private long LastFrameTime;
+        private FramerateMeter FrameCounter;
 
         private bool Paused;
         private bool FrameAdvance;
@@ -50,11 +49,11 @@ namespace Particle_Simulation
 
         public void CreateEnvironment()
         {
+            RenderThread = new Thread(new ThreadStart(Render));
+            SimulationThread = new Thread(new ThreadStart(Simulate));
             Paused = false;
             FrameAdvance = false;
-            FramerateCounter = new Stopwatch();
-            FramerateCounter.Start();
-            LastFrameTime = FramerateCounter.ElapsedTicks;
+            FrameCounter = new FramerateMeter();
             Size CSize = Canvas.Bounds.Size;
             EnvironmentBounds = new Bounds(new PointF(0, 0), new PointF(CSize.Width, CSize.Height));
             Particles = new List<Particle>();
@@ -62,14 +61,14 @@ namespace Particle_Simulation
             {
                 Particles.Add(new Particle(RandomFloat()*30 + 10, RandomPointFInBounds(EnvironmentBounds), RandomInUnitCircle().Times(1000)));
             }*/
+            // Test Case
             Particles.Add(new Particle(15, new PointF(150, 250), new PointF(300, 0)));
             Particles.Add(new Particle(15, new PointF(250, 270), new PointF(0, 0)));
+            Paused = true;
         }
 
         public void InitializeThreads()
         {
-            RenderThread = new Thread(new ThreadStart(Render));
-            SimulationThread = new Thread(new ThreadStart(Simulate));
             RenderThread.Start();
             SimulationThread.Start();
         }
@@ -137,9 +136,11 @@ namespace Particle_Simulation
         private void Canvas_Paint(object sender, PaintEventArgs e)
         {
             Graphics g = e.Graphics;
-            // Refresh Background
+
+            // Clear Background
             g.FillRectangle(Brushes.White, Canvas.Bounds);
-            // Render particles
+
+            // Draw particles
             foreach (Particle P in Particles)
             {
                 Brush PColor = Brushes.Blue;
@@ -147,18 +148,13 @@ namespace Particle_Simulation
                     PColor = Brushes.Red;
                 g.FillEllipse(PColor, new Rectangle(P.Position.Minus(P.Radius).ToPoint(), new Size((int)P.Radius*2, (int)P.Radius*2)));
             }
-            // Calculate and draw framerate
-            long CurrentFrameTime = FramerateCounter.ElapsedTicks;
-            long FrameDelta = CurrentFrameTime - LastFrameTime;
-            double DeltaSeconds = FrameDelta / (double)Stopwatch.Frequency;
-            double InstantaneousFramerate = Math.Round(1 / DeltaSeconds, 2);
-            g.DrawString(InstantaneousFramerate.ToString(), new Font("Helvetica", 10), Brushes.Black, new PointF(10, 10));
-            LastFrameTime = CurrentFrameTime;
-            // Draw Paused Icon
+
+            // Update and Draw Framerate
+            g.DrawString(FrameCounter.TickFramerate().ToString(), new Font("Helvetica", 10), Brushes.Black, new PointF(10, 10));
+
+            // Draw Pause Icon
             if (Paused)
-            {
-                g.DrawString("=", new Font("Helvetica", 80, FontStyle.Bold), Brushes.Black, new PointF(170, 170));
-            }
+                g.DrawString("=", new Font("Helvetica", 80, FontStyle.Bold), Brushes.Black, new PointF(190, 170));
         }
 
         private void Window_KeyPress(object sender, KeyPressEventArgs e)
@@ -218,55 +214,57 @@ namespace Particle_Simulation
             PreVelocity.Minus(new PointF(0, 981f * DeltaTime));
         }
 
-        private void SimulateCollision(float DeltaTime, Particle Other)
+        private void TestForWallCollision(float DeltaTime, Bounds EnvironmentBounds)
         {
-            float MyMass = Mass();
-            float OtherMass = Other.Mass();
-            PreVelocity = new PointF(
-                (Velocity.X * (MyMass - OtherMass) + (2 * OtherMass * Other.Velocity.X)) / (MyMass + OtherMass),
-                (Velocity.Y * (MyMass - OtherMass) + (2 * OtherMass * Other.Velocity.Y)) / (MyMass + OtherMass));
-        }
-
-        public void SimulateNextFrame(float DeltaTime, Bounds EnvironmentBounds, List<Particle> Particles)
-        {
-            PrePosition = Position;
-            PreVelocity = Velocity;
-            PointF NewPos = SimulateLinearAcceleration(DeltaTime);
-            bool Altered = false;
-            Colliding = false;
-
-            // Wall Collisions
-            if (NewPos.X < EnvironmentBounds.Lower.X + Radius
-                || NewPos.X > EnvironmentBounds.Upper.X - Radius)
+            if (PrePosition.X < EnvironmentBounds.Lower.X + Radius
+                || PrePosition.X > EnvironmentBounds.Upper.X - Radius)
             {
                 PreVelocity.X = -PreVelocity.X;
-                Altered = true;
             }
-            if (NewPos.Y < EnvironmentBounds.Lower.Y + Radius
-                || NewPos.Y > EnvironmentBounds.Upper.Y - Radius)
+            if (PrePosition.Y < EnvironmentBounds.Lower.Y + Radius
+                || PrePosition.Y > EnvironmentBounds.Upper.Y - Radius)
             {
                 PreVelocity.Y = -PreVelocity.Y;
-                Altered = true;
             }
+        }
 
-            // Particle Collisions
+        private void TestForParticleCollision(float DeltaTime, List<Particle> Particles)
+        {
+            Colliding = false;
             foreach (Particle Other in Particles)
             {
                 if (Other == this)
                     continue;
-                if (Other.Position.Distance(Position) < Other.Radius + this.Radius)
+                if (Other.Position.Distance(Position) <= Other.Radius + this.Radius)
                 {
                     SimulateCollision(DeltaTime, Other);
-                    Altered = true;
                     Colliding = true;
                 }
             }
+        }
 
-            if (Altered)
-                NewPos = SimulateLinearAcceleration(DeltaTime);
-            PrePosition = NewPos;
+        private void SimulateCollision(float DeltaTime, Particle Other)
+        {
+            float M1 = Mass(); // Mass 1
+            float M2 = Other.Mass(); // Mass 2
+            float S1 = Velocity.Magnitude(); // Speed 1
+            float S2 = Other.Velocity.Magnitude(); // Speed 2
+            float A1 = Velocity.Angle(); // Angle 1
+            float A2 = Other.Velocity.Angle(); // Angle 2
+            PointF DeltaVec = Other.Position.Minus(Position);
+            float CA = DeltaVec.Angle(); // Collision Angle
+            float DA1 = A1 - CA; // Delta Angle 1
+            float DA2 = A2 - CA; // Delta Angle 2
 
-            // Remove Balls From Walls
+            double FractionalCalculation = (S1 * Math.Cos(DA1) * (M1 - M2) + 2 * M2 * S2 * Math.Cos(DA2)) / (M1 + M2);
+            PreVelocity = new PointF(
+                (float)(FractionalCalculation * Math.Cos(CA) + S1 * Math.Sin(DA1) * Math.Cos(CA + Math.PI / 2)),
+                (float)(FractionalCalculation * Math.Sin(CA) + S1 * Math.Sin(DA1) * Math.Sin(CA + Math.PI / 2))
+                );
+        }
+
+        private void RemoveFromOutOfBounds(Bounds EnvironmentBounds)
+        {
             if (PrePosition.X < EnvironmentBounds.Lower.X + Radius)
                 PrePosition.X = EnvironmentBounds.Lower.X + Radius + 1;
             if (PrePosition.X > EnvironmentBounds.Upper.X - Radius)
@@ -275,6 +273,16 @@ namespace Particle_Simulation
                 PrePosition.Y = EnvironmentBounds.Lower.Y + Radius + 1;
             if (PrePosition.Y > EnvironmentBounds.Upper.Y - Radius)
                 PrePosition.Y = EnvironmentBounds.Upper.Y - Radius - 1;
+        }
+
+        public void SimulateNextFrame(float DeltaTime, Bounds EnvironmentBounds, List<Particle> Particles)
+        {
+            PreVelocity = Velocity;
+            PrePosition = SimulateLinearAcceleration(DeltaTime);
+            TestForWallCollision(DeltaTime, EnvironmentBounds);
+            TestForParticleCollision(DeltaTime, Particles);
+            PrePosition = SimulateLinearAcceleration(DeltaTime);
+            RemoveFromOutOfBounds(EnvironmentBounds);
         }
 
         public void ApplySimulation()
@@ -362,7 +370,26 @@ namespace Particle_Simulation
         }
     }
 
-    public static class Extensions
+    public class FramerateMeter : Stopwatch
+    {
+        private long LastTick = 0;
+
+        public FramerateMeter() : base() { }
+
+        public float TickFramerate(int decimals=2)
+        {
+            if (!IsRunning)
+                Start();
+            long TickDelta = ElapsedTicks - LastTick;
+            double SecondDelta = TickDelta / (double)Frequency;
+            double RawFramerate = 1.0 / SecondDelta;
+            float FinalFramerate = (float)Math.Round(RawFramerate, decimals);
+            LastTick = ElapsedTicks;
+            return FinalFramerate;
+        }
+    }
+
+    public static class PointFAlgebra
     {
         public static PointF Plus(this PointF A, PointF B)
         {
@@ -399,6 +426,11 @@ namespace Particle_Simulation
             return new PointF(P.X * S, P.Y * S);
         }
 
+        public static float Angle(this PointF P)
+        {
+            return (float)Math.Atan2(P.Y, P.X);
+        }
+
         public static float Distance(this PointF A, PointF B)
         {
             PointF Delta = A.Minus(B).AbsoluteValue();
@@ -422,6 +454,11 @@ namespace Particle_Simulation
         public static float Dot(this PointF A, PointF B)
         {
             return A.X * B.X + A.Y * B.Y;
+        }
+
+        public static PointF Perpendicular(this PointF P)
+        {
+            return new PointF(-P.Y, P.X);
         }
 
         public static Point ToPoint(this PointF P)
