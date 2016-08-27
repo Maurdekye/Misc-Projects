@@ -16,9 +16,10 @@ namespace Particle_Simulation
     public partial class Window : Form
     {
         public static float RenderRate = 1f / 60;
-        public static float SimulationRate = 1f / 120;
+        public static float SimulationRate = 1f / 240;
         public static float Timescale = 1f;
-        public static int ParticleCount = 10;
+        public static int ParticleCount = 15;
+        public static bool AdjustToWindowMovement = false;
 
         private Thread RenderThread;
         private Thread SimulationThread;
@@ -28,6 +29,8 @@ namespace Particle_Simulation
 
         private FramerateMeter FrameCounter;
 
+        private PointF LastWindowPos;
+
         private bool Paused;
         private bool FrameAdvance;
 
@@ -35,20 +38,12 @@ namespace Particle_Simulation
         {
             InitializeComponent();
             CreateEnvironment();
-        }
-
-        private void Window_Activated(object sender, EventArgs e)
-        {
             InitializeThreads();
-        }
-
-        private void Window_Deactivate(object sender, EventArgs e)
-        {
-            DestroyThreads();
         }
 
         public void CreateEnvironment()
         {
+            LastWindowPos = new PointF(Left, Top);
             RenderThread = new Thread(new ThreadStart(Render));
             SimulationThread = new Thread(new ThreadStart(Simulate));
             Paused = false;
@@ -58,7 +53,7 @@ namespace Particle_Simulation
             EnvironmentBounds = new Bounds(new PointF(0, 0), new PointF(CSize.Width, CSize.Height));
             Particles = new List<Particle>();
             for (int i = 0; i < ParticleCount; i++)
-                Particles.Add(new Particle(10 + i*4, RandomPointFInBounds(EnvironmentBounds), RandomInUnitCircle().Times(1000)));
+                Particles.Add(new Particle(30, RandomPointFInBounds(EnvironmentBounds), RandomInUnitCircle().Times(1000)));
         }
 
         public void InitializeThreads()
@@ -79,6 +74,14 @@ namespace Particle_Simulation
             {
                 Thread.Sleep((int)(RenderRate * 1000));
                 Repaint();
+                if (AdjustToWindowMovement)
+                {
+                    PointF CurrentWindowPos = new PointF(Left, Top);
+                    PointF Delta = CurrentWindowPos.Minus(LastWindowPos);
+                    foreach (Particle P in Particles)
+                        P.Position = P.Position.Minus(Delta);
+                    LastWindowPos = CurrentWindowPos;
+                }
             }
         }
 
@@ -131,9 +134,6 @@ namespace Particle_Simulation
         {
             Graphics g = e.Graphics;
 
-            // Clear Background
-            g.FillRectangle(Brushes.White, Canvas.Bounds);
-
             // Draw particles
             foreach (Particle P in Particles)
                 g.FillEllipse(Brushes.Blue, new Rectangle(P.Position.Minus(P.Radius).ToPoint(), new Size((int)P.Radius*2, (int)P.Radius*2)));
@@ -163,8 +163,8 @@ namespace Particle_Simulation
 
         private PointF PreVelocity = new PointF(0, 0);
         private PointF PrePosition = new PointF(0, 0);
-        public PointF Velocity { get; private set; } = new PointF(0, 0);
-        public PointF Position { get; private set; } = new PointF(0, 0);
+        public PointF Velocity = new PointF(0, 0);
+        public PointF Position = new PointF(0, 0);
 
         private List<Particle> CollidedRecently = new List<Particle>();
 
@@ -244,6 +244,7 @@ namespace Particle_Simulation
 
         private void SimulateCollision(float DeltaTime, Particle Other)
         {
+            // Elastic Collision Algorithm Couresy of Wikipedia.org
             float M1 = Mass(); // Mass 1
             float M2 = Other.Mass(); // Mass 2
             float S1 = Velocity.Magnitude(); // Speed 1
@@ -284,7 +285,7 @@ namespace Particle_Simulation
                 {
                     float Overlap = (Other.Radius + this.Radius) - Other.Position.Distance(Position);
                     PointF DirectionVec = Position.Minus(Other.Position).Normalized().Times(Overlap);
-                    PrePosition = PrePosition.Plus(DirectionVec.Times(0.5f));
+                    PrePosition = PrePosition.Plus(DirectionVec.Times(0.25f));
                 }
             }
         }
