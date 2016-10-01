@@ -1,0 +1,10 @@
+C:\Repos\Misc-Projects\C#\ImageDeformation\ImageDeformation\bin\Debug\ImageDeformation.exe.config
+C:\Repos\Misc-Projects\C#\ImageDeformation\ImageDeformation\bin\Debug\ImageDeformation.exe
+C:\Repos\Misc-Projects\C#\ImageDeformation\ImageDeformation\bin\Debug\ImageDeformation.pdb
+C:\Repos\Misc-Projects\C#\ImageDeformation\ImageDeformation\obj\Debug\ImageDeformation.csprojResolveAssemblyReference.cache
+C:\Repos\Misc-Projects\C#\ImageDeformation\ImageDeformation\obj\Debug\ImageDeformation.Form1.resources
+C:\Repos\Misc-Projects\C#\ImageDeformation\ImageDeformation\obj\Debug\ImageDeformation.Properties.Resources.resources
+C:\Repos\Misc-Projects\C#\ImageDeformation\ImageDeformation\obj\Debug\ImageDeformation.csproj.GenerateResource.Cache
+C:\Repos\Misc-Projects\C#\ImageDeformation\ImageDeformation\obj\Debug\ImageDeformation.exe
+C:\Repos\Misc-Projects\C#\ImageDeformation\ImageDeformation\obj\Debug\ImageDeformation.pdb
+C:\Repos\Misc-Projects\C#\ImageDeformation\ImageDeformation\bin\Debug\testim.bmp
