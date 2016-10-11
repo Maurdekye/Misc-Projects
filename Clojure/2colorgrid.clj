@@ -62,11 +62,13 @@
 
 (defn examinerow
   ([grid row]
-   (examinerow grid row (inc row)))
+   (examinerow grid row 0))
   ([grid row otherrow]
    (cond
      (= otherrow (height grid))
        false
+     (= row otherrow)
+       (examinerow grid row (inc otherrow))
      (comparerows grid row otherrow)
        true
      :else
@@ -99,7 +101,6 @@
            (if (= shiftedrow lastrow)
              (solve newgrid shiftedrow (inc shiftcount))
              (solve newgrid shiftedrow 1)))))))
-
 
 (def gr (rnumgrid 5))
 (println "New Run")
