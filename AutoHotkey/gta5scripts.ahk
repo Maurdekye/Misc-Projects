@@ -41,7 +41,7 @@ SetKeyDelay, [10, 10]
 ; Auto-Mechanic
 *Numpad0::
   Send, {Up}
-  Sleep, 500
+  Sleep, 600
   Send, {Right}
   Sleep, 50
   Send, {Up}{Enter}
@@ -73,6 +73,7 @@ SetKeyDelay, [10, 10]
 ; But you couldn't, you didn't, and now you're paying the price, you goddamn idiot. I will shit fury all over you and you will drown in 
 ; it. You're fucking dead, kiddo.
 NumpadDot::
+  return
   Send, t
   Sleep, 50
   Send, What the fuck did you just fucking say about me, you little bitch? I'll have you know I graduated top of my class in the Navy Seals, and
