@@ -2,10 +2,5 @@
   "discord" :
   {
     "api_token" : "MjM2OTU1NTA1MzcxNzc0OTc3.CuQrOg._5xQEHAGMoyFxr6ZRxAmyokXJa8"
-  },
-  "spotify" :
-  {
-    "id_token" : "4665ce5874694f88bfd0a878dc3ad2f4",
-    "secret_token" : "b03174cd5300413abb27e32d74f0a5c2"
   }
 }
