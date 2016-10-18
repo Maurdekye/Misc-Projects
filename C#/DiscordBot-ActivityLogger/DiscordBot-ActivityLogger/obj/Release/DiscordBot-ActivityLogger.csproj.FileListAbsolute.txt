@@ -1,0 +1,17 @@
+C:\Repos\Misc-Projects\C#\DiscordBot-ActivityLogger\DiscordBot-ActivityLogger\bin\Release\DiscordBot-ActivityLogger.exe.config
+C:\Repos\Misc-Projects\C#\DiscordBot-ActivityLogger\DiscordBot-ActivityLogger\bin\Release\DiscordBot-ActivityLogger.exe
+C:\Repos\Misc-Projects\C#\DiscordBot-ActivityLogger\DiscordBot-ActivityLogger\bin\Release\DiscordBot-ActivityLogger.pdb
+C:\Repos\Misc-Projects\C#\DiscordBot-ActivityLogger\DiscordBot-ActivityLogger\bin\Release\Discord.Net.dll
+C:\Repos\Misc-Projects\C#\DiscordBot-ActivityLogger\DiscordBot-ActivityLogger\bin\Release\Newtonsoft.Json.dll
+C:\Repos\Misc-Projects\C#\DiscordBot-ActivityLogger\DiscordBot-ActivityLogger\bin\Release\Nito.AsyncEx.Concurrent.dll
+C:\Repos\Misc-Projects\C#\DiscordBot-ActivityLogger\DiscordBot-ActivityLogger\bin\Release\Nito.AsyncEx.dll
+C:\Repos\Misc-Projects\C#\DiscordBot-ActivityLogger\DiscordBot-ActivityLogger\bin\Release\Nito.AsyncEx.Enlightenment.dll
+C:\Repos\Misc-Projects\C#\DiscordBot-ActivityLogger\DiscordBot-ActivityLogger\bin\Release\RestSharp.dll
+C:\Repos\Misc-Projects\C#\DiscordBot-ActivityLogger\DiscordBot-ActivityLogger\bin\Release\WebSocket4Net.dll
+C:\Repos\Misc-Projects\C#\DiscordBot-ActivityLogger\DiscordBot-ActivityLogger\bin\Release\Newtonsoft.Json.xml
+C:\Repos\Misc-Projects\C#\DiscordBot-ActivityLogger\DiscordBot-ActivityLogger\bin\Release\Nito.AsyncEx.xml
+C:\Repos\Misc-Projects\C#\DiscordBot-ActivityLogger\DiscordBot-ActivityLogger\bin\Release\Nito.AsyncEx.Concurrent.xml
+C:\Repos\Misc-Projects\C#\DiscordBot-ActivityLogger\DiscordBot-ActivityLogger\bin\Release\Nito.AsyncEx.Enlightenment.xml
+C:\Repos\Misc-Projects\C#\DiscordBot-ActivityLogger\DiscordBot-ActivityLogger\bin\Release\RestSharp.xml
+C:\Repos\Misc-Projects\C#\DiscordBot-ActivityLogger\DiscordBot-ActivityLogger\obj\Release\DiscordBot-ActivityLogger.exe
+C:\Repos\Misc-Projects\C#\DiscordBot-ActivityLogger\DiscordBot-ActivityLogger\obj\Release\DiscordBot-ActivityLogger.pdb

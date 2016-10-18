@@ -66,7 +66,9 @@ class OfficeBot
 
         Client.UserUpdated += async (object Sender, UserUpdatedEventArgs EvArgs) =>
         {
-            if (EvArgs.After.VoiceChannel.Users.Count() > 1 && EvArgs.Before.VoiceChannel != EvArgs.After.VoiceChannel)
+            if (EvArgs.Before.VoiceChannel != EvArgs.After.VoiceChannel &&
+                EvArgs.After.VoiceChannel != null &&
+                EvArgs.After.VoiceChannel.Users.Count() > 1)
             {
                 Dictionary<Channel, List<User>> OfficeChannels = GetOfficeChannels(EvArgs.Server);
                 if (OfficeChannels.ContainsKey(EvArgs.After.VoiceChannel))
