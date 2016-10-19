@@ -2,32 +2,44 @@ const discord_api = require("discord.js");
 const ytdl = require('ytdl-core');
 const bot = new discord_api.Client();
 
-var playlist = [] 
+var playlist = [];
+var dispatch;
+var playing = false;
 
-function recurPrintPlaylistNames(channel, callbefore=()=>{}, names=[], index=0) {
+function recurPrintPlaylistNames(channel, callbefore=()=>{}, names=[], index=1) {
   if (index === playlist.length) {
-    var s = "Coming up:\n";
-    for (var i=0;i<names.length;i++) {
-      s = s + "`  " + (i + 1) + ". " + names[i] + "`\n"
-    }
-    callbefore();
-    bot.sendMessage(channel, s);
+    ytdl.getInfo(playlist[0], (err, info) => {
+      var s = "```Current video: " + info.title + "\nComing up:\n";
+      for (var i=0;i<names.length;i++) {
+        s = s + "   " + (i + 1) + ". " + names[i] + "\n"
+      }
+      s = s + "```";
+      channel.sendMessage(s);
+    });
   } else {
     ytdl.getInfo(playlist[index], (err, info) => {
-      recurPrintPlaylistNames(channel, callbefore, names + [info.title], index + 1);
+      recurPrintPlaylistNames(channel, callbefore, names.concat([info.title]), index + 1);
     });
   }
 }
 
-function recurExhaustPlaylist(vchannel, connection) {
+function recurExhaustPlaylist(vchannel, tchannel, connection) {
   if (playlist.length === 0) {
+    playing = false;
     vchannel.leave();
   } else {
-    const dispatch = connection.playStream(ytdl(playlist[0], {audioonly: true}));
+    playing = true;
+    ytdl(playlist[0], (err, info) => {
+      tchannel.sendMessage("Now playing: `" + info.title + "`");
+    });
+    dispatch = connection.playStream(ytdl(playlist[0], {audioonly: true}));
+    dispatch.setVolumeLogarithmic(0.3);
     dispatch.on('end', () => {
-      if (!vchannel.guild.voiceChannel) {
+      if (playing) {
         playlist.shift();
-        recurExhaustPlaylist(vchannel, connection);
+        recurExhaustPlaylist(vchannel, tchannel, connection);
+      } else {
+        vchannel.leave();
       }
     });
   }
@@ -36,44 +48,67 @@ function recurExhaustPlaylist(vchannel, connection) {
 bot.on("message", msg => {
   var text = msg.content;
   var args = text.split(" ").filter( l => l.length > 0 );
-  if (text.startsWith("!list")) {
-    if (args.length == 0) {
+  if (args.length === 0) {
+    return;
+  }
+
+  if (args[0] === "!list") {
+    if (args.length == 1) {
       if (playlist.length == 0) {
-        bot.sendMessage(msg.channel, "No videos in playlist; type `!add <video url>` to add a video.");
+        msg.channel.sendMessage("No videos in playlist; type `!add <video url>` to add a video.");
       } else if (playlist.length == 1) {
         ytdl.getInfo(playlist[0], (err, info) => {
-          bot.sendMessage(msg.channel, "Now playing: `" + info.title + "`");
+          msg.channel.sendMessage("Current video: `" + info.title + "`");
         });
       } else {
-        recurPrintPlaylistNames(msg.channel, callbefore=() => {
-          bot.sendMessage(msg.channel, "Now playing: `" + info.title + "`");
-        });
+        recurPrintPlaylistNames(msg.channel);
       }
     } else if (args[1] === "clear") {
       playlist = [];
-      bot.sendMessage(msg.channel, "Cleared playlist.");
+      msg.channel.sendMessage("Cleared playlist.");
     }
-  } else if (text.startsWith("!add")) {
+  } else if (args[0] === "!add") {
     if (args.length == 1) {
-        bot.sendMessage(msg.channel, "Provide a YouTube video url; `!add <video url>`");
+        msg.channel.sendMessage("Provide a YouTube video url; `!add <video url>`");
     } else {
       ytdl.getInfo(args[1], (err, info) => {
         if (info) {
           playlist.push(args[1]);
-          bot.sendMessage(msg.channel, "Added `" + info.title + "` to playlist");
+          msg.channel.sendMessage("Added `" + info.title + "` to playlist");
         } else {
-          bot.sendMessage(msg.channel, "`" + args[1] + "` is not a valid YouTube video url.");
+          msg.channel.sendMessage("`" + args[1] + "` is not a valid YouTube video url.");
         }
       });
     }
-  } else if (text.startsWith("!play")) {
-    if (!msg.author.voiceChannel) {
-      bot.sendMessage(msg.channel, "Join a voice channel before using `!play`");
+  } else if (args[0] === "!play") {
+    if (playlist.length === 0) {
+      msg.channel.sendMessage("No videos in playlist; type `!add <video url>` to add a video.");
+    } else if (!msg.member.voiceChannel) {
+      msg.channel.sendMessage("Join a voice channel before using `!play`");
     } else {
-      msg.author.voiceChannel.join().then( c => recurExhaustPlaylist(msg.author.voiceChannel, c));
+      msg.member.voiceChannel.join().then( c => recurExhaustPlaylist(msg.member.voiceChannel, msg.channel, c));
+    }
+  } else if (args[0] === "!stop") {
+    if (!playing) {
+      msg.channel.sendMessage("Not currently playing in a channel.");
+    } else {
+      playing = false;
+      dispatch.end();
+    }
+  } else if (args[0] === "!skip") {
+    if (playlist.length === 0) {
+      msg.channel.sendMessage("No videos in playlist.");
+    } else {
+      ytdl(playlist[0], (err, inf) => {
+        msg.channel.sendMessage("Skipped video `" + inf.title + "`");
+      });
+      if (playing) {
+        dispatch.end();
+      } else {
+        playlist.shift();
+      }
     }
   }
 });
 
-console.log("Connecting to discord..")
 bot.login("MjM4MTA2ODg3Mzk1MDgyMjQx.CuhZ1Q.DXz0O-sccY8aovVii64cq8Cao9k");

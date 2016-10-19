@@ -2,7 +2,7 @@
   "name": "youtubeplaylistbot",
   "version": "1.0.0",
   "description": "A discord bot that allows you to play youtube videos",
-  "main": "YTPlaylist-Bot.js",
+  "main": "U2BE-Bot.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -10,6 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "discord.js": "^9.3.0",
+    "ffmpeg": "0.0.4",
     "ytdl": "^0.3.14"
   }
 }
