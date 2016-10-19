@@ -1,0 +1,15 @@
+{
+  "name": "youtubeplaylistbot",
+  "version": "1.0.0",
+  "description": "A discord bot that allows you to play youtube videos",
+  "main": "YTPlaylist-Bot.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "discord.js": "^9.3.0",
+    "ytdl": "^0.3.14"
+  }
+}
