@@ -26,6 +26,21 @@ function recurPrintPlaylistNames(channel, callbefore=()=>{}, names=[], index=1) 
   }
 }
 
+function timestamp() {
+  var ctime = new Date();
+  var hrs = ctime.getUTCHours();
+  if (hrs < 10) hrs = "0" + hrs;
+  var mns = ctime.getUTCMinutes();
+  if (mns < 10) mns = "0" + mns;
+  var sec = ctime.getUTCSeconds();
+  if (sec < 10) sec = "0" + sec;
+  return "[" + hrs + ":" + mns + ":" + sec + "]";
+}
+
+function log(text) {
+  console.log(timestamp() + " " + text);
+}
+
 function recurExhaustPlaylist(vchannel, tchannel, connection) {
   if (playlist.length === 0) {
     playing = false;
@@ -34,6 +49,7 @@ function recurExhaustPlaylist(vchannel, tchannel, connection) {
     playing = true;
     ytdl(playlist[0], (err, info) => {
       tchannel.sendMessage("Now playing: `" + info.title + "`");
+      log("Started playing new song: '" + info.title + "'");
     });
     dispatch = connection.playStream(ytdl(playlist[0], {audioonly: true}));
     dispatch.setVolumeLogarithmic(0.3);
@@ -42,6 +58,7 @@ function recurExhaustPlaylist(vchannel, tchannel, connection) {
         playlist.shift();
         recurExhaustPlaylist(vchannel, tchannel, connection);
       } else {
+        log("Stopped playing.");
         vchannel.leave();
       }
     });
@@ -69,6 +86,7 @@ bot.on("message", msg => {
     } else if (args[1] === "clear") {
       playlist = [];
       msg.channel.sendMessage("Cleared playlist.");
+      log("Cleared playlist.");
     }
   } else if (args[0] === "!add") {
     if (args.length == 1) {
@@ -78,6 +96,7 @@ bot.on("message", msg => {
         if (info) {
           playlist.push(args[1]);
           msg.channel.sendMessage("Added `" + info.title + "` to playlist");
+          log("Added new song to playlist: '" + info.title + "'");
         } else {
           msg.channel.sendMessage("`" + args[1] + "` is not a valid YouTube video url.");
         }
@@ -104,6 +123,7 @@ bot.on("message", msg => {
     } else {
       ytdl(playlist[0], (err, inf) => {
         msg.channel.sendMessage("Skipped video `" + inf.title + "`");
+        log("Skipped current song, '" + info.title + "'");
       });
       if (playing) {
         dispatch.end();
@@ -114,4 +134,5 @@ bot.on("message", msg => {
   }
 });
 
+log("Connecting to discord");
 bot.login(tokens.discord_api_token);

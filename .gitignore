@@ -45,3 +45,5 @@ renders
 Javascript/Discord/botinfo.json
 C#/DiscordBot-ActivityLogger/DiscordBot-ActivityLogger/ActivityLoggerTokenCarrier.cs
 C#/DiscordBot-OfficeBot/DiscordBot-OfficeBot/OfficeBotTokenCarrier.cs
+C#/DiscordBot-ActivityLogger/DiscordBot-ActivityLogger/bin/
+C#/DiscordBot-OfficeBot/DiscordBot-OfficeBot/bin/

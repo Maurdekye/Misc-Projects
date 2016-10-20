@@ -8,6 +8,6 @@ namespace DiscordBot_OfficeBot
 {
     static class OfficeBotTokenCarrier
     {
-        public static string Token = "MjM2NjgyNTIxNDI3OTY4MDAw.CuNfdA.FySEgYN_-zXxeUsJAte93oSAmtM";
+        public static string Token = "MjM2NjgyNTIxNDI3OTY4MDAw.CunSJg.0zZHm1LGzKwzu1Dwak9EVvFc0bM";
     }
 }

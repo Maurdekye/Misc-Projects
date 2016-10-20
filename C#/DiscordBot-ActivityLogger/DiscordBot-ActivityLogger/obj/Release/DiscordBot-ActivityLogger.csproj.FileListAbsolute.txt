@@ -15,3 +15,4 @@ C:\Repos\Misc-Projects\C#\DiscordBot-ActivityLogger\DiscordBot-ActivityLogger\bi
 C:\Repos\Misc-Projects\C#\DiscordBot-ActivityLogger\DiscordBot-ActivityLogger\bin\Release\RestSharp.xml
 C:\Repos\Misc-Projects\C#\DiscordBot-ActivityLogger\DiscordBot-ActivityLogger\obj\Release\DiscordBot-ActivityLogger.exe
 C:\Repos\Misc-Projects\C#\DiscordBot-ActivityLogger\DiscordBot-ActivityLogger\obj\Release\DiscordBot-ActivityLogger.pdb
+C:\Repos\Misc-Projects\C#\DiscordBot-ActivityLogger\DiscordBot-ActivityLogger\obj\Release\DiscordBot-ActivityLogger.csprojResolveAssemblyReference.cache

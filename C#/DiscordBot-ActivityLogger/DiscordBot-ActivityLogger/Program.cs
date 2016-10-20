@@ -75,6 +75,50 @@ namespace DiscordBot_ActivityLogger
                         LogString($"User {EvArgs.Before} changed their nickname from {EvArgs.Before.Nickname} to {EvArgs.After.Nickname}");
                     }
                 }
+                if (EvArgs.Before.IsSelfMuted != EvArgs.After.IsSelfMuted)
+                {
+                    if (EvArgs.After.IsSelfMuted)
+                    {
+                        LogString($"User {EvArgs.Before} muted themselves");
+                    }
+                    else
+                    {
+                        LogString($"User {EvArgs.Before} unmuted themselves");
+                    }
+                }
+                if (EvArgs.Before.IsServerMuted != EvArgs.After.IsServerMuted)
+                {
+                    if (EvArgs.After.IsServerMuted)
+                    {
+                        LogString($"User {EvArgs.Before} was server muted");
+                    }
+                    else
+                    {
+                        LogString($"User {EvArgs.Before} was server unmuted");
+                    }
+                }
+                if (EvArgs.Before.IsSelfDeafened != EvArgs.After.IsSelfDeafened)
+                {
+                    if (EvArgs.After.IsSelfDeafened)
+                    {
+                        LogString($"User {EvArgs.Before} deafened themselves");
+                    }
+                    else
+                    {
+                        LogString($"User {EvArgs.Before} undeafened themselves");
+                    }
+                }
+                if (EvArgs.Before.IsServerDeafened != EvArgs.After.IsServerDeafened)
+                {
+                    if (EvArgs.After.IsServerDeafened)
+                    {
+                        LogString($"User {EvArgs.Before} was server deafened");
+                    }
+                    else
+                    {
+                        LogString($"User {EvArgs.Before} was server undeafened");
+                    }
+                }
             };
 
             Console.WriteLine("Connecting to discord");
