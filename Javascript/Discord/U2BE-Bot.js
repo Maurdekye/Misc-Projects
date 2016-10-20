@@ -1,10 +1,13 @@
 const discord_api = require("discord.js");
 const ytdl = require('ytdl-core');
-const bot = new discord_api.Client();
+const fs = require('fs');
 
+var tokens = JSON.parse(fs.readFileSync("botinfo.json"));
 var playlist = [];
-var dispatch;
 var playing = false;
+var dispatch;
+
+const bot = new discord_api.Client();
 
 function recurPrintPlaylistNames(channel, callbefore=()=>{}, names=[], index=1) {
   if (index === playlist.length) {
@@ -111,4 +114,4 @@ bot.on("message", msg => {
   }
 });
 
-bot.login("MjM4MTA2ODg3Mzk1MDgyMjQx.CuhZ1Q.DXz0O-sccY8aovVii64cq8Cao9k");
+bot.login(tokens.discord_api_token);
