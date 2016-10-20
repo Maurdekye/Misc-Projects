@@ -5,12 +5,16 @@ const https = require('https');
 const url = require('url');
 const util = require('util');
 
+// global vars
+
 var tokens = JSON.parse(fs.readFileSync("botinfo.json"));
 var queue = [];
 var playing = false;
 var dispatch;
 
 const bot = new discord_api.Client();
+
+// logging functions
 
 function timestamp() {
   var ctime = new Date();
@@ -26,6 +30,8 @@ function timestamp() {
 function log(text) {
   console.log(timestamp() + " " + text);
 }
+
+// url functions
 
 function makeQueryString(obj) {
   var qlst = [];
@@ -46,6 +52,8 @@ function getQueryStringObject(queryurl) {
   }
   return obj;
 }
+
+// playlist information fetching
 
 function recurGetPlaylistContents(pId, callback, vIds=[], nextPageToken=null) {
   var queryStringBase = {
@@ -105,6 +113,8 @@ function getPlaylistContents(playlistUrl, callback) {
   }
 }
 
+// link type disseminating
+
 function getLinkType(linkurl) {
   var u = url.parse(linkurl);
   if (u.hostname === "www.youtube.com") {
@@ -116,13 +126,15 @@ function getLinkType(linkurl) {
   return "invalid";
 }
 
-function tandemGetVideoTitles(vidlinks, callback) {
+// printing names of videos in queue
+
+function tandemGetVideoTitles(vidlinks, callback) { // TODO fix me
   var vidnames = [];
   var counter = 0;
   for (var i = 0; i < vidlinks.length; i++)
     vidnames.push("");
   for (var i = 0; i < vidlinks.length; i++) {
-    var index = i;
+    let index = i;
     ytdl(vidlinks[index], (err, info) => {
       vidnames[index] = info.title;
       counter++;
@@ -143,16 +155,19 @@ function recurGetVideoTitles(vidlinks, callback, names=[], index=0) {
   }
 }
 
-function printPlaylistNames(channel) {
+function printQueueNames(channel, callback=()=>{}) {
   recurGetVideoTitles(queue, names => { // change back to tandem method at some point
     var s = "```Current video: " + names[0] + "\nComing up:\n";
     for (var i = 1; i < names.length; i++)
       s = s + "   " + (i + 1) + ". " + names[i] + "\n";
     channel.sendMessage(s + "```");
+    callback();
   });
 }
 
-function recurExhaustPlaylist(vchannel, tchannel, connection) {
+// playing videos in queue
+
+function recurExhaustQueue(vchannel, tchannel, connection) {
   if (queue.length === 0) {
     playing = false;
     vchannel.leave();
@@ -167,7 +182,7 @@ function recurExhaustPlaylist(vchannel, tchannel, connection) {
     dispatch.on('end', () => {
       if (playing) {
         queue.shift();
-        recurExhaustPlaylist(vchannel, tchannel, connection);
+        recurExhaustQueue(vchannel, tchannel, connection);
       } else {
         log("Stopped playing.");
         vchannel.leave();
@@ -176,82 +191,110 @@ function recurExhaustPlaylist(vchannel, tchannel, connection) {
   }
 }
 
+// main command handling event
+
 bot.on("message", msg => {
+  var commands = {
+
+    list: (msg, args) => {
+      if (args.length == 1) {
+        if (queue.length == 0) {
+          msg.channel.sendMessage("No videos in playlist; type `!add <video url>` to add a video.");
+        } else if (queue.length == 1) {
+          ytdl.getInfo(queue[0], (err, info) => {
+            msg.channel.sendMessage("Current video: `" + info.title + "`");
+          });
+        } else {
+          msg.channel.sendMessage("Getting playlist contents...").then(mes => {
+            printQueueNames(msg.channel, () => {
+              mes.delete();
+            });
+          });
+        }
+      } else if (args[1] === "clear") {
+        queue = [];
+        msg.channel.sendMessage("Cleared queue.");
+        log("Cleared queue.");
+      }
+    },
+
+    add: (msg, args) => {
+      if (args.length == 1) {
+          msg.channel.sendMessage("Provide a YouTube video or playlist url; `!add <video url>`");
+      } else {
+        var linktype = getLinkType(args[1]);
+        if (linktype === "invalid") {
+          msg.channel.sendMessage("`" + args[1] + "` is not a valid YouTube video or playlist url.");
+        } else if (linktype === "video") {
+          ytdl.getInfo(args[1], (err, info) => {
+            if (info) {
+              queue.push(args[1]);
+              msg.channel.sendMessage("Added `" + info.title + "` to queue");
+              log("Added new song to queue: '" + info.title + "'");
+            } else {
+              log("Error fetching video information; " + err);
+            }
+          });
+        } else if (linktype === "playlist") {
+          getPlaylistContents(args[1], vids => {
+            queue = queue.concat(vids);
+            msg.channel.sendMessage("Added videos from playlist to queue");
+            log(`Added playlist ${args[1]} to queue`);
+          });
+        }
+      }
+    },
+
+    play: (msg, args) => {
+      if (queue.length === 0) {
+        msg.channel.sendMessage("No videos in queue; type `!add <video url>` to add a video.");
+      } else if (!msg.member.voiceChannel) {
+        msg.channel.sendMessage("Join a voice channel before using `!play`");
+      } else {
+        msg.member.voiceChannel.join().then( c => recurExhaustQueue(msg.member.voiceChannel, msg.channel, c));
+      }
+    },
+
+    stop: (msg, args) => {  
+      if (!playing) {
+        msg.channel.sendMessage("Not currently playing in a channel.");
+      } else {
+        playing = false;
+        dispatch.end();
+      }
+    },
+
+    skip: (msg, args) => {
+      if (queue.length === 0) {
+        msg.channel.sendMessage("No videos in queue.");
+      } else {
+        ytdl(queue[0], (err, inf) => {
+          msg.channel.sendMessage("Skipped video `" + inf.title + "`");
+          log("Skipped current song, '" + info.title + "'");
+        });
+        if (playing) {
+          dispatch.end();
+        } else {
+          queue.shift();
+        }
+      }
+    }
+  };
+
+  var prefix = "!";
   var text = msg.content;
   var args = text.split(" ").filter( l => l.length > 0 );
   if (args.length === 0) {
     return;
   }
-
-  if (args[0] === "!list") {
-    if (args.length == 1) {
-      if (queue.length == 0) {
-        msg.channel.sendMessage("No videos in playlist; type `!add <video url>` to add a video.");
-      } else if (queue.length == 1) {
-        ytdl.getInfo(queue[0], (err, info) => {
-          msg.channel.sendMessage("Current video: `" + info.title + "`");
-        });
-      } else {
-        tandemPrintPlaylistNames(msg.channel);
-      }
-    } else if (args[1] === "clear") {
-      queue = [];
-      msg.channel.sendMessage("Cleared queue.");
-      log("Cleared queue.");
-    }
-  } else if (args[0] === "!add") {
-    if (args.length == 1) {
-        msg.channel.sendMessage("Provide a YouTube video or playlist url; `!add <video url>`");
-    } else {
-      var linktype = getLinkType(args[1]);
-      if (linktype === "invalid") {
-        msg.channel.sendMessage("`" + args[1] + "` is not a valid YouTube video or playlist url.");
-      } else if (linktype === "video") {
-        ytdl.getInfo(args[1], (err, info) => {
-          if (info) {
-            queue.push(args[1]);
-            msg.channel.sendMessage("Added `" + info.title + "` to queue");
-            log("Added new song to queue: '" + info.title + "'");
-          } else {
-            log("Error fetching video information; " + err);
-          }
-        });
-      } else if (linktype === "playlist") {
-        getPlaylistContents(args[1], vids => {
-          queue = queue.concat(vids);
-          msg.channel.sendMessage("Added videos from playlist");
-        });
-      }
-    }
-  } else if (args[0] === "!play") {
-    if (queue.length === 0) {
-      msg.channel.sendMessage("No videos in queue; type `!add <video url>` to add a video.");
-    } else if (!msg.member.voiceChannel) {
-      msg.channel.sendMessage("Join a voice channel before using `!play`");
-    } else {
-      msg.member.voiceChannel.join().then( c => recurExhaustPlaylist(msg.member.voiceChannel, msg.channel, c));
-    }
-  } else if (args[0] === "!stop") {
-    if (!playing) {
-      msg.channel.sendMessage("Not currently playing in a channel.");
-    } else {
-      playing = false;
-      dispatch.end();
-    }
-  } else if (args[0] === "!skip") {
-    if (queue.length === 0) {
-      msg.channel.sendMessage("No videos in queue.");
-    } else {
-      ytdl(queue[0], (err, inf) => {
-        msg.channel.sendMessage("Skipped video `" + inf.title + "`");
-        log("Skipped current song, '" + info.title + "'");
-      });
-      if (playing) {
-        dispatch.end();
-      } else {
-        queue.shift();
-      }
-    }
+  if (!args[0].startsWith(prefix)) {
+    return;
+  }
+  var cmd = args[0].slice(1);
+  if (!commands.hasOwnProperty(cmd)) {
+    msg.channel.sendMessage("`" + args[0] + "` is not a valid command");
+  } else {
+    commands[cmd](msg, args);
   }
 });
 
