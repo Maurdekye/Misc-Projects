@@ -157,10 +157,10 @@ function recurGetVideoTitles(vidlinks, callback, names=[], index=0) {
 
 function printQueueNames(channel, callback=()=>{}) {
   recurGetVideoTitles(queue, names => { // change back to tandem method at some point
-    var s = "```Current video: " + names[0] + "\nComing up:\n";
+    var s = "Current video: " + names[0] + "\nComing up:\n";
     for (var i = 1; i < names.length; i++)
       s = s + "   " + (i + 1) + ". " + names[i] + "\n";
-    channel.sendMessage(s + "```");
+    channel.sendMessage(s);
     callback();
   });
 }
@@ -187,6 +187,12 @@ function recurExhaustQueue(vchannel, tchannel, connection) {
         log("Stopped playing.");
         vchannel.leave();
       }
+    });
+    dispatch.on('error', err => {
+      log("Connection error occured; " + err);
+      tchannel.sendMessage("Encountered an error while playing.");
+      vchannel.leave();
+      playing = false;
     });
   }
 }
@@ -270,7 +276,7 @@ bot.on("message", msg => {
       } else {
         ytdl(queue[0], (err, inf) => {
           msg.channel.sendMessage("Skipped video `" + inf.title + "`");
-          log("Skipped current song, '" + info.title + "'");
+          log("Skipped current song, '" + inf.title + "'");
         });
         if (playing) {
           dispatch.end();
@@ -278,7 +284,17 @@ bot.on("message", msg => {
           queue.shift();
         }
       }
-    }
+    },
+
+    commands: (msg, args) => {
+      var helptext = "\nCommands:\n";
+      for (var c in commands) {
+        helptext = helptext + "    " + prefix + c + "\n";
+      }
+      msg.channel.sendMessage(helptext);
+    },
+
+    help: (msg, args) => commands.commands(msg, args)
   };
 
   var prefix = "!";
