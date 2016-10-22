@@ -2,13 +2,14 @@ const discord_api = require("discord.js");
 const ytdl = require('ytdl-core');
 const fs = require('fs');
 const https = require('https');
-const url = require('url');
-const util = require('util');
+const urlUtils = require('url');
 
 // global vars
 
+const maxmessagelength = 45;
+
 var tokens = JSON.parse(fs.readFileSync("botinfo.json"));
-var queue = [];
+var queues = {};
 var playing = false;
 var dispatch;
 
@@ -31,7 +32,7 @@ function log(text) {
   console.log(timestamp() + " " + text);
 }
 
-// url functions
+// url helpers
 
 function makeQueryString(obj) {
   var qlst = [];
@@ -41,8 +42,8 @@ function makeQueryString(obj) {
   return "?" + qlst.join("&");
 }
 
-function getQueryStringObject(queryurl) {
-  var u = url.parse(queryurl);
+function getQueryStringObject(url) {
+  var u = urlUtils.parse(url);
   if (!u.query) return {};
   var obj = {};
   var queries = u.query.split("&")
@@ -51,6 +52,56 @@ function getQueryStringObject(queryurl) {
     obj[kv[0]] = kv[1];
   }
   return obj;
+}
+
+// youtube api management
+
+function prepareYTAPIQuery(action, params) {
+  return urlUtils.format({
+    protocol: 'https:',
+    slashes: true,
+    host: 'www.googleapis.com',
+    pathname: '/youtube/v3/' + action,
+    search: makeQueryString(params)
+  });
+}
+
+function HTTPSAPIRequest(url, callback) {
+  https.get(url, request => {
+    if (request.statusCode !== 200)
+      callback("Connection error", request.statusCode);
+    else {
+      var data = "";
+      request.on('data', d => data = data + d);
+      request.on('end', () => {
+        var result = JSON.parse(data);
+        if (result.hasOwnProperty("error")) 
+          callback("api error", pagedat.error.errors);
+        else {
+          callback(null, result);
+        }
+      });
+    }
+  });
+}
+
+// queue manipulation
+
+function addLinkToQueue(guild, link, callback) {
+  if (!queues.hasOwnProperty(guild.id)) {
+    queues[guild.id] = [];
+  }
+  queues[guild.id].push(link);
+}
+
+function setQueue(guild, value) {
+    queues[guild.id] = value;
+}
+
+function getQueue(guild) {
+  if (!queues.hasOwnProperty(guild.id))
+    return [];
+  return queues[guild.id];
 }
 
 // playlist information fetching
@@ -62,46 +113,33 @@ function recurGetPlaylistContents(pId, callback, vIds=[], nextPageToken=null) {
     playlistId: pId,
     key: tokens.youtube_api_token
   };
-  if (nextPageToken) queryStringBase.pageToken = nextPageToken;
-  var apiQuery = url.format({
-    protocol: 'https:',
-    slashes: true,
-    host: 'www.googleapis.com',
-    pathname: '/youtube/v3/playlistItems',
-    search: makeQueryString(queryStringBase)
-  });
-  https.get(apiQuery, result => {
-    if (result.statusCode !== 200) callback("connection reset", result.statusCode);
-    else {
-      var data = "";
-      result.on('data', dat => {data = data + dat;});
-      result.on('end', () => {
-        var pagedat = JSON.parse(data);
-        if (pagedat.hasOwnProperty("error")) callback("api error", pagedat.error);
-        else {
-          var ids = [];
-          for (var i = 0; i < pagedat.items.length; i++) {
-            ids.push(pagedat.items[i].snippet.resourceId.videoId);
-          }
-          var newVIds = vIds.concat(ids);
-          if (pagedat.hasOwnProperty("nextPageToken")) {
-            recurGetPlaylistContents(pId, callback, newVIds, pagedat.nextPageToken);
-          } else {
-            callback(null, newVIds);
-          }
-        }
-      });
+  if (nextPageToken) 
+    queryStringBase.pageToken = nextPageToken;
+  HTTPSAPIRequest(prepareYTAPIQuery("playlistItems", queryStringBase), (err, data) => {
+    if (err) {
+      callback(err, data);
+    } else {
+      var ids = [];
+      for (var i = 0; i < data.items.length; i++) {
+        ids.push(data.items[i].snippet.resourceId.videoId);
+      }
+      var newVIds = vIds.concat(ids);
+      if (data.hasOwnProperty("nextPageToken")) {
+        recurGetPlaylistContents(pId, callback, newVIds, data.nextPageToken);
+      } else {
+        callback(null, newVIds);
+      }
     }
   });
 }
 
 function getPlaylistContents(playlistUrl, callback) {
   var qobj = getQueryStringObject(playlistUrl);
-  if (!qobj.hasOwnProperty("list")) callback("invalid url", []);
+  if (!qobj.hasOwnProperty("list")) callback("invalid url");              
   else {
     recurGetPlaylistContents(qobj.list, (errtext, content) => {
       if (errtext) {
-        log("Error fetching playlist data; " + errtext);
+        log("Error fetching playlist data; " + errtext + content);
       } else {
         var vidUrls = [];
         for (var i = 0; i < content.length; i++) {
@@ -116,7 +154,7 @@ function getPlaylistContents(playlistUrl, callback) {
 // link type disseminating
 
 function getLinkType(linkurl) {
-  var u = url.parse(linkurl);
+  var u = urlUtils.parse(linkurl);
   if (u.hostname === "www.youtube.com") {
     if (u.pathname === "/watch")
       return "video";
@@ -128,39 +166,49 @@ function getLinkType(linkurl) {
 
 // printing names of videos in queue
 
-function tandemGetVideoTitles(vidlinks, callback) { // TODO fix me
-  var vidnames = [];
+class VideoTitleFetcher {
+  constructor (link, position) {
+    this.link = link;
+    this.name = null;
+  }
+
+  activate(callback) {
+    var fetcher = this;
+    var link = this.link;
+    ytdl(link, (err, inf) => {
+      fetcher.name = inf.title;
+      callback(inf.title);
+    });
+  }
+}
+
+function tandemGetVideoTitles(vidlinks, maxnames=10000, callback) {
+  var vidFetchers = [];
   var counter = 0;
-  for (var i = 0; i < vidlinks.length; i++)
-    vidnames.push("");
-  for (var i = 0; i < vidlinks.length; i++) {
-    let index = i;
-    ytdl(vidlinks[index], (err, info) => {
-      vidnames[index] = info.title;
+  for (var i=0; i<Math.min(vidlinks.length, maxnames);i++) {
+    vidFetchers.push(new VideoTitleFetcher(vidlinks[i], i));
+    vidFetchers[i].activate(name => {
       counter++;
-      if (counter === vidlinks.length) {
+      if (counter === vidFetchers.length) {
+        var vidnames = [];
+        for (var j = 0; j < vidFetchers.length; j++) {
+          vidnames.push(vidFetchers[j].name);
+        }
         callback(vidnames);
       }
     });
   }
 }
 
-function recurGetVideoTitles(vidlinks, callback, names=[], index=0) {
-  if (index === vidlinks.length) {
-    callback(names);
-  } else {
-    ytdl.getInfo(vidlinks[index], (err, info) => {
-      recurGetVideoTitles(vidlinks, callback, names.concat([info.title]), index + 1);
-    });
-  }
-}
-
 function printQueueNames(channel, callback=()=>{}) {
-  recurGetVideoTitles(queue, names => { // change back to tandem method at some point
-    var s = "Current video: " + names[0] + "\nComing up:\n";
+  tandemGetVideoTitles(getQueue(channel.guild), maxmessagelength, names => {
+    var s = "```Current video: " + names[0] + "\nComing up:\n";
     for (var i = 1; i < names.length; i++)
-      s = s + "   " + (i + 1) + ". " + names[i] + "\n";
-    channel.sendMessage(s);
+      s = s + `   ${i+1}. ${names[i]}\n`;
+    var qlen = getQueue(channel.guild).length
+    if (qlen > maxmessagelength)
+      s = s + `   ...and ${qlen - maxmessagelength} more`;
+    channel.sendMessage(s + '```');
     callback();
   });
 }
@@ -168,20 +216,20 @@ function printQueueNames(channel, callback=()=>{}) {
 // playing videos in queue
 
 function recurExhaustQueue(vchannel, tchannel, connection) {
-  if (queue.length === 0) {
+  if (getQueue(vchannel.guild).length === 0) {
     playing = false;
     vchannel.leave();
   } else {
     playing = true;
-    ytdl(queue[0], (err, info) => {
+    ytdl(getQueue(vchannel.guild)[0], (err, info) => {
       tchannel.sendMessage("Now playing: `" + info.title + "`");
       log("Started playing new song: '" + info.title + "'");
     });
-    dispatch = connection.playStream(ytdl(queue[0], {audioonly: true}));
+    dispatch = connection.playStream(ytdl(getQueue(vchannel.guild)[0], {audioonly: true}));
     dispatch.setVolumeLogarithmic(0.3);
     dispatch.on('end', () => {
       if (playing) {
-        queue.shift();
+        getQueue(vchannel.guild).shift();
         recurExhaustQueue(vchannel, tchannel, connection);
       } else {
         log("Stopped playing.");
@@ -204,10 +252,10 @@ bot.on("message", msg => {
 
     list: (msg, args) => {
       if (args.length == 1) {
-        if (queue.length == 0) {
+        if (getQueue(msg.guild).length == 0) {
           msg.channel.sendMessage("No videos in playlist; type `!add <video url>` to add a video.");
-        } else if (queue.length == 1) {
-          ytdl.getInfo(queue[0], (err, info) => {
+        } else if (getQueue(msg.guild).length == 1) {
+          ytdl.getInfo(getQueue(msg.guild)[0], (err, info) => {
             msg.channel.sendMessage("Current video: `" + info.title + "`");
           });
         } else {
@@ -218,7 +266,7 @@ bot.on("message", msg => {
           });
         }
       } else if (args[1] === "clear") {
-        queue = [];
+        setQueue(msg.guild, []);
         msg.channel.sendMessage("Cleared queue.");
         log("Cleared queue.");
       }
@@ -234,7 +282,7 @@ bot.on("message", msg => {
         } else if (linktype === "video") {
           ytdl.getInfo(args[1], (err, info) => {
             if (info) {
-              queue.push(args[1]);
+              getQueue(msg.guild).push(args[1]);
               msg.channel.sendMessage("Added `" + info.title + "` to queue");
               log("Added new song to queue: '" + info.title + "'");
             } else {
@@ -243,7 +291,7 @@ bot.on("message", msg => {
           });
         } else if (linktype === "playlist") {
           getPlaylistContents(args[1], vids => {
-            queue = queue.concat(vids);
+            setQueue(msg.guild, getQueue(msg.guild).concat(vids));
             msg.channel.sendMessage("Added videos from playlist to queue");
             log(`Added playlist ${args[1]} to queue`);
           });
@@ -252,7 +300,7 @@ bot.on("message", msg => {
     },
 
     play: (msg, args) => {
-      if (queue.length === 0) {
+      if (getQueue(msg.guild).length === 0) {
         msg.channel.sendMessage("No videos in queue; type `!add <video url>` to add a video.");
       } else if (!msg.member.voiceChannel) {
         msg.channel.sendMessage("Join a voice channel before using `!play`");
@@ -271,27 +319,27 @@ bot.on("message", msg => {
     },
 
     skip: (msg, args) => {
-      if (queue.length === 0) {
+      if (getQueue(msg.guild).length === 0) {
         msg.channel.sendMessage("No videos in queue.");
       } else {
-        ytdl(queue[0], (err, inf) => {
+        ytdl(getQueue(msg.guild)[0], (err, inf) => {
           msg.channel.sendMessage("Skipped video `" + inf.title + "`");
           log("Skipped current song, '" + inf.title + "'");
         });
         if (playing) {
           dispatch.end();
         } else {
-          queue.shift();
+          getQueue(msg.guild).shift();
         }
       }
     },
 
     commands: (msg, args) => {
-      var helptext = "\nCommands:\n";
+      var helptext = "```Commands:\n";
       for (var c in commands) {
         helptext = helptext + "    " + prefix + c + "\n";
       }
-      msg.channel.sendMessage(helptext);
+      msg.channel.sendMessage(helptext + '```');
     },
 
     help: (msg, args) => commands.commands(msg, args)
