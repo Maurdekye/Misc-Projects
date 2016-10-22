@@ -52,6 +52,20 @@ function formatTimeString(seconds) {
   return fstring;
 }
 
+function repMulti(string, find, rep) {
+  for (var i = 0; i < find.length; i++) {
+    string = string.replace(find[i], rep[i]);
+  }
+  return string;
+}
+
+function clean(string, invalid) {
+  for (var i = 0; i < invalid.length;i++) {
+    string = string.replace(invalid, "");
+  }
+  return string;
+}
+
 // url helpers
 
 function makeQueryString(obj) {
@@ -96,13 +110,17 @@ function HTTPSAPIRequest(url, callback) {
       request.on('end', () => {
         var result = JSON.parse(data);
         if (result.hasOwnProperty("error")) 
-          callback("api error", pagedat.error.errors);
+          callback("API error", pagedat.error.message);
         else {
           callback(null, result);
         }
       });
     }
   });
+}
+
+function YTAPIQR(action, params, callback) {
+  HTTPSAPIRequest(prepareYTAPIQuery(action, params), callback);
 }
 
 function videoName(url, callback) {
@@ -134,7 +152,7 @@ function getQueue(guild) {
   return queues[guild.id];
 }
 
-// playlist information fetching
+// youtube api interactions
 
 function recurGetPlaylistContents(pId, callback, vIds=[], nextPageToken=null) {
   var queryStringBase = {
@@ -145,7 +163,7 @@ function recurGetPlaylistContents(pId, callback, vIds=[], nextPageToken=null) {
   };
   if (nextPageToken) 
     queryStringBase.pageToken = nextPageToken;
-  HTTPSAPIRequest(prepareYTAPIQuery("playlistItems", queryStringBase), (err, data) => {
+  YTAPIQR("playlistItems", queryStringBase, (err, data) => {
     if (err) {
       callback(err, data);
     } else {
@@ -179,6 +197,46 @@ function getPlaylistContents(playlistUrl, callback) {
       }
     });
   }
+}
+
+function getPlaylistTitle(playlistUrl, callback) {
+  var qobj = getQueryStringObject(playlistUrl);
+  if (!qobj.hasOwnProperty("list")) callback("invalid url");              
+  else {
+    var queryStringBase = {
+      part: 'snippet',
+      id: qobj.list,
+      key: tokens.youtube_api_token
+    }
+    YTAPIQR("playlists", queryStringBase, (err, info) => {
+      if (err)
+        console.log("Error getting playlist title: " + err + info);
+      else {
+        callback(info.items[0].snippet.title);
+      }
+    });
+  }
+}
+
+function searchYoutubeVideo(searchterms, callback) {
+  var cleansearch = clean(searchterms, "\n\t-+=\\/&?\"'").replace(" ", "+");
+  var queryStringBase = {
+    part: 'snippet',
+    maxresults: 1,
+    q: cleansearch,
+    key: tokens.youtube_api_token
+  }
+  YTAPIQR("search", queryStringBase, (err, info) => {
+    if (err)
+      console.log("Error searching: " + err + info);
+    else {
+      if (info.pageInfo.totalResults === 0) {
+        callback(null);
+      } else {
+        callback("https://www.youtube.com/watch?v=" + info.items[0].id.videoId);
+      }
+    }
+  });
 }
 
 // link type disseminating
@@ -318,22 +376,38 @@ bot.on("message", msg => {
       } else {
         var linktype = getLinkType(args[1]);
         if (linktype === "invalid") {
-          msg.channel.sendMessage("`" + args[1] + "` is not a valid YouTube video or playlist url.");
+          searchYoutubeVideo(args.slice(1).join(" "), vidlink => {
+            if (vidlink === null) {
+              msg.channel.sendMessage("Could not find video.");
+            } else {
+              videoName(vidlink, (err, title) => {
+                if (!err) {
+                  addLinkToQueue(msg.guild, vidlink);
+                  msg.channel.sendMessage("Added `" + title + "` to queue");
+                  log("Added new video to queue: '" + title + "'");
+                } else {
+                  log("Error fetching video information; " + err);
+                }
+              });
+            }
+          });
         } else if (linktype === "video") {
           videoName(args[1], (err, title) => {
-            if (info) {
-              getQueue(msg.guild).push(args[1]);
+            if (!err) {
+              addLinkToQueue(msg.guild, args[1]);
               msg.channel.sendMessage("Added `" + title + "` to queue");
-              log("Added new song to queue: '" + title + "'");
+              log("Added new video to queue: '" + title + "'");
             } else {
               log("Error fetching video information; " + err);
             }
           });
         } else if (linktype === "playlist") {
           getPlaylistContents(args[1], vids => {
-            setQueue(msg.guild, getQueue(msg.guild).concat(vids));
-            msg.channel.sendMessage("Added videos from playlist to queue");
-            log(`Added playlist ${args[1]} to queue`);
+            getPlaylistTitle(args[1], name => {
+              setQueue(msg.guild, getQueue(msg.guild).concat(vids));
+              msg.channel.sendMessage("Added playlist `" + name + "` to queue");
+              log(`Added playlist ${name} to queue`);
+            });
           });
         }
       }
