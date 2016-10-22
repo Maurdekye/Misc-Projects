@@ -1,4 +1,4 @@
-const discord_api = require("discord.js");
+const discord = require("discord.js");
 const ytdl = require('ytdl-core');
 const fs = require('fs');
 const https = require('https');
@@ -7,13 +7,25 @@ const urlUtils = require('url');
 // global vars
 
 const maxMessageLength = 2000;
+const queueSaveFile = "vidqueues.json";
 
 var tokens = JSON.parse(fs.readFileSync("botinfo.json"));
-var queues = {};
-var playings = {};
-var dispatches = {};
+var queues = new discord.Collection();
+var playings = new discord.Collection();
+var dispatches = new discord.Collection();
 
-const bot = new discord_api.Client();
+const bot = new discord.Client();
+
+// read songs from file
+
+if (fs.access(queueSaveFile, fs.constants.R_OK, err => {
+  if (!err) {
+    var rawlistdata = JSON.parse(fs.readFileSync(queueSaveFile));
+    for (var guildid in rawlistdata) {
+      queues.set(guildid, rawlistdata[guildid]);
+    }
+  }
+}));
 
 // logging functions
 
@@ -70,6 +82,14 @@ function clean(string, invalid) {
     string = replaceAll(string, invalid[i], "");
   }
   return string;
+}
+
+function collectionToObj(col) {
+  var obj = {};
+  for (const kv of col) {
+    obj[kv[0]] = kv[1];
+  }
+  return obj;
 }
 
 // url helpers
@@ -142,41 +162,37 @@ function videoName(url, callback) {
 
 // multiserver information manipulation
 
+function saveQueues() {
+  var jsonstring = JSON.stringify(collectionToObj(queues))
+  fs.writeFileSync(queueSaveFile, jsonstring);
+}
+
 function addLinkToQueue(guild, link, callback) {
-  if (!queues.hasOwnProperty(guild.id)) {
-    queues[guild.id] = [];
+  if (!queues.has(guild.id)) {
+    queues.set(guild.id, []);
   }
-  queues[guild.id].push(link);
+  setQueue(guild, queues.get(guild.id).concat([link]));
 }
 
 function setQueue(guild, value) {
-    queues[guild.id] = value;
+  queues.set(guild.id, value);
+  saveQueues();
 }
 
 function getQueue(guild) {
-  if (!queues.hasOwnProperty(guild.id))
+  if (!queues.has(guild.id))
     return [];
-  return queues[guild.id];
+  return queues.get(guild.id);
 }
 
 function playing(guild) {
-  if (!playings.hasOwnProperty(guild.id))
+  if (!playings.has(guild.id))
     return false;
-  return playings[guild.id];
+  return playings.get(guild.id);
 }
 
 function setPlaying(guild, value) {
-  playings[guild.id] = value;
-}
-
-function getDispatch(guild) {
-  if (!dispatches.hasOwnProperty(guild.id))
-    return false;
-  return dispatches[guild.id];
-}
-
-function setDispatch(guild, value) {
-  dispatches[guild.id] = value;
+  playings.set(guild.id, value);
 }
 
 // youtube api interactions
@@ -359,9 +375,9 @@ function recurExhaustQueue(vchannel, tchannel, connection) {
       tchannel.sendMessage("Now playing: `" + title + "`");
       log("Started playing new song: '" + title + "'");
     });
-    setDispatch(vchannel.guild, connection.playStream(ytdl(getQueue(vchannel.guild)[0], {audioonly: true})));
-    getDispatch(vchannel.guild).setVolumeLogarithmic(0.5);
-    getDispatch(vchannel.guild).on('end', () => {
+    dispatches.set(vchannel.guild.id, connection.playStream(ytdl(getQueue(vchannel.guild)[0], {audioonly: true})));
+    dispatches.get(vchannel.guild.id).setVolumeLogarithmic(0.5);
+    dispatches.get(vchannel.guild.id).on('end', () => {
       if (playing(vchannel.guild)) {
         getQueue(vchannel.guild).shift();
         recurExhaustQueue(vchannel, tchannel, connection);
@@ -369,12 +385,6 @@ function recurExhaustQueue(vchannel, tchannel, connection) {
         log("Stopped playing.");
         vchannel.leave();
       }
-    });
-    getDispatch(vchannel.guild).on('error', err => {
-      log("Connection error occured; " + err);
-      tchannel.sendMessage("Encountered an error while playing.");
-      vchannel.leave();
-      setPlaying(vchannel.guild, false);
     });
   }
 }
@@ -457,7 +467,7 @@ bot.on("message", msg => {
     play: (msg, args) => {
       if (playing(msg.guild)) {
         setPlaying(msg.guild, false);
-        getDispatch(msg.guild).end();
+        dispatches.get(msg.guild.id).end();
       }
       if (!msg.member.voiceChannel) {
         msg.channel.sendMessage("Join a voice channel before using `!play`");
@@ -482,7 +492,7 @@ bot.on("message", msg => {
         msg.channel.sendMessage("Not currently playing in a channel.");
       } else {
         setPlaying(msg.guild, false);
-        getDispatch(msg.guild).end();
+        dispatches.get(msg.guild.id).end();
       }
     },
 
@@ -495,7 +505,7 @@ bot.on("message", msg => {
           log("Skipped current song, '" + title + "'");
         });
         if (playing(msg.guild)) {
-          getDispatch(msg.guild).end();
+          dispatches.get(msg.guild).end();
         } else {
           getQueue(msg.guild).shift();
         }
@@ -529,6 +539,8 @@ bot.on("message", msg => {
     commands[cmd](msg, args);
   }
 });
+
+// init
 
 log("Connecting to discord");
 bot.login(tokens.discord_api_token);
