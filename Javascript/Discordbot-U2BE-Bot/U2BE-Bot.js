@@ -345,6 +345,52 @@ function recurExhaustQueue(vchannel, tchannel, connection) {
 
 // main command handling event
 
+function addVideo(msg, args, callback) {
+  if (args.length == 1) {
+    msg.channel.sendMessage("Provide a YouTube video or playlist url; `!add <video url>`");
+  } else {
+    var linktype = getLinkType(args[1]);
+    if (linktype === "invalid") {
+      searchYoutubeVideo(args.slice(1).join(" "), vidlink => {
+        if (vidlink === null) {
+          msg.channel.sendMessage("Could not find video.");
+        } else {
+          videoName(vidlink, (err, title) => {
+            if (!err) {
+              addLinkToQueue(msg.guild, vidlink);
+              msg.channel.sendMessage("Added `" + title + "` to queue");
+              log("Added new video to queue: '" + title + "'");
+              callback();
+            } else {
+              log("Error fetching video information; " + err);
+            }
+          });
+        }
+      });
+    } else if (linktype === "video") {
+      videoName(args[1], (err, title) => {
+        if (!err) {
+          addLinkToQueue(msg.guild, args[1]);
+          msg.channel.sendMessage("Added `" + title + "` to queue");
+          log("Added new video to queue: '" + title + "'");
+          callback();
+        } else {
+          log("Error fetching video information; " + err);
+        }
+      });
+    } else if (linktype === "playlist") {
+      getPlaylistContents(args[1], vids => {
+        getPlaylistTitle(args[1], name => {
+          setQueue(msg.guild, getQueue(msg.guild).concat(vids));
+          msg.channel.sendMessage("Added playlist `" + name + "` to queue");
+          log(`Added playlist ${name} to queue`);
+          callback();
+        });
+      });
+    }
+  }
+}
+
 bot.on("message", msg => {
   var commands = {
 
@@ -370,56 +416,28 @@ bot.on("message", msg => {
       }
     },
 
-    add: (msg, args) => {
-      if (args.length == 1) {
-          msg.channel.sendMessage("Provide a YouTube video or playlist url; `!add <video url>`");
-      } else {
-        var linktype = getLinkType(args[1]);
-        if (linktype === "invalid") {
-          searchYoutubeVideo(args.slice(1).join(" "), vidlink => {
-            if (vidlink === null) {
-              msg.channel.sendMessage("Could not find video.");
-            } else {
-              videoName(vidlink, (err, title) => {
-                if (!err) {
-                  addLinkToQueue(msg.guild, vidlink);
-                  msg.channel.sendMessage("Added `" + title + "` to queue");
-                  log("Added new video to queue: '" + title + "'");
-                } else {
-                  log("Error fetching video information; " + err);
-                }
-              });
-            }
-          });
-        } else if (linktype === "video") {
-          videoName(args[1], (err, title) => {
-            if (!err) {
-              addLinkToQueue(msg.guild, args[1]);
-              msg.channel.sendMessage("Added `" + title + "` to queue");
-              log("Added new video to queue: '" + title + "'");
-            } else {
-              log("Error fetching video information; " + err);
-            }
-          });
-        } else if (linktype === "playlist") {
-          getPlaylistContents(args[1], vids => {
-            getPlaylistTitle(args[1], name => {
-              setQueue(msg.guild, getQueue(msg.guild).concat(vids));
-              msg.channel.sendMessage("Added playlist `" + name + "` to queue");
-              log(`Added playlist ${name} to queue`);
-            });
-          });
-        }
-      }
-    },
+    add: (msg, args) => addVideo(msg, args, () => {}),
 
     play: (msg, args) => {
-      if (getQueue(msg.guild).length === 0) {
-        msg.channel.sendMessage("No videos in queue; type `!add <video url>` to add a video.");
-      } else if (!msg.member.voiceChannel) {
+      if (playing) {
+        playing = false;
+        dispatch.end();
+      }
+      if (!msg.member.voiceChannel) {
         msg.channel.sendMessage("Join a voice channel before using `!play`");
       } else {
-        msg.member.voiceChannel.join().then( c => recurExhaustQueue(msg.member.voiceChannel, msg.channel, c));
+        var playVid = () => {
+          if (getQueue(msg.guild).length === 0) {
+            msg.channel.sendMessage("No videos in queue; type `!add <video url>` to add a video.");
+          } else {
+            msg.member.voiceChannel.join().then( c => recurExhaustQueue(msg.member.voiceChannel, msg.channel, c));
+          }
+        }
+        if (args.length > 1) {
+          addVideo(msg, args, playVid);
+        } else {
+          playVid();
+        }
       }
     },
 
