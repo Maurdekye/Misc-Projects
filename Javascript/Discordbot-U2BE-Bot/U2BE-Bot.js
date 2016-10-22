@@ -10,8 +10,8 @@ const maxMessageLength = 2000;
 
 var tokens = JSON.parse(fs.readFileSync("botinfo.json"));
 var queues = {};
-var playing = false;
-var dispatch;
+var playings = {};
+var dispatches = {};
 
 const bot = new discord_api.Client();
 
@@ -133,7 +133,7 @@ function videoName(url, callback) {
   })
 }
 
-// queue manipulation
+// multiserver information manipulation
 
 function addLinkToQueue(guild, link, callback) {
   if (!queues.hasOwnProperty(guild.id)) {
@@ -150,6 +150,26 @@ function getQueue(guild) {
   if (!queues.hasOwnProperty(guild.id))
     return [];
   return queues[guild.id];
+}
+
+function playing(guild) {
+  if (!playings.hasOwnProperty(guild.id))
+    return false;
+  return playings[guild.id];
+}
+
+function setPlaying(guild, value) {
+  playings[guild.id] = value;
+}
+
+function getDispatch(guild) {
+  if (!dispatches.hasOwnProperty(guild.id))
+    return false;
+  return dispatches[guild.id];
+}
+
+function setDispatch(guild, value) {
+  dispatches[guild.id] = value;
 }
 
 // youtube api interactions
@@ -315,18 +335,18 @@ function printQueueNames(channel, callback=()=>{}) {
 
 function recurExhaustQueue(vchannel, tchannel, connection) {
   if (getQueue(vchannel.guild).length === 0) {
-    playing = false;
+    setPlaying(vchannel.guild, false);
     vchannel.leave();
   } else {
-    playing = true;
+    setPlaying(vchannel.guild, true);
     videoName(getQueue(vchannel.guild)[0], (err, title) => {
       tchannel.sendMessage("Now playing: `" + title + "`");
       log("Started playing new song: '" + title + "'");
     });
-    dispatch = connection.playStream(ytdl(getQueue(vchannel.guild)[0], {audioonly: true}));
-    dispatch.setVolumeLogarithmic(0.3);
-    dispatch.on('end', () => {
-      if (playing) {
+    setDispatch(vchannel.guild, connection.playStream(ytdl(getQueue(vchannel.guild)[0], {audioonly: true})));
+    getDispatch(vchannel.guild).setVolumeLogarithmic(0.5);
+    getDispatch(vchannel.guild).on('end', () => {
+      if (playing(vchannel.guild)) {
         getQueue(vchannel.guild).shift();
         recurExhaustQueue(vchannel, tchannel, connection);
       } else {
@@ -334,11 +354,11 @@ function recurExhaustQueue(vchannel, tchannel, connection) {
         vchannel.leave();
       }
     });
-    dispatch.on('error', err => {
+    getDispatch(vchannel.guild).on('error', err => {
       log("Connection error occured; " + err);
       tchannel.sendMessage("Encountered an error while playing.");
       vchannel.leave();
-      playing = false;
+      setPlaying(vchannel.guild, false);
     });
   }
 }
@@ -419,9 +439,9 @@ bot.on("message", msg => {
     add: (msg, args) => addVideo(msg, args, () => {}),
 
     play: (msg, args) => {
-      if (playing) {
-        playing = false;
-        dispatch.end();
+      if (playing(msg.guild)) {
+        setPlaying(msg.guild, false);
+        getDispatch(msg.guild).end();
       }
       if (!msg.member.voiceChannel) {
         msg.channel.sendMessage("Join a voice channel before using `!play`");
@@ -442,11 +462,11 @@ bot.on("message", msg => {
     },
 
     stop: (msg, args) => {  
-      if (!playing) {
+      if (!playing(msg.guild)) {
         msg.channel.sendMessage("Not currently playing in a channel.");
       } else {
-        playing = false;
-        dispatch.end();
+        setPlaying(msg.guild, false);
+        getDispatch(msg.guild).end();
       }
     },
 
@@ -458,8 +478,8 @@ bot.on("message", msg => {
           msg.channel.sendMessage("Skipped video `" + title + "`");
           log("Skipped current song, '" + title + "'");
         });
-        if (playing) {
-          dispatch.end();
+        if (playing(msg.guild)) {
+          getDispatch(msg.guild).end();
         } else {
           getQueue(msg.guild).shift();
         }
