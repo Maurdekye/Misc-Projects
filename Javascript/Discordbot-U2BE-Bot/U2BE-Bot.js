@@ -150,16 +150,6 @@ function YTAPIQR(action, params, callback) {
   HTTPSAPIRequest(prepareYTAPIQuery(action, params), callback);
 }
 
-function videoName(url, callback) {
-  ytdl.getInfo(url, (err, info) => {
-    if (err)
-      callback(err, info);
-    else {
-      callback(null, `${info.title} (${formatTimeString(info.length_seconds)})`);
-    }
-  })
-}
-
 // multiserver information manipulation
 
 function saveQueues() {
@@ -289,6 +279,16 @@ function searchYoutubeVideo(searchterms, callback) {
       }
     }
   });
+}
+
+function videoName(url, callback) {
+  ytdl.getInfo(url, (err, info) => {
+    if (err)
+      callback(err, info);
+    else {
+      callback(null, `${info.title} (${formatTimeString(info.length_seconds)})`);
+    }
+  })
 }
 
 // link type disseminating
