@@ -42,8 +42,8 @@ Network Trash Folder
 Temporary Items
 .apdisk
 renders
-Javascript/Discord/botinfo.json
-Javascript/Discord/node_modules/
+Javascript/Discordbot-U2BE-Bot/botinfo.json
+Javascript/Discordbot-U2BE-Bot/node_modules/
 C#/DiscordBot-ActivityLogger/DiscordBot-ActivityLogger/ActivityLoggerTokenCarrier.cs
 C#/DiscordBot-OfficeBot/DiscordBot-OfficeBot/OfficeBotTokenCarrier.cs
 C#/DiscordBot-ActivityLogger/DiscordBot-ActivityLogger/bin/
