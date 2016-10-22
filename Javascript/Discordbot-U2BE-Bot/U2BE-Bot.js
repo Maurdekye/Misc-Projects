@@ -52,16 +52,22 @@ function formatTimeString(seconds) {
   return fstring;
 }
 
+function replaceAll(string, find, rep) {
+  while (string.indexOf(find) >= 0)
+    string = string.replace(find, rep);
+  return string;
+};
+
 function repMulti(string, find, rep) {
   for (var i = 0; i < find.length; i++) {
-    string = string.replace(find[i], rep[i]);
+    string = replaceAll(string, find[i], rep[i]);
   }
   return string;
 }
 
 function clean(string, invalid) {
   for (var i = 0; i < invalid.length;i++) {
-    string = string.replace(invalid, "");
+    string = replaceAll(string, invalid[i], "");
   }
   return string;
 }
@@ -101,6 +107,7 @@ function prepareYTAPIQuery(action, params) {
 }
 
 function HTTPSAPIRequest(url, callback) {
+  log("HTTP Request to " + url);
   https.get(url, request => {
     if (request.statusCode !== 200)
       callback("Connection error", request.statusCode);
@@ -239,11 +246,11 @@ function getPlaylistTitle(playlistUrl, callback) {
 }
 
 function searchYoutubeVideo(searchterms, callback) {
-  var cleansearch = clean(searchterms, "\n\t-+=\\/&?\"'").replace(" ", "+");
+  var cleansearch = replaceAll(clean(searchterms, "\n\t-+=\\/&?\"'"), " ", "+");
   var queryStringBase = {
     part: 'snippet',
-    maxresults: 1,
     q: cleansearch,
+    maxresults: 20,
     key: tokens.youtube_api_token
   }
   YTAPIQR("search", queryStringBase, (err, info) => {
@@ -253,7 +260,16 @@ function searchYoutubeVideo(searchterms, callback) {
       if (info.pageInfo.totalResults === 0) {
         callback(null);
       } else {
-        callback("https://www.youtube.com/watch?v=" + info.items[0].id.videoId);
+        var found = false;
+        for (var i = 0; i < 20; i++) {
+          if (info.items[i].id.kind === "youtube#video") {
+            callback("https://www.youtube.com/watch?v=" + info.items[i].id.videoId);
+            found = true;
+            break;
+          }
+        }
+        if (!found)
+          callback(null);
       }
     }
   });
@@ -453,7 +469,7 @@ bot.on("message", msg => {
             msg.member.voiceChannel.join().then( c => recurExhaustQueue(msg.member.voiceChannel, msg.channel, c));
           }
         }
-        if (args.length > 1) {
+        if (args.length > 1 && getQueue(msg.guild).length == 0) {
           addVideo(msg, args, playVid);
         } else {
           playVid();

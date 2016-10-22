@@ -1,11 +1,15 @@
-separateVowels :: [Char] -> [[Char]]
-separateVowels "" = [""]
-separateVowels (c:r) = 
-  let listed = separateVowels r in
-    if elem c "aeiou" then  
-      "":(c:head listed):tail listed
+splitClusterBefore :: (a -> Bool) -> Bool -> [a] -> [[a]]
+splitClusterBefore _ _ [] = [[]]
+splitClusterBefore filt inCluster (c:r) = 
+    if filt c then
+      let listed = splitClusterBefore filt True r in
+        if not inCluster then
+          []:(c:head listed):tail listed
+        else
+          (c:head listed):tail listed
     else 
-      (c:head listed):tail listed
+      let listed = splitClusterBefore filt False r 
+      in (c:head listed):tail listed
 
 intersperse :: a -> [a] -> [a]
 intersperse _ [] = []
@@ -17,4 +21,13 @@ flatten [] = []
 flatten (h:t) = h ++ flatten t
 
 gibberish :: [Char] -> [Char]
-gibberish str = flatten $ intersperse "igit" $ separateVowels str
+gibberish = flatten . (intersperse "igit") . (splitClusterBefore (`elem` "aeiou") False)
+
+gibberish' :: Bool -> [Char] -> [Char]
+gibberish' _ [] = []
+gibberish' inCluster (c:r) = 
+    if elem c "aeiou" then
+      if not inCluster then
+        "idig" ++ c:gibberish' True r
+      else c:gibberish' True r
+    else c:gibberish' False r
