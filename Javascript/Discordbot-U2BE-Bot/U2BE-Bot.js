@@ -505,7 +505,7 @@ bot.on("message", msg => {
           log("Skipped current song, '" + title + "'");
         });
         if (playing(msg.guild)) {
-          dispatches.get(msg.guild).end();
+          dispatches.get(msg.guild.id).end();
         } else {
           getQueue(msg.guild).shift();
         }
