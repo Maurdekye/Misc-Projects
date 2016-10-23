@@ -43,6 +43,7 @@ Temporary Items
 .apdisk
 renders
 Javascript/Discordbot-U2BE-Bot/botinfo.json
+Javascript/Discordbot-U2BE-Bot/vidqueues.json
 Javascript/Discordbot-U2BE-Bot/node_modules/
 C#/DiscordBot-ActivityLogger/DiscordBot-ActivityLogger/ActivityLoggerTokenCarrier.cs
 C#/DiscordBot-OfficeBot/DiscordBot-OfficeBot/OfficeBotTokenCarrier.cs
