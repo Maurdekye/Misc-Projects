@@ -25,3 +25,12 @@ C:\Users\ncolaprete\Desktop\scripts\Misc-Projects\C#\MandelbrotDrawer\Mandelbrot
 C:\Users\ncolaprete\Desktop\scripts\Misc-Projects\C#\MandelbrotDrawer\MandelbrotDrawer\obj\Release\MandelbrotDrawer.Form1.resources
 C:\Users\ncolaprete\Desktop\scripts\Misc-Projects\C#\MandelbrotDrawer\MandelbrotDrawer\obj\Release\MandelbrotDrawer.Properties.Resources.resources
 C:\Users\ncolaprete\Desktop\scripts\Misc-Projects\C#\MandelbrotDrawer\MandelbrotDrawer\obj\Release\MandelbrotDrawer.csproj.GenerateResource.Cache
+C:\Repos\Misc-Projects\C#\MandelbrotDrawer\MandelbrotDrawer\bin\Release\MandelbrotDrawer.exe.config
+C:\Repos\Misc-Projects\C#\MandelbrotDrawer\MandelbrotDrawer\obj\Release\MandelbrotDrawer.exe
+C:\Repos\Misc-Projects\C#\MandelbrotDrawer\MandelbrotDrawer\obj\Release\MandelbrotDrawer.pdb
+C:\Repos\Misc-Projects\C#\MandelbrotDrawer\MandelbrotDrawer\bin\Release\MandelbrotDrawer.exe
+C:\Repos\Misc-Projects\C#\MandelbrotDrawer\MandelbrotDrawer\bin\Release\MandelbrotDrawer.pdb
+C:\Repos\Misc-Projects\C#\MandelbrotDrawer\MandelbrotDrawer\obj\Release\MandelbrotDrawer.csprojResolveAssemblyReference.cache
+C:\Repos\Misc-Projects\C#\MandelbrotDrawer\MandelbrotDrawer\obj\Release\MandelbrotDrawer.Form1.resources
+C:\Repos\Misc-Projects\C#\MandelbrotDrawer\MandelbrotDrawer\obj\Release\MandelbrotDrawer.Properties.Resources.resources
+C:\Repos\Misc-Projects\C#\MandelbrotDrawer\MandelbrotDrawer\obj\Release\MandelbrotDrawer.csproj.GenerateResource.Cache

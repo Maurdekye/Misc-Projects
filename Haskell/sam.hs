@@ -1,14 +1,14 @@
 splitClusterBefore :: (a -> Bool) -> Bool -> [a] -> [[a]]
 splitClusterBefore _ _ [] = [[]]
-splitClusterBefore filt inCluster (c:r) = 
+splitClusterBefore inCluster filt (c:r) = 
     if filt c then
-      let listed = splitClusterBefore filt True r in
+      let listed = splitClusterBefore True filt r in
         if not inCluster then
           []:(c:head listed):tail listed
         else
           (c:head listed):tail listed
     else 
-      let listed = splitClusterBefore filt False r 
+      let listed = splitClusterBefore False filt r 
       in (c:head listed):tail listed
 
 intersperse :: a -> [a] -> [a]
@@ -21,7 +21,7 @@ flatten [] = []
 flatten (h:t) = h ++ flatten t
 
 gibberish :: [Char] -> [Char]
-gibberish = flatten . (intersperse "igit") . (splitClusterBefore (`elem` "aeiou") False)
+gibberish = flatten . (intersperse "igit") . (splitClusterBefore False $ not . (`elem` "aeiou"))
 
 gibberish' :: Bool -> [Char] -> [Char]
 gibberish' _ [] = []
