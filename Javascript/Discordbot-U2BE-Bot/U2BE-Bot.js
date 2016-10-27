@@ -340,7 +340,7 @@ function tandemGetVideoTitles(vidlinks, callback) {
   }
 }
 
-function printQueueNames(channel, callback=()=>{}) {
+function printQueueNames(channel, callback) {
   tandemGetVideoTitles(getQueue(channel.guild), names => {
     var s = "```Current video: " + names[0] + "\nComing up:\n";
     for (var i = 1; i < names.length; i++) {
@@ -359,7 +359,7 @@ function printQueueNames(channel, callback=()=>{}) {
       s = s + endbit;
     }
     channel.sendMessage(s + '```');
-    callback();
+    if (callback) callback();
   });
 }
 
@@ -373,7 +373,7 @@ function recurExhaustQueue(vchannel, tchannel, connection) {
     setPlaying(vchannel.guild, true);
     videoName(getQueue(vchannel.guild)[0], (err, title) => {
       tchannel.sendMessage("Now playing: `" + title + "`");
-      log("Started playing new song: '" + title + "'");
+      log("Started playing new video: '" + title + "'");
     });
     dispatches.set(vchannel.guild.id, connection.playStream(ytdl(getQueue(vchannel.guild)[0], {audioonly: true})));
     dispatches.get(vchannel.guild.id).setVolumeLogarithmic(0.5);
@@ -393,150 +393,255 @@ function recurExhaustQueue(vchannel, tchannel, connection) {
 
 function addVideo(msg, args, callback) {
   if (args.length == 1) {
-    msg.channel.sendMessage("Provide a YouTube video or playlist url; `!add <video url>`");
+    msg.channel.sendMessage("Provide a YouTube video or playlist url; `" + getCommandUsageString("add") + "`");
   } else {
+    var addVidWName = (vidlink) => {
+      videoName(vidlink, (err, title) => {
+        if (!err) {
+          addLinkToQueue(msg.guild, vidlink);
+          msg.channel.sendMessage("Added `" + title + "` to queue");
+          log("Added new video to queue: '" + title + "'");
+          if (callback) callback();
+        } else {
+          log("Error fetching video information; " + err);
+        }
+      });
+    }
     var linktype = getLinkType(args[1]);
     if (linktype === "invalid") {
       searchYoutubeVideo(args.slice(1).join(" "), vidlink => {
         if (vidlink === null) {
           msg.channel.sendMessage("Could not find video.");
         } else {
-          videoName(vidlink, (err, title) => {
-            if (!err) {
-              addLinkToQueue(msg.guild, vidlink);
-              msg.channel.sendMessage("Added `" + title + "` to queue");
-              log("Added new video to queue: '" + title + "'");
-              callback();
-            } else {
-              log("Error fetching video information; " + err);
-            }
-          });
+          addVidWName(vidlink);
         }
       });
     } else if (linktype === "video") {
-      videoName(args[1], (err, title) => {
-        if (!err) {
-          addLinkToQueue(msg.guild, args[1]);
-          msg.channel.sendMessage("Added `" + title + "` to queue");
-          log("Added new video to queue: '" + title + "'");
-          callback();
-        } else {
-          log("Error fetching video information; " + err);
-        }
-      });
+      addVidWName(args[1]);
     } else if (linktype === "playlist") {
       getPlaylistContents(args[1], vids => {
         getPlaylistTitle(args[1], name => {
           setQueue(msg.guild, getQueue(msg.guild).concat(vids));
           msg.channel.sendMessage("Added playlist `" + name + "` to queue");
           log(`Added playlist ${name} to queue`);
-          callback();
+          if (callback) callback();
         });
       });
     }
   }
 }
 
-bot.on("message", msg => {
-  var commands = {
-
-    list: (msg, args) => {
-      if (args.length == 1) {
-        if (getQueue(msg.guild).length == 0) {
-          msg.channel.sendMessage("No videos in playlist; type `!add <video url>` to add a video.");
-        } else if (getQueue(msg.guild).length == 1) {
-          videoName(getQueue(msg.guild)[0], (err, title) => {
-            msg.channel.sendMessage("Current video: `" + title + "`");
-          });
-        } else {
-          msg.channel.sendMessage("Getting playlist contents...").then(mes => {
-            printQueueNames(msg.channel, () => {
-              mes.delete();
-            });
-          });
-        }
-      } else if (args[1] === "clear") {
-        setQueue(msg.guild, []);
-        msg.channel.sendMessage("Cleared queue.");
-        log("Cleared queue.");
-      }
-    },
-
-    add: (msg, args) => addVideo(msg, args, () => {}),
-
-    play: (msg, args) => {
-      if (playing(msg.guild)) {
-        setPlaying(msg.guild, false);
-        dispatches.get(msg.guild.id).end();
-      }
-      if (!msg.member.voiceChannel) {
-        msg.channel.sendMessage("Join a voice channel before using `!play`");
-      } else {
-        var playVid = () => {
-          if (getQueue(msg.guild).length === 0) {
-            msg.channel.sendMessage("No videos in queue; type `!add <video url>` to add a video.");
-          } else {
-            msg.member.voiceChannel.join().then( c => recurExhaustQueue(msg.member.voiceChannel, msg.channel, c));
-          }
-        }
-        if (args.length > 1 && getQueue(msg.guild).length == 0) {
-          addVideo(msg, args, playVid);
-        } else {
-          playVid();
-        }
-      }
-    },
-
-    stop: (msg, args) => {  
-      if (!playing(msg.guild)) {
-        msg.channel.sendMessage("Not currently playing in a channel.");
-      } else {
-        setPlaying(msg.guild, false);
-        dispatches.get(msg.guild.id).end();
-      }
-    },
-
-    skip: (msg, args) => {
-      if (getQueue(msg.guild).length === 0) {
-        msg.channel.sendMessage("No videos in queue.");
-      } else {
-        videoName(getQueue(msg.guild)[0], (err, title) => {
-          msg.channel.sendMessage("Skipped video `" + title + "`");
-          log("Skipped current song, '" + title + "'");
+function listVideos(msg, args, callback) {
+  console.log(getQueue(msg.guild)[0]);
+  if (args.length == 1) {
+    if (getQueue(msg.guild).length == 0) {
+      msg.channel.sendMessage("No videos in playlist; type `" + getCommandUsageString("add") + "` to add a video.");
+    } else if (getQueue(msg.guild).length == 1) {
+      videoName(getQueue(msg.guild)[0], (err, title) => {
+        msg.channel.sendMessage("Current video: `" + title + "`");
+        if (callback) callback();
+      });
+    } else {
+      console.log(getQueue(msg.guild)[0]);
+      msg.channel.sendMessage("Getting playlist contents...").then(mes => {
+        printQueueNames(msg.channel, () => {
+          mes.delete();
+          if (callback) callback();
         });
-        if (playing(msg.guild)) {
-          dispatches.get(msg.guild.id).end();
-        } else {
-          getQueue(msg.guild).shift();
-        }
+      });
+    }
+  }
+}
+
+function clearVideos(msg, args, callback) {
+  setQueue(msg.guild, []);
+  msg.channel.sendMessage("Cleared queue.");
+  log("Cleared queue.");
+  stopPlaying(msg, args, callback);
+}
+
+function startPlaying(msg, args, callback) {
+  if (playing(msg.guild)) {
+    stopPlaying(msg, args);
+  }
+  if (!msg.member.voiceChannel) {
+    msg.channel.sendMessage("Join a voice channel before using `" + getPrefixedCommand("play") + "`");
+    if (callback) callback();
+  } else {
+    var playVid = () => {
+      if (getQueue(msg.guild).length === 0) {
+        msg.channel.sendMessage("No videos in queue; type `" + commands.add.usage + "` to add a video.");
+      } else {
+        msg.member.voiceChannel.join().then( c => {
+          recurExhaustQueue(msg.member.voiceChannel, msg.channel, c)
+          if (callback) callback();
+        });
       }
-    },
-
-    commands: (msg, args) => {
-      var helptext = "```Commands:\n";
-      for (var c in commands) {
-        helptext = helptext + "    " + prefix + c + "\n";
+    }
+    if (args.length > 1) {
+      var addVidWName = (vidlink, callback) => {
+        videoName(vidlink, (err, title) => {
+          if (!err) {
+            setQueue(msg.guild, [vidlink].concat(queues.get(msg.guild.id)));
+          } else {
+            log("Error fetching video information; " + err);
+          }
+          callback();
+        });
       }
-      msg.channel.sendMessage(helptext + '```');
-    },
+      var prompt = args.slice(1).join(" ");
+      var type = getLinkType(prompt);
+      if (type === "invalid") {
+        searchYoutubeVideo(prompt, vidlink => {
+          if (vidlink === null) {
+            msg.channel.sendMessage("Could not find video.");
+            playVid();
+          } else {
+            addVidWName(vidlink, playVid);
+          }
+        });
+      } else if (type === "video") {
+        addVidWName(vidlink, playVid);
+      } else {
+        msg.channel.sendMessage(`Cannot add whole playlists with ${getPrefixedCommand("play")}; use ${getPrefixedCommand("add")} instead`).then(smg => {if (callback) callback();})
+      }
+    } else {
+      playVid();
+    }
+  }
+}
 
-    help: (msg, args) => commands.commands(msg, args)
-  };
+function stopPlaying(msg, args, callback) {
+  if (!playing(msg.guild)) {
+    msg.channel.sendMessage("Not currently playing in a channel.");
+  } else {
+    setPlaying(msg.guild, false);
+    dispatches.get(msg.guild.id).end();
+  }
+  if (callback) callback();
+}
 
-  var prefix = "!";
+function skipVideo(msg, args, callback) {
+  if (getQueue(msg.guild).length === 0) {
+    msg.channel.sendMessage("No videos in queue.");
+  } else {
+    var pushVid = () => {
+      videoName(getQueue(msg.guild)[0], (err, title) => {
+        log("Skipped current video, '" + title + "'");
+        msg.channel.sendMessage("Skipped video `" + title + "`").then(sentMsg => {
+          if (callback) callback();
+        });
+      });
+      if (playing(msg.guild)) {
+        dispatches.get(msg.guild.id).end();
+      } else {
+        getQueue(msg.guild).shift();
+      }
+    }
+    if (args.length > 1 && (parseInt(args[1]) || args[1] === "last")) {
+      var vidindex = parseInt(args[1]);
+      if (args[1] === "last")
+        vidindex = getQueue(msg.guild).length;
+      if (vidindex === 0)
+        pushVid();
+      else if (vidindex > getQueue(msg.guild).length) {
+        var lastvid = getQueue(msg.guild).pop();
+        videoName(lastvid, (err, title) => {
+          log("Skipped last video, '" + title + "'");
+          msg.channel.sendMessage("Skipped video `" + title + "`").then(sentMsg => {
+            if (callback) callback();
+          });
+        });
+      } else {
+        var remvid = getQueue(msg.guild).splice(vidindex-1, 1)[0];
+        videoName(remvid, (err, title) => {
+          log("Skipped video " + vidindex + ", '" + title + "'");
+          msg.channel.sendMessage("Skipped video `" + title + "`").then(sentMsg => {
+            if (callback) callback();
+          });
+        });
+      }
+    } else {
+      pushVid();
+    }
+  }
+}
+
+function getPrefixedCommand(cmd) {
+  return prefix + cmd;
+}
+
+function getCommandUsageString(cmd) {
+  return `${getPrefixedCommand(cmd)} ${commands[cmd].usage}`;
+}
+
+function printCommands(msg, args, callback) {
+  var helptext = "```Commands:\n";
+  for (var c in commands) {
+    helptext = helptext + `    ${getCommandUsageString(c)}; ${commands[c].description}\n`;
+  }
+  msg.channel.sendMessage(helptext + '```');
+  if (callback) callback();
+}
+
+var prefix = "!";
+var commands = {
+  add: {
+    action: addVideo,
+    usage: "<video url|playlist url|search terms>",
+    description: "Adds a video or playlist to the end of the queue, or finds a video by searching"
+  },
+  list: {
+    action: listVideos,
+    usage: "",
+    description: "Shows all videos in the queue"
+  },
+  clear: {
+    action: clearVideos,
+    usage: "",
+    description: "Empties the queue"
+  },
+  play: {
+    action: startPlaying,
+    usage: "[video url|search terms]",
+    description: "Starts playing video in the front of the queue in your current voice channel"
+  },
+  stop: {
+    action: stopPlaying,
+    usage: "",
+    description: "Stops playing the current video"
+  },
+  skip: {
+    action: skipVideo,
+    usage: "[video number|'last']",
+    description: "Skips the current video in the list, or removes a specific video if an argument was given"
+  },
+  commands: {
+    action: printCommands,
+    usage: "",
+    description: "Prints this list of commands out"
+  },
+  help: {
+    action: printCommands,
+    usage: "",
+    description: "Also prints this list of commands out"
+  }
+}
+
+bot.on("message", msg => {
+  if (msg.author.bot)
+    return;
   var text = msg.content;
   var args = text.split(" ").filter( l => l.length > 0 );
-  if (args.length === 0) {
+  if (args.length === 0)
     return;
-  }
-  if (!args[0].startsWith(prefix)) {
+  if (!args[0].startsWith(prefix))
     return;
-  }
   var cmd = args[0].slice(1);
   if (!commands.hasOwnProperty(cmd)) {
     msg.channel.sendMessage("`" + args[0] + "` is not a valid command");
   } else {
-    commands[cmd](msg, args);
+    commands[cmd].action(msg, args);
   }
 });
 

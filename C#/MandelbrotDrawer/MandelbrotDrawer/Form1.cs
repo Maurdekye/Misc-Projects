@@ -133,6 +133,16 @@ namespace MandelbrotDrawer
             CalculationIterations = Math.Max(CalculationIterations - d*2, 1);
             Refresh();
         }
+
+        private void ConsoleBox_KeyDown(object sender, KeyEventArgs e)
+        {
+
+        }
+
+        private void DisplayBox_PreviewKeyDown(object sender, PreviewKeyDownEventArgs e)
+        {
+
+        }
     }
 }
 
