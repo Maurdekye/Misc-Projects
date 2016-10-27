@@ -432,7 +432,6 @@ function addVideo(msg, args, callback) {
 }
 
 function listVideos(msg, args, callback) {
-  console.log(getQueue(msg.guild)[0]);
   if (args.length == 1) {
     if (getQueue(msg.guild).length == 0) {
       msg.channel.sendMessage("No videos in playlist; type `" + getCommandUsageString("add") + "` to add a video.");
@@ -442,7 +441,6 @@ function listVideos(msg, args, callback) {
         if (callback) callback();
       });
     } else {
-      console.log(getQueue(msg.guild)[0]);
       msg.channel.sendMessage("Getting playlist contents...").then(mes => {
         printQueueNames(msg.channel, () => {
           mes.delete();
@@ -542,7 +540,7 @@ function skipVideo(msg, args, callback) {
       var vidindex = parseInt(args[1]);
       if (args[1] === "last")
         vidindex = getQueue(msg.guild).length;
-      if (vidindex === 0)
+      if (vidindex <= 1)
         pushVid();
       else if (vidindex > getQueue(msg.guild).length) {
         var lastvid = getQueue(msg.guild).pop();
@@ -646,6 +644,13 @@ bot.on("message", msg => {
 });
 
 // init
+
+bot.on('ready', ()=>{
+  for (var g of bot.guilds) {
+    if (g.voiceConnection)
+      g.voiceConnection.voiceChannel.leave();
+  }
+});
 
 log("Connecting to discord");
 bot.login(tokens.discord_api_token);
