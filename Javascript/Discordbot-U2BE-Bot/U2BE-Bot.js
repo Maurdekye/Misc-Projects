@@ -432,7 +432,6 @@ function addVideo(msg, args, callback) {
 }
 
 function listVideos(msg, args, callback) {
-  console.log(getQueue(msg.guild)[0]);
   if (args.length == 1) {
     if (getQueue(msg.guild).length == 0) {
       msg.channel.sendMessage("No videos in playlist; type `" + getCommandUsageString("add") + "` to add a video.");
@@ -442,7 +441,6 @@ function listVideos(msg, args, callback) {
         if (callback) callback();
       });
     } else {
-      console.log(getQueue(msg.guild)[0]);
       msg.channel.sendMessage("Getting playlist contents...").then(mes => {
         printQueueNames(msg.channel, () => {
           mes.delete();
@@ -461,9 +459,6 @@ function clearVideos(msg, args, callback) {
 }
 
 function startPlaying(msg, args, callback) {
-  if (playing(msg.guild)) {
-    stopPlaying(msg, args);
-  }
   if (!msg.member.voiceChannel) {
     msg.channel.sendMessage("Join a voice channel before using `" + getPrefixedCommand("play") + "`");
     if (callback) callback();
@@ -472,10 +467,15 @@ function startPlaying(msg, args, callback) {
       if (getQueue(msg.guild).length === 0) {
         msg.channel.sendMessage("No videos in queue; type `" + commands.add.usage + "` to add a video.");
       } else {
-        msg.member.voiceChannel.join().then( c => {
-          recurExhaustQueue(msg.member.voiceChannel, msg.channel, c)
+        if (playing(msg.guild)) {
+          recurExhaustQueue(msg.member.voiceChannel, msg.channel, msg.guild.voiceConnection);
           if (callback) callback();
-        });
+        } else {
+          msg.member.voiceChannel.join().then( c => {
+            recurExhaustQueue(msg.member.voiceChannel, msg.channel, c)
+            if (callback) callback();
+          });
+        }
       }
     }
     if (args.length > 1) {
