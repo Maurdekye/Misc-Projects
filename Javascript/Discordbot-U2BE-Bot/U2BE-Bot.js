@@ -380,6 +380,7 @@ function recurExhaustQueue(vchannel, tchannel, connection) {
     dispatches.get(vchannel.guild.id).on('end', () => {
       if (playing(vchannel.guild)) {
         getQueue(vchannel.guild).shift();
+        saveQueues();
         recurExhaustQueue(vchannel, tchannel, connection);
       } else {
         log("Stopped playing.");
@@ -534,6 +535,7 @@ function skipVideo(msg, args, callback) {
         dispatches.get(msg.guild.id).end();
       } else {
         getQueue(msg.guild).shift();
+        saveQueues();
       }
     }
     if (args.length > 1 && (parseInt(args[1]) || args[1] === "last")) {
@@ -544,6 +546,7 @@ function skipVideo(msg, args, callback) {
         pushVid();
       else if (vidindex > getQueue(msg.guild).length) {
         var lastvid = getQueue(msg.guild).pop();
+        saveQueues();
         videoName(lastvid, (err, title) => {
           log("Skipped last video, '" + title + "'");
           msg.channel.sendMessage("Skipped video `" + title + "`").then(sentMsg => {
@@ -552,6 +555,7 @@ function skipVideo(msg, args, callback) {
         });
       } else {
         var remvid = getQueue(msg.guild).splice(vidindex-1, 1)[0];
+        saveQueues();
         videoName(remvid, (err, title) => {
           log("Skipped video " + vidindex + ", '" + title + "'");
           msg.channel.sendMessage("Skipped video `" + title + "`").then(sentMsg => {
