@@ -21,24 +21,24 @@ def trim(text):
     return trim_left(trim_right(text))
 
 def recur_getnum(quest='Please give a number:', wrong="I didn't understand that."):
-    usr_in = raw_input(quest + ' ')
+    usr_in = input(quest + ' ')
     try:
         to_sender = int(usr_in)
     except ValueError:
-        print wrong
+        print(wrong)
         return recur_getnum(quest, wrong)
     return to_sender
     
 def recur_yorn(quest='Yes or No?', wrong="I didn't understand that."):
     valid_yes = ['yes', 'yep', 'yeah', 'yiss', 'yeh', '*nod head*', 'y']
     valid_no = ['no', 'nope', 'nuh uh','nuh-uh', 'nah', '*shake head*', 'n']
-    usr_in = raw_input(quest + ' ').lower()
+    usr_in = input(quest + ' ').lower()
     for yes, no in zip(valid_yes, valid_no):
         if yes in usr_in:
             return True
         if no in usr_in:
             return False
-    print wrong
+    print(wrong)
     return recur_yorn(quest, wrong)
 
 # --- Initial Variable Declarations and Preparations --- #
@@ -92,12 +92,12 @@ used = []
 missed = []
 chances = 6
 
-guess = ['_' for x in xrange(word_len)]
+guess = ['_' for x in range(word_len)]
 
 # --- Main Loop --- #
 
 while True:
-    if debug: print 'begin'
+    if debug: print('begin')
 
     # --- Reformat List by Letters Known --- #
 
@@ -116,46 +116,46 @@ while True:
 
     if debug:
         for word in new_words:
-            print word
-        print 'len words ' + str(len(new_words))
+            print(word)
+        print('len words ' + str(len(new_words)))
 
     if listpossible:
-        print 'List of Possible Words:'
+        print('List of Possible Words:')
         for w in new_words:
-            print w
-        print '\n' + str(len(new_words)) + ' in total.'
+            print(w)
+        print('\n' + str(len(new_words)) + ' in total.')
     
     # --- Check List for Answer --- #
     
     if len(new_words) == 1:
         ans = recur_yorn("Is your word '{}'?".format(new_words[0]))
         if ans:
-            raw_input('Yes, I win!')
+            input('Yes, I win!')
         else:
-            raw_input('I do not know of any word by the parameters you have provided.')
+            input('I do not know of any word by the parameters you have provided.')
         sys.exit()
 
     if len(new_words) == 0:
-        print 'I do not know of any word by the parameters you have provided.'
-        raw_input()
+        print('I do not know of any word by the parameters you have provided.')
+        input()
         sys.exit()
 
     # --- Letter Frequency Indexing --- #
     
-    priorities = [[] for x in xrange(word_len)]
-    for letter in xrange(word_len):
-        if debug: print '\n\nletter ' + str(letter)
-        if debug: print '\t\t' + guess[letter]
+    priorities = [[] for x in range(word_len)]
+    for letter in range(word_len):
+        if debug: print('\n\nletter ' + str(letter))
+        if debug: print('\t\t' + guess[letter])
         if guess[letter] != '_':
             continue
         counts = {l : 0 for l in alpha if l not in used}
         for word in new_words:
             if word[letter] not in used and word[letter] in alpha:
                 counts[word[letter]] += 1
-        counts = {l : c for l, c in counts.iteritems() if c > 0}
+        counts = {l : c for l, c in counts.items() if c > 0}
         
         if debug:
-            print '\n' + str(counts)
+            print('\n' + str(counts))
 
         fin_dict = []
         for comp_letter in counts:
@@ -170,14 +170,14 @@ while True:
 
     if debug:
         for lis in priorities:
-            print lis
+            print(lis)
 
     # --- Letter Guess --- #
 
-    for letter in guess: print letter.upper(),
-    print '\n'
+    for letter in guess: print(letter.upper(), end=' ')
+    print('\n')
 
-    frees = [i for i in xrange(word_len) if guess[i] == '_']
+    frees = [i for i in range(word_len) if guess[i] == '_']
     guessletter = (0, 'a')
     for i in frees:
         if priorities[i][0][0] > guessletter[0]:
@@ -185,13 +185,13 @@ while True:
     guessletter = guessletter[1]
     if not recur_yorn('Is the letter {} in the word?'.format(guessletter.upper())):
         missed += [guessletter]
-        print '\n' + choice(miss_phrases)
+        print('\n' + choice(miss_phrases))
         chances -= 1
         if chances <= 0:
-            raw_input("I've run out of chances!")
+            input("I've run out of chances!")
             sys.exit()
         else:
-            print 'I have {} chances left.'.format(chances)
+            print('I have {} chances left.'.format(chances))
     else:
         
         while True:
@@ -208,22 +208,22 @@ while True:
                     numbers += '  '
                     found += [i]
                     
-            print fin
-            print numbers
-            print 
+            print(fin)
+            print(numbers)
+            print() 
             usr_plin = recur_getnum("What index is it in?") - 1
             if usr_plin > word_len or usr_plin < 0:
-                print "That doesn't make sense."
+                print("That doesn't make sense.")
                 continue
             if usr_plin in found:
-                print "There's already a letter there."
+                print("There's already a letter there.")
                 continue
             guess[usr_plin] = guessletter
             if recur_yorn("Does it appear anywhere else?"):
                 continue
             break
     used += [guessletter]
-    print
+    print()
     
     
     
