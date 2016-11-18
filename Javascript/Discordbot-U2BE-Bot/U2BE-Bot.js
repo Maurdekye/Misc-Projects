@@ -500,7 +500,7 @@ function startPlaying(msg, args, callback) {
           }
         });
       } else if (type === "video") {
-        addVidWName(vidlink, playVid);
+        addVidWName(prompt, playVid);
       } else {
         msg.channel.sendMessage(`Cannot add whole playlists with ${getPrefixedCommand("play")}; use ${getPrefixedCommand("add")} instead`).then(smg => {if (callback) callback();})
       }

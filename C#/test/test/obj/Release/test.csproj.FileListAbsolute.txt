@@ -1,0 +1,5 @@
+C:\Repos\Misc-Projects\C#\test\test\bin\Release\test.exe.config
+C:\Repos\Misc-Projects\C#\test\test\bin\Release\test.exe
+C:\Repos\Misc-Projects\C#\test\test\bin\Release\test.pdb
+C:\Repos\Misc-Projects\C#\test\test\obj\Release\test.exe
+C:\Repos\Misc-Projects\C#\test\test\obj\Release\test.pdb

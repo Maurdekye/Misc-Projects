@@ -167,10 +167,10 @@ def wrap(text, width=32, tab=4):
         text = text[width:]
     return scribe + " "*tab + text
 
-ns = "this is a test message containing an economy of variety within its confines"
-#print(wrap(transcribe(ns), 60))
-for i, e in enumerate(adds):
-    print(str(i) + ":" + str(e))
+ns = "Hello sam, meet brainfuck! It's super cool."
+print(wrap(memtranscribe(ns), 60))
+#for i, e in enumerate(adds):
+#    print(str(i) + ":" + str(e))
 
 '''words = []
 with open("thesaurus.txt", "r") as f:

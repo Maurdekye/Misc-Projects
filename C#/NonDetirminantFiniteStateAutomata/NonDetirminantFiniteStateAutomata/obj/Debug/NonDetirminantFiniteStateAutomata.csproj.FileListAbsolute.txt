@@ -1,0 +1,6 @@
+C:\Repos\Misc-Projects\C#\NonDetirminantFiniteStateAutomata\NonDetirminantFiniteStateAutomata\bin\Debug\NonDetirminantFiniteStateAutomata.exe.config
+C:\Repos\Misc-Projects\C#\NonDetirminantFiniteStateAutomata\NonDetirminantFiniteStateAutomata\bin\Debug\NonDetirminantFiniteStateAutomata.exe
+C:\Repos\Misc-Projects\C#\NonDetirminantFiniteStateAutomata\NonDetirminantFiniteStateAutomata\bin\Debug\NonDetirminantFiniteStateAutomata.pdb
+C:\Repos\Misc-Projects\C#\NonDetirminantFiniteStateAutomata\NonDetirminantFiniteStateAutomata\obj\Debug\NonDetirminantFiniteStateAutomata.csprojResolveAssemblyReference.cache
+C:\Repos\Misc-Projects\C#\NonDetirminantFiniteStateAutomata\NonDetirminantFiniteStateAutomata\obj\Debug\NonDetirminantFiniteStateAutomata.exe
+C:\Repos\Misc-Projects\C#\NonDetirminantFiniteStateAutomata\NonDetirminantFiniteStateAutomata\obj\Debug\NonDetirminantFiniteStateAutomata.pdb

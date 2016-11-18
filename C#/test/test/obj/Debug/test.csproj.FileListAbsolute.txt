@@ -1,0 +1,6 @@
+C:\Repos\Misc-Projects\C#\test\test\bin\Debug\test.exe.config
+C:\Repos\Misc-Projects\C#\test\test\bin\Debug\test.exe
+C:\Repos\Misc-Projects\C#\test\test\bin\Debug\test.pdb
+C:\Repos\Misc-Projects\C#\test\test\obj\Debug\test.csprojResolveAssemblyReference.cache
+C:\Repos\Misc-Projects\C#\test\test\obj\Debug\test.exe
+C:\Repos\Misc-Projects\C#\test\test\obj\Debug\test.pdb
