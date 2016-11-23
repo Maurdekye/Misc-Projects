@@ -109,7 +109,7 @@ namespace NonDetirminantFiniteStateAutomata
             this.Transitions = Transitions;
         }
 
-        public NDFA (string StartState, List<string> GoalStates, List<Tuple<string, char, string>> Transitions)
+        public NDFA(string StartState, List<string> GoalStates, List<Tuple<string, char, string>> Transitions)
         {
             this.StartState = StartState;
             this.GoalStates = GoalStates;
