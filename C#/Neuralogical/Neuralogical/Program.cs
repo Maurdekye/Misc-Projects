@@ -30,16 +30,7 @@ namespace Neuralogical
 
             // Train network with training data
             Console.WriteLine("Training network...");
-            int iter = 0;
-            foreach (var tup in NetworkTrainData)
-            {
-                iter += 1;
-                NumberRecognition.Train(tup.Item1, tup.Item2);
-                if (iter % ((int)(NetworkTrainData.Count / 100)) == 0)
-                {
-                    Console.WriteLine($"{(iter * 100) / NetworkTrainData.Count}%");
-                }
-            }
+            NumberRecognition.Train(NetworkTrainData);
             Console.WriteLine("Finished training.");
 
             // Evaluate network efficacy with testing data
@@ -111,19 +102,30 @@ namespace Neuralogical
 
             return OutputLayerEval;
         }
-
-        public void Train(double[] Input, double[] ExpectedOutput)
+        
+        public void Train(List<Tuple<double[], double[]>> trainingData, double epsilon = 0.01)
         {
-            if (Input.Length != InputLayerCount)
-            {
-                throw new IndexOutOfRangeException($"Improper input given; expected a length of {InputLayerCount}, got {Input.Length}");
-            }
-            if (ExpectedOutput.Length != OutputLayerCount)
-            {
-                throw new IndexOutOfRangeException($"Improper expected output given; expected a length of {OutputLayerCount}, got {ExpectedOutput.Length}");
-            }
-
             // TODO write training algorithm
+
+        }
+
+        public double EvaluateCurrentCost(List<Tuple<double[], double[]>> trainingData)
+        {
+            return Cost(trainingData.Select(e => e.Item2).ToList(), trainingData.Select(t => Evaluate(t.Item1)).ToList());
+        }
+
+        private static double Cost(List<double[]> ExpectedOutputs, List<double[]> GeneratedOutputs)
+        {
+            double totalerror = 0;
+            for (int i = 0; i < ExpectedOutputs.Count; i++)
+            {
+                for (int j = 0; j < ExpectedOutputs[i].Count(); j++)
+                {
+                    double error = ExpectedOutputs[i][j] - GeneratedOutputs[i][j];
+                    totalerror += error * error;
+                }
+            }
+            return totalerror / (2 * ExpectedOutputs.Count);
         }
     }
 }
@@ -206,7 +208,7 @@ namespace Utils
             return Images;
         }
 
-        public static string Show(byte[,] image, byte threshold = 128, char lowPrint = '.', char highPrint = '0')
+        public static string Show(byte[,] image, byte threshold = 128, char lowPrint = ' ', char highPrint = '0')
         {
             StringBuilder builder = new StringBuilder();
             for (int x = 0; x < image.GetLength(0); x++)
