@@ -1,0 +1,10 @@
+C:\Repos\Misc-Projects\C#\Neuralogical\Neuralogical\bin\Debug\Neuralogical.exe.config
+C:\Repos\Misc-Projects\C#\Neuralogical\Neuralogical\bin\Debug\Neuralogical.exe
+C:\Repos\Misc-Projects\C#\Neuralogical\Neuralogical\bin\Debug\Neuralogical.pdb
+C:\Repos\Misc-Projects\C#\Neuralogical\Neuralogical\obj\Debug\Neuralogical.csprojResolveAssemblyReference.cache
+C:\Repos\Misc-Projects\C#\Neuralogical\Neuralogical\obj\Debug\Neuralogical.exe
+C:\Repos\Misc-Projects\C#\Neuralogical\Neuralogical\obj\Debug\Neuralogical.pdb
+C:\Repos\Misc-Projects\C#\Neuralogical\Neuralogical\bin\Debug\t10k-images.idx3-ubyte
+C:\Repos\Misc-Projects\C#\Neuralogical\Neuralogical\bin\Debug\t10k-labels.idx1-ubyte
+C:\Repos\Misc-Projects\C#\Neuralogical\Neuralogical\bin\Debug\train-images.idx3-ubyte
+C:\Repos\Misc-Projects\C#\Neuralogical\Neuralogical\bin\Debug\train-labels.idx1-ubyte
