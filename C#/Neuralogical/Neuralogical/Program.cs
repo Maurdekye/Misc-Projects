@@ -103,10 +103,16 @@ namespace Neuralogical
             return OutputLayerEval;
         }
         
-        public void Train(List<Tuple<double[], double[]>> trainingData, double epsilon = 0.01)
+        public void Train(List<Tuple<double[], double[]>> trainingData, double epsilon = 0.01, double learningRate = 0.1)
         {
-            // TODO write training algorithm
+            while (GradientDescent(trainingData, learningRate) > epsilon) { }
+        }
 
+        public double GradientDescent(List<Tuple<double[], double[]>> trainingData, double learningRate)
+        {
+            double cost = EvaluateCurrentCost(trainingData);
+            // TODO implement gradient descent algorithm
+            return cost;
         }
 
         public double EvaluateCurrentCost(List<Tuple<double[], double[]>> trainingData)
