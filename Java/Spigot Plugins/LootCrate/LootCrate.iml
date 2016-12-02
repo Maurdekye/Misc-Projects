@@ -10,11 +10,22 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/../spigot.jar!/" />
+          <root url="jar://$MODULE_DIR$/../spigot-1.11.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES>
-          <root url="jar://$MODULE_DIR$/../spigot.jar!/" />
+          <root url="jar://$MODULE_DIR$/../spigot-1.11.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/../craftbukkit-1.11.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES>
+          <root url="jar://$MODULE_DIR$/../craftbukkit-1.11.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>

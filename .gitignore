@@ -49,3 +49,4 @@ C#/DiscordBot-ActivityLogger/DiscordBot-ActivityLogger/ActivityLoggerTokenCarrie
 C#/DiscordBot-OfficeBot/DiscordBot-OfficeBot/OfficeBotTokenCarrier.cs
 C#/DiscordBot-ActivityLogger/DiscordBot-ActivityLogger/bin/
 C#/DiscordBot-OfficeBot/DiscordBot-OfficeBot/bin/
+*.jar

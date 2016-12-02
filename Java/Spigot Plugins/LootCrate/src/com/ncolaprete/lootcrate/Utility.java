@@ -3,13 +3,13 @@ package com.ncolaprete.lootcrate;
 import com.earth2me.essentials.api.NoLoanPermittedException;
 import com.earth2me.essentials.api.UserDoesNotExistException;
 import net.ess3.api.Economy;
-import net.minecraft.server.v1_9_R1.*;
+import net.minecraft.server.v1_11_R1.TileEntityChest;
 import org.bukkit.*;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
-import org.bukkit.craftbukkit.v1_9_R1.block.CraftChest;
+import org.bukkit.craftbukkit.v1_11_R1.block.CraftChest;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -146,6 +146,7 @@ class Utility
 
     public static void setChestInventoryName(Block chestblock, String name)
     {
+        // Needs updating
         CraftChest chest = (CraftChest) chestblock.getState();
         try
         {

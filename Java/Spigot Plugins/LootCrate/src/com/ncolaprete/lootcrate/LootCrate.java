@@ -1,5 +1,6 @@
 package com.ncolaprete.lootcrate;
 
+import org.apache.commons.lang3.StringUtils;
 import org.bukkit.*;
 import org.bukkit.Material;
 import org.bukkit.block.*;
@@ -31,6 +32,7 @@ import org.bukkit.util.Vector;
 
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
@@ -126,11 +128,6 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
                 printError("Key name '" + type + "' conflicts with existing prize!");
                 continue;
             } catch (Exception e){};
-            if (type.equalsIgnoreCase("_no_key"))
-            {
-                printError("The key name '_no_key' is disallowed.");
-                continue;
-            }
 
             String materialname = keysection.getString("material", "tripwire_hook");
             Material material = Material.getMaterial(materialname.toUpperCase());
@@ -149,6 +146,9 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
             lorestring = ChatColor.translateAlternateColorCodes('?', lorestring);
             List<String> lore = Arrays.asList(lorestring.split("\\\\n"));
 
+            //csend.sendMessage("Loaded new crate key: " + type);
+            //csend.sendMessage("\t material: " + material + ", name: " + name + ", price: " + buyprice);
+            //csend.sendMessage("\tloretext: " + lorestring);
             crateKeys.add(new CrateKey(type, material, name, buyprice, lore));
         }
 
@@ -171,9 +171,9 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
 
             boolean broadcast = cratesection.getBoolean("broadcast_on_drop", false);
 
-            String reqKeyName = cratesection.getString("required_key", "_no_key");
+            String reqKeyName = cratesection.getString("required_key", null);
             CrateKey reqKey = null;
-            if (!reqKeyName.equalsIgnoreCase("_no_key"))
+            if (reqKeyName != null)
             {
                 reqKey = crateKeys.stream().filter(ck -> ck.type.equalsIgnoreCase(reqKeyName)).findFirst().orElse(null);
                 if (reqKey == null)
@@ -205,14 +205,14 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
                         continue;
                     }
                 } catch (Exception e) {
-                    reqKey = crateKeys.stream().filter(ck -> ck.type.equalsIgnoreCase(prizeName)).findFirst().orElse(null);
-                    if (reqKey == null)
+                    CrateKey prizeKey = crateKeys.stream().filter(ck -> ck.type.equalsIgnoreCase(prizeName)).findFirst().orElse(null);
+                    if (prizeKey == null)
                     {
                         printError("Unknown prize: " + prizeName);
                         continue;
                     }
                     prize = Prize._CRATE_KEY;
-                    keyPrizeIndex = crateKeys.indexOf(reqKey);
+                    keyPrizeIndex = crateKeys.indexOf(prizeKey);
                 }
 
                 double rewardChance = rewardsection.getDouble("chance", 0);
@@ -231,6 +231,7 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
 
                 rewardList.add(new Reward(prize, amount, rewardChance));
             }
+
             crateLayouts.add(new CrateLayout(printname, type, spawnChance, reqKey, broadcast, rewardList));
         }
 
@@ -873,9 +874,9 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
 
     public Crate getCrate(Block b)
     {
-        if (b.getType() != Material.CHEST)
+        if (b == null || b.getType() != Material.CHEST)
             return null;
-        return cratePositions.stream().filter(c -> c.layout.equals(b)).findFirst().orElse(null);
+        return cratePositions.stream().filter(c -> c.equals(b)).findFirst().orElse(null);
     }
 
     public CrateLayout getLayout(ItemStack item)

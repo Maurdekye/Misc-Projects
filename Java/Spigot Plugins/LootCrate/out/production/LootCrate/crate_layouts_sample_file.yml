@@ -6,7 +6,6 @@ free_crate:
   rewards:
     1:
       prize: common_key
-      amount: 1
       chance: 50
     2:
       prize: common_key
@@ -14,7 +13,6 @@ free_crate:
       chance: 10
     3:
       prize: mystical_key
-      amount: 1
       chance: 1
 common_crate:
   name: ?aCommon Crate
@@ -23,7 +21,6 @@ common_crate:
   rewards:
     1:
       prize: nothing
-      amount: 0
       chance: 25
     2:
       prize: iron_bars
@@ -47,7 +44,6 @@ common_crate:
       chance: 10
     7:
       prize: mystical_key
-      amount: 1
       chance: 8
     8:
       prize: diamonds
@@ -60,7 +56,6 @@ uncommon_crate:
   rewards:
     1:
       prize: nothing
-      amount: 0
       chance: 10
     2:
       prize: common_key
@@ -80,7 +75,6 @@ uncommon_crate:
       chance: 10
     6:
       prize: iron_toolset
-      amount: 0
       chance: 10
     7:
       prize: diamonds
@@ -118,7 +112,6 @@ mystical_crate:
       chance: 5
     7:
       prize: legendary_key
-      amount: 1
       chance: 5
     8:
       prize: massive_damage
@@ -156,11 +149,9 @@ legendary_crate_1:
       chance: 2
     6:
       prize: lucky_trousers
-      amount: 0
       chance: 1
     7:
       prize: waterglide_boots
-      amount: 0
       chance: 1
 legendary_crate_2:
   name: ?e?lLegendary Crate
@@ -186,15 +177,12 @@ legendary_crate_2:
       chance: 5
     5:
       prize: ancient_key
-      amount: 1
       chance: 2
     6:
       prize: frostspark_cleats
-      amount: 0
       chance: 1
     7:
       prize: hydrodyne_helmet
-      amount: 0
       chance: 1
 ancient_crate_1:
   name: ?8?oAncient Crate
@@ -204,11 +192,9 @@ ancient_crate_1:
   rewards:
     1:
       prize: nothing
-      amount: 0
       chance: 10
     2:
       prize: heavens_blade
-      amount: 0
       chance: 2
     3:
       prize: veilstrike_shortbow
@@ -222,11 +208,9 @@ ancient_crate_2:
   rewards:
     1:
       prize: nothing
-      amount: 0
       chance: 100
     2:
       prize: unyielding_battersea
-      amount: 0
       chance: 20
     3:
       prize: giga_drill_breaker

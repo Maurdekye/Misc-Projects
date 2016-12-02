@@ -41,6 +41,10 @@ class Crate
     {
         return layout.isKeyValid(key);
     }
+
+    public boolean equals(Block b) {
+        return block.getX() == b.getX() && block.getY() == b.getY() && block.getZ() == b.getZ() && block.getWorld().getUID() == b.getWorld().getUID();
+    }
 }
 
 class CrateLayout implements LoreTaggable

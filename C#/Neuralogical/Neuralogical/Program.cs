@@ -54,8 +54,6 @@ namespace Neuralogical
         int OutputLayerCount { get; }
         private double[,] InputToHiddenWeights;
         private double[,] HiddenToOutputWeights;
-        private double[] HiddenLayerBias;
-        private double[] OutputLayerBias;
 
         public Network(int InputLayerCount, int HiddenLayerCount, int OutputLayerCount)
         {
@@ -65,8 +63,6 @@ namespace Neuralogical
 
             this.InputToHiddenWeights = Utils.Arrays.InitArray(new double[InputLayerCount, HiddenLayerCount], 1.0);
             this.HiddenToOutputWeights = Utils.Arrays.InitArray(new double[HiddenLayerCount, OutputLayerCount], 1.0);
-            this.HiddenLayerBias = Utils.Arrays.InitArray(new double[HiddenLayerCount], 0.5);
-            this.OutputLayerBias = Utils.Arrays.InitArray(new double[OutputLayerCount], 0.5);
         }
 
         public double[] Evaluate(double[] Input)
@@ -85,7 +81,7 @@ namespace Neuralogical
                 {
                     weightedSum += Input[i] * InputToHiddenWeights[i, h];
                 }
-                HiddenLayerEval[h] = Utils.Maths.Sigmoid(weightedSum - HiddenLayerBias[h]);
+                HiddenLayerEval[h] = Utils.Maths.Sigmoid(weightedSum);
             }
 
             // Calculate output layer from hidden layer calculation
@@ -97,13 +93,13 @@ namespace Neuralogical
                 {
                     weightedSum += HiddenLayerEval[h] * HiddenToOutputWeights[h, o];
                 }
-                OutputLayerEval[o] = Utils.Maths.Sigmoid(weightedSum - OutputLayerBias[o]);
+                OutputLayerEval[o] = Utils.Maths.Sigmoid(weightedSum);
             }
 
             return OutputLayerEval;
         }
         
-        public void Train(List<Tuple<double[], double[]>> trainingData, double epsilon = 0.01, double learningRate = 0.1)
+        public void Train(List<Tuple<double[], double[]>> trainingData, double epsilon = 0.01, double learningRate = 0.01)
         {
             while (GradientDescent(trainingData, learningRate) > epsilon) { }
         }
