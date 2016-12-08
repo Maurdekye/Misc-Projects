@@ -22,6 +22,7 @@ import org.bukkit.util.Vector;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -405,6 +406,11 @@ class Utility
                 return b;
         } while (iter.hasNext());
         return null;
+    }
+
+    public static <T> T getFirst(Collection<T> search, Predicate<T> pred)
+    {
+        return search.stream().filter(pred).findFirst().orElse(null);
     }
 
     public static Inventory arrangeItems(String invName, List<ItemStack> items)

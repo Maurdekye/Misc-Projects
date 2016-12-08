@@ -175,7 +175,7 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
             CrateKey reqKey = null;
             if (reqKeyName != null)
             {
-                reqKey = crateKeys.stream().filter(ck -> ck.type.equalsIgnoreCase(reqKeyName)).findFirst().orElse(null);
+                reqKey = Utility.getFirst(crateKeys, ck -> ck.type.equalsIgnoreCase(reqKeyName));
                 if (reqKey == null)
                 {
                     printError("crate key '" + reqKeyName + "' not found in crate_keys.yml!");
@@ -205,7 +205,7 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
                         continue;
                     }
                 } catch (Exception e) {
-                    CrateKey prizeKey = crateKeys.stream().filter(ck -> ck.type.equalsIgnoreCase(prizeName)).findFirst().orElse(null);
+                    CrateKey prizeKey = Utility.getFirst(crateKeys, ck -> ck.type.equalsIgnoreCase(prizeName));
                     if (prizeKey == null)
                     {
                         printError("Unknown prize: " + prizeName);
@@ -876,16 +876,17 @@ public class LootCrate extends JavaPlugin implements Listener, CommandExecutor{
     {
         if (b == null || b.getType() != Material.CHEST)
             return null;
-        return cratePositions.stream().filter(c -> c.equals(b)).findFirst().orElse(null);
+        return Utility.getFirst(cratePositions, c -> c.equals(b));
     }
 
     public CrateLayout getLayout(ItemStack item)
     {
-        return crateLayouts.stream().filter(l -> Utility.itemHasLoreLine(item, l.getLoreTag())).findFirst().orElse(null);
+        return Utility.getFirst(crateLayouts, l -> Utility.itemHasLoreLine(item, l.getLoreTag()));
     }
 
     private void dropRandomCrate(Location center, double radius)
     {
+        csend.sendMessage("dropping crate");
         // get layout to use
         int index = Utility.randomWeightedIndex(crateLayouts.stream().map(l -> l.spawnChance).collect(Collectors.toList()));
         if (index == -1)
