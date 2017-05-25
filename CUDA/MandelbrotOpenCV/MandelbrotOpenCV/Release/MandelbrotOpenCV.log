@@ -1,0 +1,4 @@
+﻿Source.obj : error LNK2001: unresolved external symbol _threadIdx
+Source.obj : error LNK2001: unresolved external symbol _blockIdx
+Source.obj : error LNK2001: unresolved external symbol _blockDim
+C:\Repos\Misc-Projects\CUDA\MandelbrotOpenCV\Release\MandelbrotOpenCV.exe : fatal error LNK1120: 3 unresolved externals
