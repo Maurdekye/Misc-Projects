@@ -1,0 +1,56 @@
+@name Turret
+@outputs Fire
+@persist Pos:vector Lock:entity IsLocked LockLastPressed
+@persist FreezeLastPressed FreezeToggle
+@persist SitLastPressed SitToggle
+runOnTick(1)
+
+LockPressed = owner():keyPressed("G")
+FreezePressed = owner():keyPressed("L")
+SitPressed = owner():keyPressed("V")
+
+if (LockPressed || SitPressed) {
+    FreezeToggle = 0
+}
+
+Prop = entity():isWeldedTo()
+Prop:propFreeze(1)
+Fire = owner():keyAttack1()
+
+if (LockPressed) {
+    if (IsLocked == 1 && !LockLastPressed) {
+        IsLocked = 0
+    } elseif (owner():aimEntity():isValid()) {
+        Lock = owner():aimEntity()
+        IsLocked = 1
+    }
+}
+
+if (SitPressed && !SitLastPressed) {
+    SitToggle = !SitToggle
+}
+
+if (!SitToggle) {
+    Pos = owner():shootPos() + vec(0, 0, 90)
+    if (Fire) {
+        Pos = Pos - vec(0,0,60)    
+    }
+}
+
+AimPos = owner():eyeTraceCursor():pos()
+if (IsLocked == 1) {
+    AimPos = Lock:pos() + vec(0, 0, Lock:radius())
+}
+
+if (FreezePressed && !FreezeLastPressed) {
+    FreezeToggle = !FreezeToggle
+}
+
+if (!FreezeToggle) {
+    Prop:reposition(Pos)
+    Prop:rerotate((Pos - AimPos):toAngle())
+}
+
+SitLastPressed = SitPressed
+FreezeLastPressed = FreezePressed
+LockLastPressed = LockPressed
